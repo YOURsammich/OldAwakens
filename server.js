@@ -30,6 +30,19 @@ function createChannel(io, channelName){
             role : 3
         };
         
+        
+        
+        socket.on('message', function (message) {
+            
+            socket.emit('message', {
+                message : message,
+                messageType : 'chat',
+                nick : 'sammich'
+            });
+            
+        });
+        
+        
         function attemptJoin (){
             
             console.log(user.remote_addr)

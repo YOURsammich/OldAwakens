@@ -1,5 +1,30 @@
 var socket = io.connect(window.location.pathname);
 
+var Attributes = {
+    set : function (attribute, value) {
+        this.storedAttributes['chat-' + attribute] = value;
+        localStorage.setItem('chat-' + attribute, value);
+    },
+    get : function (attribute) {
+        return this.storedAttributes['chat-' + attribute];
+    },
+    storedAttributes : (function () {
+        var allKeys = Object.keys(localStorage),
+            allAtt = {},
+            key,
+            i;
+        
+        for (i = 0; allKeys.length > i; i++) {
+            key = allKeys[i];
+            if (key !== '__proto__' && key.substr(0, 4) === 'chat') {
+                allAtt[key] = localStorage[key];
+            }
+        }
+        
+        return allAtt;
+    }())
+    
+};
 
 function appendMessageTo(message, el) {
     
@@ -8,7 +33,6 @@ function appendMessageTo(message, el) {
     }
     
     el.appendChild(message);
-    
     
 }
 
@@ -19,10 +43,10 @@ function buildMessage(message, messageType, nick, flair) {
         nickDIV = document.createElement('div'),
         messageDIV = document.createElement('div');
     
-    container.className = 'message';
-    
-    if (messageType !== undefined) {
-        container.className += ' ' + messageType;
+    if (messageType === undefined) {
+        container.className = 'message';
+    } else {
+        container.className = 'messsage ' + messageType;
     }
     
     timeDIV.className = 'time';
@@ -49,7 +73,7 @@ function handleCommand(commandData) {
 function sendMessage(message) {
     console.log(message);
     
-    appendMessageTo(buildMessage(message, 'chat', 'sammich'));
+    socket.emit('message', message);
     
 }
 
@@ -92,6 +116,13 @@ $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
     
 });
 
+function handleReceivedMessage(messageData) {
+    var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair);
+    appendMessageTo(messageHTML);
+    
+}
+
+socket.on('message', handleReceivedMessage);
 
 socket.on('connect', function () {
     socket.emit('requestJoin');
