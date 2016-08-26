@@ -1,0 +1,70 @@
+body {
+    margin: 0;
+    font-family: "Droid Sans", sans-serif;
+}
+
+.main-container {
+    width: 100%;
+    height: 100%;
+}
+
+#messages {
+    height: calc(100% - 40px);
+    width: 100%;
+    background-color: black;
+    position: relative;
+}
+
+.time {
+    padding-left: 0.4em;
+    padding-right: 0.4em;
+    font-size: 0.8em;
+    padding-top: 0.2em;
+    color: grey;
+}
+
+.nick {
+    padding-right: 5px;
+    color: rgb(100, 100, 192);
+    text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
+}
+
+.message {
+    text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
+}
+
+.messageContent {
+    color: white;
+}
+
+.chat-message {
+    
+}
+
+.message div {
+    display: inline-block;
+}
+
+#input-bar {
+    position: absolute;
+    bottom: 0px;
+    background-color: rgb(58, 58, 58);
+    padding: 5px;
+    width: calc(100% - 10px);
+}
+
+#input-bar textarea {
+    width: 100%;
+    height: 30px;
+    resize: none;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 3px;
+    padding-right: 3px;
+    font-size: 14px;
+    background: rgba(20, 20, 20, 0.75);
+    color: white;
+    border: 1px solid #0C0D0E;
+    border-radius: 5px;
+    box-shadow: rgba(255, 255, 255, 0.1) 0 1px 0, rgba(0, 0, 0, 0.8) 0 1px 7px 0px inset;
+}
