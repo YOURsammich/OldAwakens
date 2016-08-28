@@ -46,7 +46,7 @@ function buildMessage(message, messageType, nick, flair) {
     if (messageType === undefined) {
         container.className = 'message';
     } else {
-        container.className = 'messsage ' + messageType;
+        container.className = 'message ' + messageType;
     }
     
     timeDIV.className = 'time';
@@ -66,13 +66,46 @@ function buildMessage(message, messageType, nick, flair) {
     return container;
 }
 
+function sendCommand(command, params) {
+    
+    socket.emit('command', command, params);
+    
+}
+
+function formatParams(commandParams, givenParams, paramsType) {
+    var formatedParams = {},
+        i;
+    
+    if (paramsType === 0) {
+        formatedParams[commandParams[0]] = givenParams;
+    }    
+    
+    return formatedParams;
+}
+
 function handleCommand(commandData) {
-    console.log(commandData);
+    
+    var commandName = commandData[1],
+        params = commandData[2],
+        formatedParams;
+    
+    if (COMMANDS[commandName]) {
+        
+        if (COMMANDS[commandName].params) {
+            
+            formatedParams = formatParams(COMMANDS[commandName].params, params, 0);
+            
+            sendCommand(commandName, formatedParams);
+        } else {
+            sendCommand(commandName);
+        }
+        
+    }
+    
 }
 
 function sendMessage(message) {
-    console.log(message);
-    
+
     socket.emit('message', message);
     
 }
