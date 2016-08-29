@@ -45,12 +45,13 @@ function createChannel(io, channelName) {
         
         
         
-        socket.on('message', function (message) {
+        socket.on('message', function (message, flair) {
             
             socket.emit('message', {
                 message : message,
                 messageType : 'chat',
-                nick : user.nick
+                nick : user.nick,
+                flair : flair
             });
             
         });

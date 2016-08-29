@@ -6,7 +6,11 @@ var Attributes = {
         localStorage.setItem('chat-' + attribute, value);
     },
     get : function (attribute) {
-        return this.storedAttributes['chat-' + attribute];
+        return this.storedAttributes['chat-' + attribute] || '';
+    },
+    remove : function (attribute) {
+        delete this.storedAttributes['chat-' + attribute];
+        localStorage.removeItem('chat-' + attribute);
     },
     storedAttributes : (function () {
         var allKeys = Object.keys(localStorage),
@@ -55,7 +59,13 @@ function buildMessage(message, messageType, nick, flair) {
     
     if (nick) {
         nickDIV.className = 'nick';
-        nickDIV.textContent = nick + ': ';
+        
+        if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
+            nickDIV.innerHTML = parser.parse(flair) + ': ';
+        } else {
+            nickDIV.textContent = nick + ': ';
+        }
+
         container.appendChild(nickDIV);
     }
     
@@ -66,9 +76,13 @@ function buildMessage(message, messageType, nick, flair) {
     return container;
 }
 
-function sendCommand(command, params) {
-    
-    socket.emit('command', command, params);
+function sendCommand(commandName, params) {
+        
+    if (COMMANDS[commandName].handler) {
+        COMMANDS[commandName].handler(params);
+    } else {
+        socket.emit('command', commandName, params);
+    }
     
 }
 
@@ -104,9 +118,20 @@ function handleCommand(commandData) {
     
 }
 
-function sendMessage(message) {
+function decorateText(text) {
+    var decorativeModifiers = '',
+        color = Attributes.get('color');
+    
+    if (color) {
+        decorativeModifiers = '#' + color;
+    }
+    
+    return decorativeModifiers + text;
+}
 
-    socket.emit('message', message);
+function sendMessage(message) {
+    
+    socket.emit('message', decorateText(message), Attributes.get('flair'));
     
 }
 
