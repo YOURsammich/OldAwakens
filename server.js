@@ -6,19 +6,6 @@ var fs = require('fs');
 
 var channels = {};
 
-var COMMANDS = {
-    
-    nick : {
-        params : ['nick'],
-        handler : function (user, params) {
-            if (params.nick.length < 50) {
-                user.nick = params.nick;
-            }
-        }
-    }
-    
-};
-
 process.on('uncaughtException', function (err) {
     // handle the error safely
     console.log(err);
@@ -40,14 +27,28 @@ function createChannel(io, channelName) {
         var user = {
             remote_addr : socket.request.connection.remoteAddress,
             socket : socket,
-            role : 3
+            role : 3,
+            id : Math.random().toString()
         };
         
-        
+        var COMMANDS = {
+
+            nick : {
+                params : ['nick'],
+                handler : function (user, params) {
+                    if (params.nick.length < 50) {
+                        user.nick = params.nick;
+
+                        roomEmit('nick', user.id, user.nick);
+                    }
+                }
+            }
+
+        };
         
         socket.on('message', function (message, flair) {
             
-            socket.emit('message', {
+            roomEmit('message', {
                 message : message,
                 messageType : 'chat',
                 nick : user.nick,
@@ -81,10 +82,10 @@ function createChannel(io, channelName) {
         
         socket.on('command', function (commandName, params) {
             
-            console.log(commandName, params)
+            console.log(commandName, params);
             
-            if (typeof commandName == 'string' && COMMANDS[commandName]) {
-                if (!params || typeof params == 'object') {
+            if (typeof commandName === 'string' && COMMANDS[commandName]) {
+                if (!params || typeof params === 'object') {
                     handleCommand(COMMANDS[commandName], params);
                 }       
                 
@@ -96,20 +97,47 @@ function createChannel(io, channelName) {
         
         function attemptJoin() {
             
+            function join () {
+                var i,
+                    onlineUsers = [];
+                
+                for (i = 0; i < channel.online.length; i++) {
+                    onlineUsers.push({
+                        nick : channel.online[i].nick,
+                        id : channel.online[i].id
+                    });
+                }
+                
+                user.nick = Math.random().toString();
+                channel.online.push(user);
+                
+                socket.join('chat');
+                
+                socket.emit('channeldata', {
+                    users : onlineUsers
+                });
+                
+                roomEmit('joined', user.id, user.nick);
+                
+            }
+            
             console.log(user.remote_addr);
-            user.nick = Math.random().toString();
-            channel.online.push(user);
+            join();
             
         }
         
         function findIndex(att, value) {
             var i;
-            for (i = 0; i < channel.online[att].length; i++) {
-                if (channel.online[att] === value) {
+            for (i = 0; i < channel.online.length; i++) {
+                if (channel.online[i][att] === value) {
                     return i;
                 }
             }
             return -1;
+        }
+        
+        function roomEmit() {
+            room.in('chat').emit.apply(room, arguments);
         }
         
         socket.on('requestJoin', attemptJoin);
@@ -117,6 +145,7 @@ function createChannel(io, channelName) {
         socket.on('disconnect', function () {
             var index = findIndex('nick', user.nick);
             if (index !== -1) {
+                roomEmit('left', user.id);
                 channel.online.splice(index, 1);
             }
         });

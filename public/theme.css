@@ -86,9 +86,15 @@ body {
     border-left: 4px solid rgb(34, 34, 34);
 }
 
+#user-list {
+    margin-top: 20px;
+}
+
+#user-list li {
+    list-style-type: none;
+}
+
 #menu-tabs {
-    position: absolute;
-    left: 0px;
     width: 100%;
     padding-top: 15px;
     padding-bottom: 15px;

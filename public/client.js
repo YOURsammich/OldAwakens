@@ -1,5 +1,18 @@
 var socket = io.connect(window.location.pathname);
 
+var ONLINE = {
+    users : {},
+    getId : function (nick) {
+        var keys = Object.keys(this.users),
+            i;
+        for (i = 0; i < keys.length; i++) {
+            if (nick === this.users[keys[i]].nick) {
+                return keys[i];
+            }
+        }
+    }
+};
+
 var Attributes = {
     set : function (attribute, value) {
         this.storedAttributes['chat-' + attribute] = value;
@@ -181,6 +194,21 @@ function handleReceivedMessage(messageData) {
 }
 
 socket.on('message', handleReceivedMessage);
+
+socket.on('joined', menuControl.addUser);
+
+socket.on('nick', menuControl.changeNick);
+
+socket.on('left', menuControl.removeUser);
+
+socket.on('channeldata', function (channeldata) {
+    var i;
+
+    for (i = 0; i < channeldata.users.length; i++) {
+        menuControl.addUser(channeldata.users[i].id, channeldata.users[i].nick);
+    }
+
+});
 
 socket.on('connect', function () {
     socket.emit('requestJoin');
