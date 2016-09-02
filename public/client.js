@@ -15,11 +15,11 @@ var ONLINE = {
 
 var Attributes = {
     set : function (attribute, value) {
-        this.storedAttributes['chat-' + attribute] = value;
+        this.storedAttributes[attribute] = value;
         localStorage.setItem('chat-' + attribute, value);
     },
     get : function (attribute) {
-        return this.storedAttributes['chat-' + attribute] || '';
+        return this.storedAttributes[attribute] || '';
     },
     remove : function (attribute) {
         delete this.storedAttributes['chat-' + attribute];
@@ -34,7 +34,7 @@ var Attributes = {
         for (i = 0; allKeys.length > i; i++) {
             key = allKeys[i];
             if (key !== '__proto__' && key.substr(0, 4) === 'chat') {
-                allAtt[key] = localStorage[key];
+                allAtt[key.substr(5)] = localStorage[key];
             }
         }
         
@@ -74,9 +74,9 @@ function buildMessage(message, messageType, nick, flair) {
         nickDIV.className = 'nick';
         
         if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
-            nickDIV.innerHTML = parser.parse(flair) + ': ';
+            nickDIV.innerHTML = parser.parse(flair) + ':';
         } else {
-            nickDIV.textContent = nick + ': ';
+            nickDIV.textContent = nick + ':';
         }
 
         container.appendChild(nickDIV);
@@ -105,7 +105,7 @@ function formatParams(commandParams, givenParams, paramsType) {
     
     if (paramsType === 0) {
         formatedParams[commandParams[0]] = givenParams;
-    }    
+    }
     
     return formatedParams;
 }
@@ -159,6 +159,11 @@ function handleInput(value) {
     
 }
 
+function showMessage(messageData) {
+    var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair);
+    appendMessageTo(messageHTML);
+    
+}
 
 $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
     var keyCode = e.which,
@@ -187,13 +192,7 @@ $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
     
 });
 
-function handleReceivedMessage(messageData) {
-    var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair);
-    appendMessageTo(messageHTML);
-    
-}
-
-socket.on('message', handleReceivedMessage);
+socket.on('message', showMessage);
 
 socket.on('joined', menuControl.addUser);
 
@@ -203,9 +202,9 @@ socket.on('left', menuControl.removeUser);
 
 socket.on('channeldata', function (channeldata) {
     var i;
-
+    
     for (i = 0; i < channeldata.users.length; i++) {
-        menuControl.addUser(channeldata.users[i].id, channeldata.users[i].nick);
+        menuControl.addUser(channeldata.users[i].id, channeldata.users[i].nick, true);
     }
 
 });

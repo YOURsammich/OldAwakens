@@ -38,7 +38,7 @@ function createChannel(io, channelName) {
                 handler : function (user, params) {
                     if (params.nick.length < 50) {
                         user.nick = params.nick;
-
+                        
                         roomEmit('nick', user.id, user.nick);
                     }
                 }
@@ -95,7 +95,7 @@ function createChannel(io, channelName) {
             
         });
         
-        function attemptJoin() {
+        function attemptJoin(requestedData) {
             
             function join () {
                 var i,
@@ -108,7 +108,10 @@ function createChannel(io, channelName) {
                     });
                 }
                 
-                user.nick = Math.random().toString();
+                if (user.nick === undefined) {
+                    user.nick = Math.random().toString();
+                }
+                
                 channel.online.push(user);
                 
                 socket.join('chat');
@@ -122,8 +125,19 @@ function createChannel(io, channelName) {
             }
             
             console.log(user.remote_addr);
-            join();
             
+            if (requestedData && requestedData.nick && findIndex('nick', requestedData.nick) === -1) {
+                if(!/^[\x21-\x7E]*$/i.test(data.nick)){
+                    showMessage(socket, 'Nick contained invalid characters.', 'error');
+                    join();
+                } else {
+                    user.nick = requestedData.nick;
+                    join();
+                }
+            } else {
+                join();
+            }
+
         }
         
         function findIndex(att, value) {
@@ -134,6 +148,10 @@ function createChannel(io, channelName) {
                 }
             }
             return -1;
+        }
+        
+        function showMessage(socket, message, style) {
+            socket.emit('message', message);
         }
         
         function roomEmit() {
