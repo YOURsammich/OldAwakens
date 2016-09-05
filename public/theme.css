@@ -51,6 +51,11 @@ body {
     color: #2CE72C;
 }
 
+.error {
+    color: #FF0000;
+    font-weight: bold;
+}
+
 .message div {
     display: inline;
 }

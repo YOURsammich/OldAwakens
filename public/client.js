@@ -40,17 +40,14 @@ var Attributes = {
         
         return allAtt;
     }())
-    
 };
 
 function appendMessageTo(message, el) {
-    
     if (el === undefined) {
         el = document.getElementById('messages');
     }
     
     el.appendChild(message);
-    
 }
 
 function buildMessage(message, messageType, nick, flair) {
@@ -89,22 +86,33 @@ function buildMessage(message, messageType, nick, flair) {
     return container;
 }
 
+function showMessage(messageData) {
+    var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair);
+    appendMessageTo(messageHTML);
+}
+
 function sendCommand(commandName, params) {
-        
     if (COMMANDS[commandName].handler) {
         COMMANDS[commandName].handler(params);
     } else {
         socket.emit('command', commandName, params);
     }
-    
 }
 
-function formatParams(commandParams, givenParams, paramsType) {
+function formatParams(commandParams, givenParams) {
     var formatedParams = {},
         i;
     
-    if (paramsType === 0) {
+    if (commandParams.length === 1) {
         formatedParams[commandParams[0]] = givenParams;
+    } else if (commandParams.length > 1) {
+        
+        var splitCommand = givenParams.split(' ');
+        
+        for (i = 0; i < splitCommand.length; i++) {
+            formatedParams[commandParams[i]] = splitCommand[i];
+        }
+        
     }
     
     return formatedParams;
@@ -120,13 +128,18 @@ function handleCommand(commandData) {
         
         if (COMMANDS[commandName].params) {
             
-            formatedParams = formatParams(COMMANDS[commandName].params, params, 0);
+            formatedParams = formatParams(COMMANDS[commandName].params, params);
             
             sendCommand(commandName, formatedParams);
         } else {
             sendCommand(commandName);
         }
         
+    } else {
+        showMessage({
+            message : 'That isn\'t a command',
+            messageType : 'error'
+        });
     }
     
 }
@@ -143,9 +156,7 @@ function decorateText(text) {
 }
 
 function sendMessage(message) {
-    
     socket.emit('message', decorateText(message), Attributes.get('flair'));
-    
 }
 
 function handleInput(value) {
@@ -156,13 +167,6 @@ function handleInput(value) {
     } else {
         sendMessage(value);
     }
-    
-}
-
-function showMessage(messageData) {
-    var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair);
-    appendMessageTo(messageHTML);
-    
 }
 
 $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
@@ -178,7 +182,6 @@ $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
             }
         }
     }
-    
 });
 
 $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
@@ -189,7 +192,6 @@ $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
     
     this.style.height = newHeight + 'px';
     messageDiv.style.top = -(newHeight - 30) + 'px';
-    
 });
 
 socket.on('message', showMessage);
@@ -200,15 +202,39 @@ socket.on('nick', menuControl.changeNick);
 
 socket.on('left', menuControl.removeUser);
 
-socket.on('channeldata', function (channeldata) {
-    var i;
+socket.on('channeldata', function (channel) {
+    var i,
+        channelData;
     
-    for (i = 0; i < channeldata.users.length; i++) {
-        menuControl.addUser(channeldata.users[i].id, channeldata.users[i].nick, true);
+    for (i = 0; i < channel.users.length; i++) {
+        menuControl.addUser(channel.users[i].id, channel.users[i].nick, true);
     }
+    
+    if (channel.data) {
+        try {
+            channelData = JSON.parse(channel.data);
+        } catch (err) {
+            console.log(err);
+        }
+        
+        
+        showMessage({
+            message : channeldata.topic,
+            messageType : 'general'
+        });
+    }
+    
+});
 
+socket.on('update', function (allAtt) {
+    var keys = Object.keys(allAtt),
+        i;
+    
+    for (i = 0; i < keys.length; i++) {
+        Attributes.set(keys[i], allAtt[keys[i]]);
+    }
 });
 
 socket.on('connect', function () {
-    socket.emit('requestJoin');
+    socket.emit('requestJoin', Attributes.storedAttributes);
 });

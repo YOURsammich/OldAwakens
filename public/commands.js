@@ -23,6 +23,12 @@ var COMMANDS = {
     //server side commands
     nick : {
         params : ['nick']
+    },
+    login : {
+        params : ['nick', 'password']
+    },
+    register : {
+        params : ['nick', 'password']
     }
     
 }
