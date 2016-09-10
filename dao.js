@@ -84,10 +84,34 @@ module.exports = {
         var sql = "SELECT * FROM `channel_info` WHERE `channelName` = ?";
         db.query(sql, channelName, function (err, rows, fields) {
             if (rows && rows.length) {
-                defer.resolve(rows[0]).promise();
+                try {
+                    defer.resolve(JSON.parse(rows[0].roles), JSON.parse(rows[0].data)).promise();
+                } catch (err) {
+                    defer.reject(err);
+                }
             } else {
                 defer.reject();
             }
+        });
+        return defer;
+    },
+    setChannelinfo : function(channelName, att, value){
+        var defer = $.Deferred();
+        var sql = "UPDATE `awakens`.`channel_info` SET `data` = ? WHERE `channel_info`.`channelName` = ?";
+        this.getChannelinfo(channelName).then(function(roles, channelData){
+            channelData[att] = value;
+            db.query(sql, [JSON.stringify(channelData), channelName], function(err, rows, fields){
+                if (err) {
+                    defer.reject(err);
+                } else {
+                    defer.resolve().promise();   
+                }
+            });
+        }).fail(function () {
+            channelData = {};
+            channelData[att] = value;
+            db.query("INSERT INTO `awakens`.`channel_info` (`channelName`, `roles`, `data`) VALUES (?, '{}', ?);", [channelName, JSON.stringify(channelData)]);
+            defer.resolve().promise();   
         });
         return defer;
     },

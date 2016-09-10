@@ -14,7 +14,13 @@ var ONLINE = {
 };
 
 var Attributes = {
-    set : function (attribute, value) {
+    set : function (attribute, value, notify) {
+        if (notify && this.get(attribute) !== value) {
+            showMessage({
+                message : attribute + ' is now set to ' + value,
+                messageType : 'info'
+            });
+        }
         this.storedAttributes[attribute] = value;
         localStorage.setItem('chat-' + attribute, value);
     },
@@ -80,7 +86,13 @@ function buildMessage(message, messageType, nick, flair) {
     }
     
     messageDIV.className = 'messageContent';
-    messageDIV.innerHTML = parser.parse(message);
+    
+    if (messageType === 'info') {
+        messageDIV.textContent = message;
+    } else {
+        messageDIV.innerHTML = parser.parse(message);
+    }
+    
     container.appendChild(messageDIV);
     
     return container;
@@ -169,6 +181,31 @@ function handleInput(value) {
     }
 }
 
+function channelTheme(channelData) {
+    if (channelData.note) {
+        showMessage({
+            message : channelData.note,
+            messageType : 'note'
+        });
+        Attributes.set('note', channelData.note);
+    }
+    
+    if (channelData.topic) {
+        document.title = channelData.topic;
+        showMessage({
+            message : channelData.topic,
+            messageType : 'general'
+        });
+        Attributes.set('topic', channelData.topic);
+    }
+    
+    if (channelData.background) {
+        document.getElementById('messages').style.background = channelData.background;
+        Attributes.set('background', channelData.background);
+    }
+    
+}
+
 $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
     var keyCode = e.which,
         inputValue = this.value;
@@ -206,24 +243,15 @@ socket.on('channeldata', function (channel) {
     var i,
         channelData;
     
-    for (i = 0; i < channel.users.length; i++) {
-        menuControl.addUser(channel.users[i].id, channel.users[i].nick, true);
+    if (channel.users) {
+        for (i = 0; i < channel.users.length; i++) {
+            menuControl.addUser(channel.users[i].id, channel.users[i].nick, true);
+        }   
     }
     
-    if (channel.data) {
-        try {
-            channelData = JSON.parse(channel.data);
-        } catch (err) {
-            console.log(err);
-        }
-        
-        
-        showMessage({
-            message : channeldata.topic,
-            messageType : 'general'
-        });
-    }
+    console.log(channel)
     
+    channelTheme(channel.data);
 });
 
 socket.on('update', function (allAtt) {
@@ -231,7 +259,7 @@ socket.on('update', function (allAtt) {
         i;
     
     for (i = 0; i < keys.length; i++) {
-        Attributes.set(keys[i], allAtt[keys[i]]);
+        Attributes.set(keys[i], allAtt[keys[i]], true);
     }
 });
 

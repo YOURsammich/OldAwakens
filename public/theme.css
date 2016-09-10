@@ -42,9 +42,21 @@ body {
     width: 70%;
 }
 
+.action .messageContent:before,
+.action .messageContent:after,
+.note .messageContent:before,
+.note .messageContent:after,
 .general .messageContent:before,
 .general .messageContent:after{
     content: ' ** '
+}
+
+.info {
+    color: red;
+}
+
+.note {
+    color: #B30000;
 }
 
 .general {
@@ -54,6 +66,10 @@ body {
 .error {
     color: #FF0000;
     font-weight: bold;
+}
+
+.action {
+    color: #66B2FF;
 }
 
 .message div {
