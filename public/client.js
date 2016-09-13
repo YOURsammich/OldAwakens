@@ -15,7 +15,7 @@ var ONLINE = {
 
 var Attributes = {
     set : function (attribute, value, notify) {
-        if (notify && this.get(attribute) !== value) {
+        if (notify && this.get(attribute) !== value && attribute !== 'token') {
             showMessage({
                 message : attribute + ' is now set to ' + value,
                 messageType : 'info'
@@ -28,7 +28,7 @@ var Attributes = {
         return this.storedAttributes[attribute] || '';
     },
     remove : function (attribute) {
-        delete this.storedAttributes['chat-' + attribute];
+        delete this.storedAttributes[attribute];
         localStorage.removeItem('chat-' + attribute);
     },
     storedAttributes : (function () {
@@ -54,6 +54,7 @@ function appendMessageTo(message, el) {
     }
     
     el.appendChild(message);
+    el.scrollTop = el.scrollHeight;
 }
 
 function buildMessage(message, messageType, nick, flair) {
@@ -88,7 +89,7 @@ function buildMessage(message, messageType, nick, flair) {
     messageDIV.className = 'messageContent';
     
     if (messageType === 'info') {
-        messageDIV.textContent = message;
+        messageDIV.innerHTML = parser.escape(message);
     } else {
         messageDIV.innerHTML = parser.parse(message);
     }
@@ -113,55 +114,73 @@ function sendCommand(commandName, params) {
 
 function formatParams(commandParams, givenParams) {
     var formatedParams = {},
+        splitCommand,
         i;
     
-    if (commandParams.length === 1) {
-        formatedParams[commandParams[0]] = givenParams;
-    } else if (commandParams.length > 1) {
+    if (commandParams[0].indexOf('|') !== -1) { 
+        splitCommand = commandParams[0].split('|');
         
-        var splitCommand = givenParams.split(' ');
+        for (i = 0; i < splitCommand.length; i++) {
+            formatedParams[splitCommand[i]] = givenParams.split('|')[i];
+        }
+    } else if (commandParams.length > 1) {
+        splitCommand = givenParams.split(' ');
         
         for (i = 0; i < splitCommand.length; i++) {
             formatedParams[commandParams[i]] = splitCommand[i];
         }
-        
+    } else {
+        formatedParams[commandParams[0]] = givenParams;
     }
     
     return formatedParams;
 }
 
 function handleCommand(commandData) {
-    
     var commandName = commandData[1],
         params = commandData[2],
         formatedParams;
     
     if (COMMANDS[commandName]) {
-        
         if (COMMANDS[commandName].params) {
             
             formatedParams = formatParams(COMMANDS[commandName].params, params);
             
-            sendCommand(commandName, formatedParams);
+            if (COMMANDS[commandName].params.length <= Object.keys(formatedParams).length) {
+                sendCommand(commandName, formatedParams);
+            } else {
+                showMessage({
+                    message : 'Invalid: /' + commandName + ' <' + COMMANDS[commandName].params.join('> <') + '>',
+                    messageType : 'error'
+                });
+            }
         } else {
             sendCommand(commandName);
         }
-        
     } else {
         showMessage({
             message : 'That isn\'t a command',
             messageType : 'error'
         });
     }
-    
 }
 
 function decorateText(text) {
     var decorativeModifiers = '',
-        color = Attributes.get('color');
+        color = Attributes.get('color'),
+        bgcolor = Attributes.get('bgcolor'),
+        glow = Attributes.get('glow');
+    
+    if (glow) {
+        decorativeModifiers = '###' + glow;
+    }
+    
+    if (bgcolor) {
+        decorativeModifiers += '##' + bgcolor
+    }
     
     if (color) {
-        decorativeModifiers = '#' + color;
+        decorativeModifiers += '#' + color
     }
     
     return decorativeModifiers + text;
@@ -203,6 +222,10 @@ function channelTheme(channelData) {
         document.getElementById('messages').style.background = channelData.background;
         Attributes.set('background', channelData.background);
     }
+    
+}
+
+function showUserPanel() {
     
 }
 
@@ -248,9 +271,7 @@ socket.on('channeldata', function (channel) {
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, true);
         }   
     }
-    
-    console.log(channel)
-    
+
     channelTheme(channel.data);
 });
 
@@ -263,6 +284,18 @@ socket.on('update', function (allAtt) {
     }
 });
 
+socket.on('disconnect', function () {
+    showMessage({
+        message : 'disconnected',
+        messageType : 'error'
+    });
+});
+
 socket.on('connect', function () {
-    socket.emit('requestJoin', Attributes.storedAttributes);
+    if (window.top !== window.self) {
+        window.top.location = window.self.location;
+    } else {
+        socket.emit('requestJoin', Attributes.storedAttributes);
+        menuControl.updateValues();   
+    }
 });

@@ -6,7 +6,30 @@ var COMMANDS = {
             if (params.color === 'none') {
                 Attributes.remove('color');
             } else {
-                Attributes.set('color', params.color);
+                Attributes.set('color', params.color.replace(/#/g,''), true);
+                menuControl.updateValues();
+            }
+        }
+    },
+    bgcolor : {
+        params : ['color'],
+        handler : function (params) {
+            if (params.color === 'none') {
+                Attributes.remove('bgcolor');
+            } else {
+                Attributes.set('bgcolor', params.color.replace(/#/g,''), true);
+                menuControl.updateValues();
+            }
+        }
+    },
+    glow : {
+        params : ['color'],
+        handler : function (params) {
+            if (params.color === 'none') {
+                Attributes.remove('glow');
+            } else {
+                Attributes.set('glow', params.color.replace(/#/g,''), true);
+                menuControl.updateValues();
             }
         }
     },
@@ -16,7 +39,7 @@ var COMMANDS = {
             if (params.color === 'none') {
                 Attributes.remove('flair');
             } else {
-                Attributes.set('flair', params.flair);
+                Attributes.set('flair', params.flair, true);
             }
         }
     },
@@ -35,6 +58,13 @@ var COMMANDS = {
                     messageType : 'info'
                 });
             }
+        }
+    },
+    whoami : {
+        handler : function () {
+            sendCommand('whois', {
+                nick : Attributes.get('nick') 
+            });
         }
     },
     //server side commands
@@ -58,6 +88,15 @@ var COMMANDS = {
     },
     me : {
         params : ['message']
+    },
+    whois : {
+        params : ['nick']
+    },
+    change_password : {
+        params : ['oldpassword', 'newpassword']
+    },
+    ban : {
+        params : ['nick|reason']
     }
     
 };
