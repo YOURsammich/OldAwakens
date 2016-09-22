@@ -222,6 +222,15 @@ body {
     position: absolute;
 }
 
+/* embed */
+
+.video-overlay {
+    position: fixed;
+    width: 528px;
+    height: 322px;
+    z-index: 5;
+}
+
 /* chat styles */
 
 .shake{

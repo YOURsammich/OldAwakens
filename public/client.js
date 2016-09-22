@@ -13,6 +13,11 @@ var ONLINE = {
     }
 };
 
+function scrollToBottom(id) {
+    var el = document.getElementById(id);
+    el.scrollTop = el.scrollHeight;
+}
+
 var Attributes = {
     set : function (attribute, value, notify) {
         if (notify && this.get(attribute) !== value && attribute !== 'token') {
@@ -54,7 +59,7 @@ function appendMessageTo(message, el) {
     }
     
     el.appendChild(message);
-    el.scrollTop = el.scrollHeight;
+    scrollToBottom("messages");
 }
 
 function buildMessage(message, messageType, nick, flair) {
