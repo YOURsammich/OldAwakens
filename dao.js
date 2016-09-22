@@ -37,6 +37,15 @@ function ucwords(string) {
 }
 
 module.exports = {
+    encrypt : function(password){
+        var defer = $.Deferred();
+        bcrypt.genSalt(10, function(err, salt){
+            bcrypt.hash(password, salt, null, function(err, hash){
+                defer.resolve(hash).promise();
+            });
+        });
+        return defer;
+    },
     register : function (nick, password, ip) {
         var defer = $.Deferred();
         var sql = "INSERT INTO `awakens`.`users`(`nick`,`password`,`remote_addr`,`role`) VALUES(?,?,?,?)";
@@ -58,10 +67,10 @@ module.exports = {
         var sql = "SELECT * FROM `users` WHERE `nick` = ?";
         db.query(sql, nick, function (err, rows, fields) {
             if (rows && rows.length) {
-                bcrypt.compare(password, rows[0].password, function (err, res) {
+                bcrypt.compare(password, rows[0].password, function (err, res) {//check if password is correct
                     defer.resolve(res, rows[0]).promise();
                 });
-            } else {
+            } else {//not an account
                 defer.reject();
             }
         });
@@ -90,7 +99,9 @@ module.exports = {
                     defer.reject(err);
                 }
             } else {
-                defer.reject();
+                db.query("INSERT INTO `awakens`.`channel_info` (`channelName`, `roles`, `data`) VALUES (?, '{}', '{}');", channelName, function (err, rows, fields) {
+                    defer.resolve({}, {}).promise();
+                });
             }
         });
         return defer;
@@ -123,6 +134,45 @@ module.exports = {
                 defer.reject(err);
             } else {
                 defer.resolve().promise();
+            }
+        });
+        return defer;
+    },
+    banlist : function(channelName){
+        var defer = $.Deferred();
+        var sql = "SELECT * FROM `channel_banned` WHERE `channelName` = ?;"
+        db.query(sql, channelName, function (err, rows, fields) {
+            var banlist = [],
+                rows;
+            
+            if(rows && rows.length){
+                rows = JSON.parse(rows[0].banned);
+                for(var i = 0; i < rows.length; i++){
+                    banlist.push(rows[i].nick);
+                }
+                defer.resolve(banlist, rows).promise();
+            } else {
+                db.query("INSERT INTO `awakens`.`channel_banned` (`channelName`, `banned`) VALUES (?, '[]');", channelName);
+                defer.resolve([]).promise();
+            }
+        });
+        return defer;
+    },
+    ban : function(channelName, nick, bannedBy, reason){
+        var defer = $.Deferred();
+        var sql = "UPDATE `awakens`.`channel_banned` SET `banned` = ? WHERE `channelName` = ?;";
+        this.banlist(channelName).then(function(banlist, banData){            
+            if (banlist.indexOf(nick) === -1) {
+                banData.push({
+                    nick : nick,
+                    bannedBy : bannedBy, 
+                    reason : reason
+                });
+                db.query(sql, [JSON.stringify(banData), channelName],function(err, rows, fields){
+                    defer.resolve().promise();
+                });
+            } else {
+                defer.reject();
             }
         });
         return defer;
