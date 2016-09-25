@@ -81,7 +81,6 @@ function createChannel(io, channelName) {
         };
         
         var COMMANDS = {
-
             nick : {
                 params : ['nick'],
                 handler : function (user, params) {
@@ -257,6 +256,7 @@ function createChannel(io, channelName) {
                 }
             },
             ban : {
+                role : 1,
                 params : ['nick', 'reason'],
                 handler : function (user, params) {
                     var index = findIndex(channel.online, 'nick', params.nick),
@@ -275,6 +275,7 @@ function createChannel(io, channelName) {
                 }
             },
             lockdown : {
+                role : 1,
                 handler : function (user) {
                     channel.status = 'locked';
                     showMessage(user.socket, 'Channel is now locked');
@@ -283,14 +284,16 @@ function createChannel(io, channelName) {
         };
         
         socket.on('message', function (message, flair) {
-            
-            roomEmit('message', {
-                message : message,
-                messageType : 'chat',
-                nick : user.nick,
-                flair : flair
-            });
-            
+            if (typeof message === 'string' && typeof flair === 'string') {
+                if (message.length < 10000 && flair.length < 500) {
+                    roomEmit('message', {
+                        message : message,
+                        messageType : 'chat',
+                        nick : user.nick,
+                        flair : flair
+                    });      
+                }
+            }
         });
         
         function handleCommand(command, params) {
@@ -311,23 +314,41 @@ function createChannel(io, channelName) {
                 command.handler(user);
             }
             
-            
         }
         
         socket.on('command', function (commandName, params) {
-            
-            console.log(commandName, params);
-            
             if (typeof commandName === 'string' && COMMANDS[commandName]) {
                 if (!params || typeof params === 'object') {
                     handleCommand(COMMANDS[commandName], params);
                 }
             }
-            
+        });
+        
+        socket.on('register', function (nick, password) {
+            if (typeof nick === 'string' && typeof password === 'string') {
+                if (nick.length < 50 && /^[\x21-\x7E]*$/i.test(nick)) {
+                    dao.findip(user.remote_addr).then(function (accounts) {
+                        if (accounts.length < 5) {
+                            dao.register(nick, password, user.remote_addr).then(function () {
+                                showMessage(user.socket, nick + ' is now regiserted');
+                                updateUserData(user, {
+                                    nick : nick
+                                });
+                            }).fail(function () {
+                                showMessage(user.socket, 'This nick is already registered');
+                            });
+                         } else {
+                             showMessage(user.socket, 'Serveral accounts already registered with this IP');
+                         }
+                    });
+                } else {
+                    showMessage(user.socket, 'Invalid nick');
+                }
+            }
         });
         
         function attemptJoin(requestedData) {
-                        
+            
             function join(requestedData) {
                 var i,
                     onlineUsers = [];
@@ -377,25 +398,32 @@ function createChannel(io, channelName) {
                 var IPindex = banlist.indexOf(user.remote_addr),
                     nickIndex = banlist.indexOf(requestedData.nick);
                 
-                if (IPindex === -1 && nickIndex === -1) {
-                    if (channel.status === 'locked') {
-                        console.log(requestedData);
-                        dao.login(requestedData.nick, requestedData.password).then(function (correctPassword) {
-                            if (correctPassword) {
-                                join(requestedData);
+                if (findIndex(channel.online, 'id', user.id) === -1) {
+                    if (IPindex === -1 && nickIndex === -1) {
+                        if (channel.status === 'locked') {
+                            if (typeof requestedData.nick === 'string' && typeof requestedData.password === 'string') {
+                                dao.login(requestedData.nick, requestedData.password).then(function (correctPassword) {
+                                    if (correctPassword) {
+                                        join(requestedData);
+                                    } else {
+                                        showMessage(user.socket, 'Incorrect password');
+                                        socket.emit('locked');
+                                    }
+                                }).fail(function () {
+                                    showMessage(user.socket, 'That account doesn\'t exist');
+                                    socket.emit('locked');
+                                });
                             } else {
-                                showMessage(socket, 'Wrong password')
                                 socket.emit('locked');
                             }
-                        }).fail(function () {
-                            showMessage(socket, 'Is not an account')
-                            socket.emit('locked');
-                        });
+                        } else {
+                            join(requestedData); 
+                        } 
                     } else {
-                        join(requestedData); 
-                    } 
+                        showMessage(socket, 'banned', 'error');
+                    }   
                 } else {
-                    showMessage(socket, 'banned', 'error');
+                    showMessage(socket, 'not today son');
                 }
             });
         }

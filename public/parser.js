@@ -5,36 +5,37 @@ var parser = {
     repslsh : 'ÃƒÂ¸ÃƒÂº!#@&5nÃƒÂ¥ÃƒÂ¶EESCHEInoheÃƒÂ©ÃƒÂ¤',
     replink : 'ÃƒÂ©ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂºENONHEInoheÃƒÂ¥ÃƒÂ¶',
     repnmliz : 'ÃƒÂ©ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂ¶EESCHEInoheÃƒÂ©ÃƒÂ¤',
-    multiple : function(str, mtch, rep, limit) {
+    multiple : function (str, mtch, rep, limit) {
         var ct = 0;
-        var limit = limit ? limit : 9;
-        while (str.match(mtch) !== null && ct++ < limit)
+        limit = limit || 9;
+        while (str.match(mtch) !== null && ct++ < limit) {
             str = str.replace(mtch, rep);
+        }
         return str;
     },
-    removeHTML : function(parsed){
+    removeHTML : function (parsed) {
         var span = document.createElement('span');
         span.innerHTML = parsed;
         return span.textContent;
     },
     loadedFonts : {},
-    addFont : function(family) {
+    addFont : function (family) {
         if (!this.loadedFonts[family]) {
             this.loadedFonts[family] = true;
             var stylesheet = document.createElement('link');
             stylesheet.rel = 'stylesheet';
             stylesheet.href = 'https://fonts.googleapis.com/css?family=' + encodeURIComponent(family);
-            document.head.appendChild(stylesheet)
+            document.head.appendChild(stylesheet);
         }
     },
-    getAllFonts : function(str) {
+    getAllFonts : function (str) {
         var match;
         while (match = this.fontRegex.exec(str)) {
             str = str.replace(this.fontRegex, "$2");
             this.addFont(match[3]);
         }
     },
-    escape : function(str){
+    escape : function (str) {
         // Convert chars to html codes
         str = str.replace(/\n/g, '\\n');
         str = str.replace(/&/gi, '&amp;');
@@ -51,7 +52,7 @@ var parser = {
         str = str.replace(/\s{2}/gi, ' &nbsp;');
         return str;
     },
-    parse : function(str){
+    parse : function (str) {
         // Convert chars to html codes
         str = str.replace(/\n/g, '\\n');
         str = str.replace(/&/gi, '&amp;');
@@ -100,12 +101,12 @@ var parser = {
         */
         
         // Replace colors
-        str = this.multiple(str, /&#35;&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="text-shadow: 0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1;">$2</span>',1000);
-        str = this.multiple(str, /&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="background-color: #$1;">$2</span>',1000);
-        str = this.multiple(str, /&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="color: #$1;">$2</span>',1000);
-        str = this.multiple(str, RegExp('&#35;&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="text-shadow: 0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1;">$2</span>',1000);
+        str = this.multiple(str, /&#35;&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="text-shadow: 0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1;">$2</span>', 1000);
+        str = this.multiple(str, /&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="background-color: #$1;">$2</span>', 1000);
+        str = this.multiple(str, /&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="color: #$1;">$2</span>', 1000);
+        str = this.multiple(str, RegExp('&#35;&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="text-shadow: 0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1;">$2</span>', 1000);
         str = this.multiple(str, RegExp('&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="background-color: $1;">$2</span>',1000);
-        str = this.multiple(str, RegExp('&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="color: $1;">$2</span>',1000);
+        str = this.multiple(str, RegExp('&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="color: $1;">$2</span>', 1000);
         
         //replace fonts
         str = this.multiple(str, this.fontRegex, '<span style="font-family:\'$3\'">$4</span>');
@@ -136,16 +137,16 @@ var parser = {
         //video embeds
         str = str.replace(/<a [^>]*href="[^"]*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?"]*)[^"]*">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'youtube\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="[^"]*vimeo.com\/(\d+)">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'vimeo\', \'$1\')" class="show-video">[video]</a>');
-        str = str.replace(/<a [^>]*href="[^"]*(?:soundcloud.com\/[\w-]+\/[\w-]+)">([^<]*)<\/a>/, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="Soundcloud(\'$1\')" class="show-video">[audio]</a>');
+        str = str.replace(/<a [^>]*href="[^"]*(?:soundcloud.com\/[\w-]+\/[\w-]+)">([^<]*)<\/a>/, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="soundCloud(\'$1\')" class="show-video">[audio]</a>');
         str = str.replace(/<a [^>]*href="[^"]*liveleak.com\/ll_embed\?f=(\w+)">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'liveleak\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="([^'"]*\.webm)">([^<]*)<\/a>/i, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="embed(\'html5\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="([^'"]*\.mp3)">([^<]*)<\/a>/i, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'audio\', \'$1\')" class="show-video">[audio]</a>');
         str = str.replace(/<a [^>]*href="([^'"]*\.wav)">([^<]*)<\/a>/i, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'audio\', \'$1\')" class="show-video">[audio]</a>');
-        str = str.replace(/<a [^>]*href="[^"]*ustream.tv\/embed\/(\d+)\?v=3&amp;wmode=direct">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'ustream\', \'$1\')" class="show-video">[video]</a>');        
+        str = str.replace(/<a [^>]*href="[^"]*ustream.tv\/embed\/(\d+)\?v=3&amp;wmode=direct">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'ustream\', \'$1\')" class="show-video">[video]</a>');          
         
         var img = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:agif|apng|gif|jpg|jpeg|png|bmp|svg))<\/a>/gi.exec(str);
         if (img && CLIENT.toggles.get('images')) {
-            str = this.multiple(str,img[0], img[1] + '<img src="' + img[2] + '" onload="scrollToBottom(\'messages\');"/></a>',3);
+            str = this.multiple(str,img[0], img[1] + '<img src="' + img[2] + '" onload="awakens.scrollToBottom(\'messages\');"/></a>',3);
         }
         
         //replace normalied text

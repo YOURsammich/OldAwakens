@@ -11,6 +11,10 @@ var menuControl = {
             li : li
         };
         
+        if (document.getElementsByClassName('loginPanel').length !== 0 && nick === Attributes.get('nick')) {
+            document.body.removeChild(document.getElementsByClassName('loginPanel')[0]);
+        }
+        
         menuControl.updateCount();
         
         if (noShow === undefined) {
@@ -90,7 +94,6 @@ var menuControl = {
             }
             
         });
-        
     }
     
     $$$.query('.toggle-menu').addEventListener('click', function () {

@@ -159,7 +159,7 @@ body {
 
 #user-list {
     margin-top: 20px;
-    display: none;
+    /*display: none;*/
 }
 
 #user-list li {
@@ -220,6 +220,114 @@ body {
     width: 36px;
     left: 6px;
     position: absolute;
+}
+
+/*register panel*/
+
+.overlay{
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    animation: shade 1s forwards;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@keyframes shade {
+    from {
+        background-color: rgba(0,0,0, 0);
+    } to {
+        background-color: rgba(0,0,0,.5);
+    }
+}
+
+.registerPanel {
+    animation-name: slideOpen;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    overflow: hidden;
+    width: 500px;
+    margin: 0 auto;
+    background-color: #545454;
+    color: black;
+    box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset, rgba(255, 255, 255, 0.2) 0px -1px 0px 0px;
+    border: 4px solid #222;
+    text-align: center;
+}
+
+@keyframes slideOpen {
+    from {
+        height: 0px;
+    } to {
+        height: 335px;
+    }
+}
+
+.registerPanel header {
+    font-size: 30px;
+    color: white;
+    font-family: Montserrat;
+    margin: 15px;
+}
+
+.registerPanel input {
+    width: 60%;
+    height: 30px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-family: Montserrat;
+    padding: 0 20px 0 20px;
+    outline: none;
+}
+
+.registerPanel #cancel {
+    position: relative;
+    float: right;
+    cursor: pointer;
+    font-size: 30px;
+    right: 20px;
+    top: 13px;
+    color: white;
+}
+
+/*login panel*/
+
+.loginPanel {
+    width: 300px;
+    height: 300px;
+    position: absolute;
+    top: 30%;
+    left: calc(50% - 150px);
+    text-align: center;
+    box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset, rgba(255, 255, 255, 0.2) 0px -1px 0px 0px;
+    border: solid 4px #222;
+    background-color: #545454;
+}
+
+.loginPanel input {
+    width: 60%;
+    height: 25px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-family: Montserrat;
+    border-radius: 5px;
+    border: solid 1px #ccc;
+    padding: 0px 20px;
+    outline: none;
+}
+
+.loginPanel header {
+    font-size: 30px;
+    color: white;
+    font-family: Montserrat;
+    margin: 15px;
 }
 
 /* embed */

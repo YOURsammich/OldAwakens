@@ -13,11 +13,6 @@ var ONLINE = {
     }
 };
 
-function scrollToBottom(id) {
-    var el = document.getElementById(id);
-    el.scrollTop = el.scrollHeight;
-}
-
 var Attributes = {
     set : function (attribute, value, notify) {
         if (notify && this.get(attribute) !== value && attribute !== 'token') {
@@ -53,13 +48,17 @@ var Attributes = {
     }())
 };
 
+function scrollToBottom(el) {
+    el.scrollTop = el.scrollHeight;
+}
+
 function appendMessageTo(message, el) {
     if (el === undefined) {
         el = document.getElementById('messages');
     }
     
     el.appendChild(message);
-    scrollToBottom("messages");
+    scrollToBottom(el);
 }
 
 function buildMessage(message, messageType, nick, flair) {
@@ -83,7 +82,7 @@ function buildMessage(message, messageType, nick, flair) {
         nickDIV.className = 'nick';
         
         if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
-            nickDIV.innerHTML = parser.parse(flair) + ':';
+            nickDIV.innerHTML = parser.parse(flair.replace(/\r?\n|\r/g, '')) + ':';
         } else {
             nickDIV.textContent = nick + ':';
         }
@@ -96,6 +95,9 @@ function buildMessage(message, messageType, nick, flair) {
     if (messageType === 'info') {
         messageDIV.innerHTML = parser.escape(message);
     } else {
+        while (message.split(/\n/).length > 30) {
+            message = message.replace(/\n/, ' ');
+        }
         messageDIV.innerHTML = parser.parse(message);
     }
     
@@ -122,7 +124,7 @@ function formatParams(commandParams, givenParams) {
         splitCommand,
         i;
     
-    if (commandParams[0].indexOf('|') !== -1) { 
+    if (commandParams[0].indexOf('|') !== -1) {
         splitCommand = commandParams[0].split('|');
         
         for (i = 0; i < splitCommand.length; i++) {
@@ -230,8 +232,59 @@ function channelTheme(channelData) {
     
 }
 
-function showUserPanel() {
+function createRegisterPanel() {
+    var registerPanel = document.getElementsByClassName('registerPanel'),
+        overlay,
+        header,
+        cancel,
+        userName,
+        password,
+        confirmPassword,
+        submitButton;
     
+    if (registerPanel.length === 0) {
+        overlay = document.createElement('div');
+        overlay.className = 'overlay';
+        registerPanel = document.createElement('div');
+        registerPanel.className = 'registerPanel';
+        cancel = document.createElement('span');
+        cancel.textContent = 'x';
+        cancel.id = 'cancel';
+        header = document.createElement('header');
+        header.textContent = 'Register';
+        userName = document.createElement('input');
+        userName.value = Attributes.get('nick');
+        password = document.createElement('input');
+        password.placeholder = 'Password';
+        confirmPassword = document.createElement('input');
+        confirmPassword.placeholder = 'Confirm password'
+        submitButton = document.createElement('button');
+        submitButton.textContent = 'submit';
+        
+        registerPanel.appendChild(cancel);
+        registerPanel.appendChild(header);
+        registerPanel.appendChild(userName);
+        registerPanel.appendChild(password);
+        registerPanel.appendChild(confirmPassword);
+        registerPanel.appendChild(document.createElement('br'));
+        registerPanel.appendChild(submitButton);
+        
+        cancel.addEventListener('click', function() {
+            document.body.removeChild(overlay);
+        });
+        
+        submitButton.addEventListener('click', function() {
+            if (password.value === confirmPassword.value) {
+                if (password.value.length > 4) {
+                    socket.emit('register', userName.value, password.value);
+                }
+            }
+        });
+        
+        overlay.appendChild(registerPanel);
+        document.body.appendChild(overlay);
+        userName.focus();
+    }
 }
 
 $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
@@ -274,7 +327,7 @@ socket.on('channeldata', function (channel) {
     if (channel.users) {
         for (i = 0; i < channel.users.length; i++) {
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, true);
-        }   
+        }
     }
 
     channelTheme(channel.data);
@@ -286,6 +339,43 @@ socket.on('update', function (allAtt) {
     
     for (i = 0; i < keys.length; i++) {
         Attributes.set(keys[i], allAtt[keys[i]], true);
+    }
+});
+
+socket.on('locked', function () {
+    var loginPanel = document.getElementsByClassName('loginPanel'),
+        header,
+        nickInput,
+        passwordInput,
+        submitButton;
+    
+    if (loginPanel.length === 0) {
+        loginPanel = document.createElement('div');
+        loginPanel.className = 'loginPanel';
+        header = document.createElement('header');
+        header.textContent = 'Channel is locked';
+        submitButton = document.createElement('button');
+        submitButton.textContent = 'login';
+        nickInput = document.createElement('input');
+        nickInput.placeholder = 'Username';
+        passwordInput = document.createElement('input');
+        passwordInput.placeholder = 'Password';
+        passwordInput.type = 'password';
+
+        loginPanel.appendChild(header);
+        loginPanel.appendChild(nickInput);
+        loginPanel.appendChild(passwordInput);
+        loginPanel.appendChild(document.createElement('br'));
+        loginPanel.appendChild(submitButton);
+        
+        submitButton.addEventListener('click', function () {
+            socket.emit('requestJoin', {
+                nick : nickInput.value,
+                password : passwordInput.value
+            });
+        });
+        
+        document.body.appendChild(loginPanel);
     }
 });
 
@@ -301,6 +391,6 @@ socket.on('connect', function () {
         window.top.location = window.self.location;
     } else {
         socket.emit('requestJoin', Attributes.storedAttributes);
-        menuControl.updateValues();   
+        menuControl.updateValues();
     }
 });

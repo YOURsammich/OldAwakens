@@ -67,14 +67,14 @@ var COMMANDS = {
             });
         }
     },
+    register : {
+        handler : createRegisterPanel  
+    },
     //server side commands
     nick : {
         params : ['nick']
     },
     login : {
-        params : ['nick', 'password']
-    },
-    register : {
         params : ['nick', 'password']
     },
     topic : {
@@ -97,6 +97,7 @@ var COMMANDS = {
     },
     ban : {
         params : ['nick|reason']
-    }
+    },
+    lockdown : {}
     
 };
