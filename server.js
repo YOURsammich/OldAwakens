@@ -222,21 +222,23 @@ function createChannel(io, channelName) {
                         });
                     }
                 }
-            }, 
+            },
             whois : {
                 params : ['nick'],
                 handler : function (user, params) {
-                    dao.find(params.nick).then(function (dbuser) {
-                        showMessage(user.socket, `Nick: ${dbuser.nick}\n Role: ${dbuser.role}\n IP: ${dbuser.remote_addr}\n Registered: Yes`, 'info');
-                    }).fail(function () {
-                        var index = findIndex(channel.online, 'nick', params.nick),
-                            userData = channel.online[index];
-                        if (index !== -1) {
-                            showMessage(user.socket, `Nick: ${userData.nick}\n Role: ${userData.role}\n IP: ${userData.remote_addr}\n Registered: No`, 'info');   
-                        } else {
+                    var index = findIndex(channel.online, 'nick', params.nick),
+                        userData;
+                    
+                    if (index !== -1) {
+                        userData = channel.online[index];
+                        showMessage(user.socket, `Nick: ${userData.nick}\n Role: ${userData.role}\n IP: ${userData.remote_addr}\n Registered: No`, 'info');
+                    } else {
+                        dao.find(params.nick).then(function (dbuser) {
+                            showMessage(user.socket, `Nick: ${dbuser.nick}\n Role: ${dbuser.role}\n IP: ${dbuser.remote_addr}\n Registered: Yes`, 'info');
+                        }).fail(function () {
                             showMessage(user.socket, params.nick + ' doesn\'t exist', 'info');
-                        }
-                    });
+                        });
+                    }
                 }
             },
             change_password : {
@@ -252,6 +254,21 @@ function createChannel(io, channelName) {
                         }).fail(function () {
                             showMessage(user.socket, 'Wrong password, if you\'ve forgot your password contact an admin', 'error'); 
                         });
+                    }
+                }
+            },
+            kick : {
+                role : 2,
+                params : ['nick', 'reason'],
+                handler : function (user, params) {
+                    var index = findIndex(channel.online, 'nick', params.nick),
+                        message = params.reason ? 'You\'ve been kicked: ' + params.reason : 'You\'ve been kicked';
+                    
+                    if (index !== -1) {
+                        showMessage(channel.online[index].socket, message, 'error');
+                        channel.online[index].socket.disconnect();
+                    } else {
+                        showMessage(user.socket, params.nick + ' is not online');
                     }
                 }
             },
@@ -274,11 +291,84 @@ function createChannel(io, channelName) {
                     });
                 }
             },
+            banip : {
+                role : 1,
+                params : ['nick', 'reason'],
+                handler : function (user, params) {
+                    var index = findIndex(channel.online, 'nick', params.nick),
+                        message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
+                    
+                    if (index !== -1) {
+                        dao.ban(channelName, channel.online[index].remote_addr, user.nick, params.reason).then(function () {         
+                            showMessage(channel.online[index].socket, message, 'error');
+                            channel.online[index].socket.disconnect();
+                            showMessage(user.socket, params.nick + ' is now IP banned', 'info');
+                        }).fail(function () {
+                            showMessage(user.socket, params.nick + ' is already banned', 'error');
+                        });
+                    }
+                }
+            },
+            unban : {
+                role : 1,
+                params : ['nick'],
+                handler : function (user, params) {
+                    dao.unban(channelName, params.nick).then(function () {
+                        showMessage(user.socket, params.nick + ' is unbanned');
+                    }).fail(function () {
+                        showMessage(user.socket, params.nick + ' isn\'t banned', 'error');
+                    });
+                }
+            },
             lockdown : {
                 role : 1,
                 handler : function (user) {
                     channel.status = 'locked';
                     showMessage(user.socket, 'Channel is now locked');
+                }
+            },
+            unlock : {
+                role : 1,
+                handler : function (user) {
+                    channel.status = 'public';
+                    showMessage(user.socket, 'Channel is now unlocked');
+                }
+            },
+            whitelist : {
+                role : 1,
+                params : ['nick'],
+                handler : function (user, params) {
+                    dao.find(params.nick).then(function (dbuser) {
+                        dao.getChannelAtt(channelName, 'whitelist').then(function (whitelist) {
+                             if (whitelist.indexOf(user.nick) === -1) {
+                                 whitelist.push(params.nick);
+                                 dao.setChannelinfo(channelName, 'whitelist', whitelist).then(function () {
+                                     showMessage(user.socket, params.nick + ' is now whitelisted');
+                                 });
+                             } else {
+                                 showMessage(user.socket, params.nick + ' is already whitelisted', 'error');
+                             }
+                        });
+                    }).fail(function () {
+                        showMessage(user.nick, user.nick + ' is not registered', 'error'); 
+                    });
+                }
+            },
+            unwhitelist : {
+                role : 1,
+                params : ['nick'],
+                handler : function (user) {
+                    dao.getChannelAtt(channelName, 'whitelist').then(function (whitelist) {
+                        var index = whitelist.indexOf(params.nick);
+                        if (index !== -1) {
+                            whitelist.splice(index, 1);
+                            dao.setChannelinfo(channelName, 'whitelist', whitelist).then(function () {
+                                showMessage(user.socket, params.nick + ' has been unwhitelisted');
+                            });
+                        } else {
+                            showMessage(user.socket, params.nick + ' isn\'t whitelisted', 'error');
+                        }
+                    });
                 }
             }
         };
@@ -347,89 +437,110 @@ function createChannel(io, channelName) {
             }
         });
         
-        function attemptJoin(requestedData) {
-            
-            function join(requestedData) {
+        function joinChannel(nick, role) {            
+            dao.getChannelinfo(channelName).then(function (roles, channelData) {
                 var i,
                     onlineUsers = [];
-                
+
                 for (i = 0; i < channel.online.length; i++) {
                     onlineUsers.push({
                         nick : channel.online[i].nick,
                         id : channel.online[i].id
                     });
                 }
-                                
+
                 channel.online.push(user);
-                
+
                 socket.join('chat');
                 
-                dao.getChannelinfo(channelName).then(function (roles, channelData) {
-                    socket.emit('channeldata', {
-                        users : onlineUsers,
-                        data : channelData
-                    });
-                    
-                    dao.find(requestedData.nick).then(function (dbuser) {
-                        if (requestedData.token === tokens[dbuser.nick]) {
-                            user.nick = dbuser.nick;
-                        } else {
-                            user.nick = dao.getNick();
-                        }
-                        socket.emit('update', {
-                            nick : user.nick 
-                        });
-                        roomEmit('joined', user.id, user.nick);
-                    }).fail(function () {
-                        if (requestedData.nick && /^[\x21-\x7E]*$/i.test(requestedData.nick)) {
-                            user.nick = requestedData.nick;
-                        } else {
-                            user.nick = dao.getNick();
-                        }
-                        socket.emit('update', {
-                            nick : user.nick 
-                        });
-                        roomEmit('joined', user.id, user.nick);
-                    });
-                });
-            }
-            
-            dao.banlist(channelName).then(function (banlist) {
-                var IPindex = banlist.indexOf(user.remote_addr),
-                    nickIndex = banlist.indexOf(requestedData.nick);
+                user.nick = nick || dao.getNick();
+                user.role = role || 4;
                 
-                if (findIndex(channel.online, 'id', user.id) === -1) {
-                    if (IPindex === -1 && nickIndex === -1) {
-                        if (channel.status === 'locked') {
-                            if (typeof requestedData.nick === 'string' && typeof requestedData.password === 'string') {
-                                dao.login(requestedData.nick, requestedData.password).then(function (correctPassword) {
-                                    if (correctPassword) {
-                                        join(requestedData);
-                                    } else {
-                                        showMessage(user.socket, 'Incorrect password');
-                                        socket.emit('locked');
-                                    }
-                                }).fail(function () {
-                                    showMessage(user.socket, 'That account doesn\'t exist');
-                                    socket.emit('locked');
-                                });
-                            } else {
-                                socket.emit('locked');
-                            }
-                        } else {
-                            join(requestedData); 
-                        } 
-                    } else {
-                        showMessage(socket, 'banned', 'error');
-                    }   
-                } else {
-                    showMessage(socket, 'not today son');
-                }
+                socket.emit('channeldata', {
+                    users : onlineUsers,
+                    data : channelData
+                });
+                
+                socket.emit('update', {
+                    nick : user.nick,
+                    role : user.role
+                });
+                
+                roomEmit('joined', user.id, user.nick);
             });
         }
         
-        socket.on('requestJoin', attemptJoin);
+        function joinLockedChannel(nick, token, password) {
+            
+            function isWhitelisted(nick, role) {
+                dao.getChannelAtt(channelName, 'whitelist').then(function (whitelist) {
+                    if(whitelist.indexOf(nick) !== -1) {
+                        joinChannel(nick, role);
+                    } else {
+                        showMessage(socket, 'That account isn\'t whitelisted', 'error');
+                    }
+                });
+            }
+            
+            dao.find(nick).then(function(dbuser) {
+                if (tokens[nick] === token) {
+                    isWhitelisted(dbuser.nick, dbuser.role);
+                } else {
+                    dao.login(nick, password).then(function (correctPassword, dbuser) {
+                        if (correctPassword) {
+                            isWhitelisted(dbuser.nick, dbuser.role);
+                        } else {
+                            showMessage(socket, 'Inncorect password', 'error');
+                        }
+                    });
+                }
+            }).fail(function() {
+                showMessage(socket, 'That account doesn\'t exist', 'error');
+                socket.emit('locked');
+            });
+        }
+        
+        function attemptJoin(nick, token) {
+            dao.banlist(channelName).then(function (banlist) {
+                var IPindex = banlist.indexOf(user.remote_addr),
+                    nickIndex = banlist.indexOf(nick);
                 
+                if (IPindex === -1 && nickIndex === -1) {
+                    if (typeof nick === 'string' && /^[\x21-\x7E]*$/i.test(nick)) {
+                        dao.find(nick).then(function (dbuser) {
+                            if (tokens[nick] && tokens[nick] === token) {
+                                joinChannel(dbuser.nick, dbuser.role);
+                            } else {
+                                joinChannel();
+                            }
+                        }).fail(function() {
+                            joinChannel(nick);
+                        });  
+                    } else {
+                        joinChannel();
+                    }
+                } else {
+                    showMessage(socket, 'banned', 'error');
+                }   
+            });
+        }
+                        
+        socket.on('requestJoin', function (requestedData) {
+            if (findIndex(channel.online, 'id', user.id) === -1) {
+                if (channel.status === 'public') {
+                    attemptJoin(requestedData.nick, requestedData.token);
+                } else {
+                    if (typeof requestedData.nick === 'string' && typeof requestedData.password === 'string') {
+                        joinLockedChannel(requestedData.nick, requestedData.token, requestedData.password);
+                    } else {
+                        socket.emit('locked');
+                    }
+                }
+            } else {
+                showMessage(socket, 'Only one socket connection allowed', 'error');
+            }
+        });
+        
         socket.on('disconnect', function () {
             var index = findIndex(channel.online, 'nick', user.nick);
             if (index !== -1) {

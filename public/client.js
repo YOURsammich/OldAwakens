@@ -96,7 +96,8 @@ function buildMessage(message, messageType, nick, flair) {
         messageDIV.innerHTML = parser.escape(message);
     } else {
         while (message.split(/\n/).length > 30) {
-            message = message.replace(/\n/, ' ');
+            var index = message.lastIndexOf('\n');
+            message = message.slice(0, index) + message.slice(index + 1);
         }
         messageDIV.innerHTML = parser.parse(message);
     }
@@ -371,7 +372,8 @@ socket.on('locked', function () {
         submitButton.addEventListener('click', function () {
             socket.emit('requestJoin', {
                 nick : nickInput.value,
-                password : passwordInput.value
+                password : passwordInput.value,
+                token : Attributes.get('token')
             });
         });
         

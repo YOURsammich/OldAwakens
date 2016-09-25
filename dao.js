@@ -36,6 +36,16 @@ function ucwords(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function findIndex(channel, att, value) {
+    var i;
+    for (i = 0; i < channel.length; i++) {
+        if (channel[i][att] === value) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 module.exports = {
     encrypt : function(password){
         var defer = $.Deferred();
@@ -88,6 +98,20 @@ module.exports = {
         });
         return defer;
     },
+    findip : function(ip) {
+        var defer = $.Deferred();
+        var sql = "SELECT * FROM `users` WHERE `remote_addr` = ?";
+        db.query(sql, ip, function (err, rows, fields) {
+            var nicks = [];
+            if (rows) {
+                rows.forEach(function (i) {
+                    nicks.push(i.nick);
+                });
+            }
+            defer.resolve(nicks).promise();
+        });
+        return defer;
+    },
     getChannelinfo : function (channelName) {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `channel_info` WHERE `channelName` = ?";
@@ -106,7 +130,14 @@ module.exports = {
         });
         return defer;
     },
-    setChannelinfo : function(channelName, att, value){
+    getChannelAtt : function (channelName, att) {
+        var defer = $.Deferred();
+        this.getChannelinfo(channelName).then(function (roles, channelData) {
+            defer.resolve(channelData[att] || []).promise();
+        });
+        return defer;
+    },
+    setChannelinfo : function (channelName, att, value){
         var defer = $.Deferred();
         var sql = "UPDATE `awakens`.`channel_info` SET `data` = ? WHERE `channel_info`.`channelName` = ?";
         this.getChannelinfo(channelName).then(function(roles, channelData){
@@ -161,13 +192,29 @@ module.exports = {
     ban : function(channelName, nick, bannedBy, reason){
         var defer = $.Deferred();
         var sql = "UPDATE `awakens`.`channel_banned` SET `banned` = ? WHERE `channelName` = ?;";
-        this.banlist(channelName).then(function(banlist, banData){            
+        this.banlist(channelName).then(function(banlist, banData){
             if (banlist.indexOf(nick) === -1) {
                 banData.push({
                     nick : nick,
                     bannedBy : bannedBy, 
                     reason : reason
                 });
+                db.query(sql, [JSON.stringify(banData), channelName],function(err, rows, fields){
+                    defer.resolve().promise();
+                });
+            } else {
+                defer.reject();
+            }
+        });
+        return defer;
+    },
+    unban : function(channelName, nick) {
+        var defer = $.Deferred();
+        var sql = "UPDATE `awakens`.`channel_banned` SET `banned` = ? WHERE `channelName` = ?;";
+        this.banlist(channelName).then(function (banlist, banData) {
+            var index = findIndex(banData, 'nick', nick);
+            if (index !== -1) {
+                banData.splice(index, 1);
                 db.query(sql, [JSON.stringify(banData), channelName],function(err, rows, fields){
                     defer.resolve().promise();
                 });

@@ -98,6 +98,15 @@ var COMMANDS = {
     ban : {
         params : ['nick|reason']
     },
-    lockdown : {}
+    unban : {
+        params : ['nick']  
+    },
+    lockdown : {},
+    whitelist : {
+        params : ['nick']
+    },
+    unwhitelist : {
+        params : ['nick']
+    }
     
 };
