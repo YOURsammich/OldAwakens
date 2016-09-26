@@ -107,6 +107,11 @@ var COMMANDS = {
     },
     unwhitelist : {
         params : ['nick']
+    },
+    captcha : {
+        params : ['toggle']
+    },
+    code : {
+        params : ['code']
     }
-    
 };
