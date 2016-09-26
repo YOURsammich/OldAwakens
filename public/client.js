@@ -95,8 +95,8 @@ function buildMessage(message, messageType, nick, flair) {
     if (messageType === 'info') {
         messageDIV.innerHTML = parser.escape(message);
     } else if (messageType === 'captcha') {
-		messageDIV.innerHTML = '<pre style="font-size:3px;line-height:2px;">'+parser.escape(message)+"</p>";
-	} else {
+        messageDIV.innerHTML = '<pre style="font-size:3px;line-height:2px;">'+parser.escape(message)+"</p>";
+    } else {
         while (message.split(/\n/).length > 30) {
             var index = message.lastIndexOf('\n');
             message = message.slice(0, index) + message.slice(index + 1);
@@ -110,7 +110,7 @@ function buildMessage(message, messageType, nick, flair) {
 }
 
 function captchaMessage(captcha) {
-	var messageHTML = buildMessage(captcha, "captcha");
+    var messageHTML = buildMessage(captcha, "captcha");
     appendMessageTo(messageHTML);
 }
 
