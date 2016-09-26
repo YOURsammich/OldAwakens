@@ -24,6 +24,23 @@ function findIndex(channel, att, value) {
     return -1;
 }
 
+function stringObject(obj) {
+    var keys,
+        i;
+    
+    if (typeof obj === 'object') {
+        keys = Object.keys(obj);
+        for (i = 0; i < keys.length; i++) {
+            if (typeof obj[keys[i]] !== 'string') {
+                delete obj[keys[i]];
+            }
+        }
+        return obj;
+    } else {
+        return {};
+    }
+}
+
 function createChannel(io, channelName) {
     
     console.log('Starting channel', channelName);
@@ -641,7 +658,7 @@ function createChannel(io, channelName) {
                     nickIndex = banlist.indexOf(nick);
                 
                 if (IPindex === -1 && nickIndex === -1) {
-                    if (typeof nick === 'string' && /^[\x21-\x7E]*$/i.test(nick)) {
+                    if (nick && /^[\x21-\x7E]*$/i.test(nick)) {
                         dao.find(nick).then(function (dbuser) {
                             if (tokens[nick] && tokens[nick] === token) {
                                 joinChannel(dbuser.nick, dbuser.role);
@@ -659,27 +676,17 @@ function createChannel(io, channelName) {
                 }   
             });
         }
-        
-        function channelStatus (requestedData) {
-            if (channel.status === 'public') {
-                attemptJoin(requestedData.nick, requestedData.token);
-            } else {
-                if (typeof requestedData.nick === 'string' && typeof requestedData.password === 'string') {
-                    attemptLockedChannel(requestedData.nick, requestedData.token, requestedData.password);
-                } else {
-                    socket.emit('locked');
-                }
-            }
-        }
-        
+                
         function attemptCaptcha(requestedData) {
             var code;
             if (channel.captcha[user.id]) {
-                if (channel.captcha[user.id].toUpperCase() === requestedData.captcha.toUpperCase()) {
-                    delete channel.captcha[user.id];
-                    channelStatus(requestedData);
-                } else {
-                    showMessage(socket, 'Incorrect captcha code!', 'error');
+                if (requestedData.captcha) {
+                    if (channel.captcha[user.id].toUpperCase() === requestedData.captcha.toUpperCase()) {
+                        delete channel.captcha[user.id];
+                        attemptJoin(requestedData);
+                    } else {
+                        showMessage(socket, 'Incorrect captcha code!', 'error');
+                    }   
                 }
             } else {
                 code = captchaGen.generateRandomText(8);
@@ -691,13 +698,22 @@ function createChannel(io, channelName) {
         
         socket.on('requestJoin', function (requestedData) {
             if (findIndex(channel.online, 'id', user.id) === -1) {
-                dao.getChannelAtt(channelName, 'captcha').then(function(captcha){
-                    if (captcha) {
-                        attemptCaptcha(requestedData);
+                requestedData = stringObject(requestedData);
+                if (channel.status === 'public') {
+                    dao.getChannelAtt(channelName, 'captcha').then(function (captcha) {
+                        if (captcha) {
+                            attemptCaptcha(requestedData);
+                        } else {
+                            attemptJoin(requestedData);
+                        }
+                    }); 
+                } else {
+                    if (requestedData.nick && requestedData.password) {
+                        attemptLockedChannel(requestedData.nick, requestedData.token, requestedData.password);
                     } else {
-                        channelStatus(requestedData);
+                        socket.emit('locked');
                     }
-                });
+                }   
             } else {
                 showMessage(socket, 'Only one socket connection allowed', 'error');
             }
