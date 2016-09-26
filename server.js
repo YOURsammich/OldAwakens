@@ -4,6 +4,7 @@ var _ = require('underscore');
 var $ = require('jquery-deferred');
 var express = require('express');
 var fs = require('fs');
+var captchaGen = require('ascii-captcha');
 
 var channels = {};
 var tokens = {};
@@ -343,14 +344,17 @@ function createChannel(io, channelName) {
                 handler : function (user, params) {
                     dao.find(params.nick).then(function (dbuser) {
                         dao.getChannelAtt(channelName, 'whitelist').then(function (whitelist) {
-                             if (whitelist.indexOf(user.nick) === -1) {
-                                 whitelist.push(params.nick);
-                                 dao.setChannelinfo(channelName, 'whitelist', whitelist).then(function () {
-                                     showMessage(user.socket, params.nick + ' is now whitelisted');
-                                 });
-                             } else {
-                                 showMessage(user.socket, params.nick + ' is already whitelisted', 'error');
-                             }
+                            if (whitelist === undefined) {
+                                whitelist = [];
+                            }
+                            if (whitelist.indexOf(user.nick) === -1) {
+                                whitelist.push(params.nick);
+                                dao.setChannelinfo(channelName, 'whitelist', whitelist).then(function () {
+                                    showMessage(user.socket, params.nick + ' is now whitelisted');
+                                });
+                            } else {
+                                showMessage(user.socket, params.nick + ' is already whitelisted', 'error');
+                            }
                         });
                     }).fail(function () {
                         showMessage(user.nick, user.nick + ' is not registered', 'error'); 
@@ -362,6 +366,9 @@ function createChannel(io, channelName) {
                 params : ['nick'],
                 handler : function (user) {
                     dao.getChannelAtt(channelName, 'whitelist').then(function (whitelist) {
+                        if (whitelist === undefined) {
+                            whitelist = [];
+                        }
                         var index = whitelist.indexOf(params.nick);
                         if (index !== -1) {
                             whitelist.splice(index, 1);
@@ -374,23 +381,20 @@ function createChannel(io, channelName) {
                     });
                 }
             },
-            captcha : {
+            captchaOn : {
                 role : 1,
-                params : ['toggle'],
-                handler : function(user, params) {
-                    if (channel.status == "public") {
-                        if (params.toggle == "true") {
-                            dao.setChannelinfo(channelName, 'captcha', 'true').then(function(){
-                                showMessage(user.socket, "Join captcha enabled");
-                            });
-                        } else {
-                            dao.setChannelinfo(channelName, 'captcha', 'false').then(function(){
-                                showMessage(user.socket, "Join captcha disabled");
-                            });
-                        }
-                    } else {
-                        showMessage(user.socket, "Cannot put captcha on locked channel!", "error");
-                    }
+                handler : function (user) {
+                    dao.setChannelinfo(channelName, 'captcha', true).then(function(){
+                        showMessage(user.socket, 'Join captcha enabled');
+                    });
+                }
+            },
+            captchaOff : {
+                role : 1,
+                handler : function (user) {
+                    dao.setChannelinfo(channelName, 'captcha', false).then(function(){
+                        showMessage(user.socket, 'Join captcha disabled');
+                    });
                 }
             },
             code : {
@@ -620,10 +624,13 @@ function createChannel(io, channelName) {
             });
         }
         
-        function joinLockedChannel(nick, token, password) {
+        function attemptLockedChannel(nick, token, password) {
             
             function isWhitelisted(nick, role) {
                 dao.getChannelAtt(channelName, 'whitelist').then(function (whitelist) {
+                    if (whitelist === undefined) {
+                        whitelist = [];
+                    }
                     if(whitelist.indexOf(nick) !== -1) {
                         joinChannel(nick, role);
                     } else {
@@ -649,15 +656,7 @@ function createChannel(io, channelName) {
                 socket.emit('locked');
             });
         }
-        
-        function joinCaptchaChannel(nick, role, token) {
-            if (captcha[user.id] == token) {
-                joinChannel(nick, role);
-            } else {
-                showMessage(socket, 'Incorrect captcha code!', 'error');
-            }
-        }
-        
+                
         function attemptJoin(nick, token) {
             dao.banlist(channelName).then(function (banlist) {
                 var IPindex = banlist.indexOf(user.remote_addr),
@@ -665,29 +664,14 @@ function createChannel(io, channelName) {
                 
                 if (IPindex === -1 && nickIndex === -1) {
                     if (typeof nick === 'string' && /^[\x21-\x7E]*$/i.test(nick)) {
-                        dao.getChannelAtt(channelName, 'captcha').then(function(captcha){
-                            if (captcha.length > 0 && captcha === "true") {
-                                dao.find(nick).then(function (dbuser) {
-                                    if (tokens[nick] && tokens[nick] === token) {
-                                        user.nick = dbuser.nick;
-                                        user.role = dbuser.role;
-                                    }
-                                });
-                                showMessage(socket, "Please solve a captcha with /code CAPTCHA before continuing.");
-                                var code = captchaGen.generateRandomText(8);
-                                channel.captcha[user.id] = code;
-                                socket.emit("captcha", captchaGen.word2Transformedstr(code));
+                        dao.find(nick).then(function (dbuser) {
+                            if (tokens[nick] && tokens[nick] === token) {
+                                joinChannel(dbuser.nick, dbuser.role);
                             } else {
-                                dao.find(nick).then(function (dbuser) {
-                                    if (tokens[nick] && tokens[nick] === token) {
-                                        joinChannel(dbuser.nick, dbuser.role);
-                                    } else {
-                                        joinChannel();
-                                    }
-                                }).fail(function() {
-                                    joinChannel(nick);
-                                });
+                                joinChannel();
                             }
+                        }).fail(function() {
+                            joinChannel(nick);
                         });
                     } else {
                         joinChannel();
@@ -697,18 +681,44 @@ function createChannel(io, channelName) {
                 }   
             });
         }
-                        
+        
+        function channelStatus (requestedData) {
+            if (channel.status === 'public') {
+                attemptJoin(requestedData.nick, requestedData.token);
+            } else {
+                if (typeof requestedData.nick === 'string' && typeof requestedData.password === 'string') {
+                    attemptLockedChannel(requestedData.nick, requestedData.token, requestedData.password);
+                } else {
+                    socket.emit('locked');
+                }
+            }
+        }
+        
+        function attemptCaptcha(requestedData) {
+            var code;
+            if (channel.captcha[user.id]) {
+                if (channel.captcha[user.id].toUpperCase() === requestedData.captcha.toUpperCase()) {
+                    channelStatus(requestedData);
+                } else {
+                    showMessage(socket, 'Incorrect captcha code!', 'error');
+                }
+            } else {
+                code = captchaGen.generateRandomText(8);
+                channel.captcha[user.id] = code;
+                showMessage(socket, "Please solve a captcha with /code CAPTCHA before continuing.");
+                socket.emit("captcha", captchaGen.word2Transformedstr(code));
+            }
+        }
+        
         socket.on('requestJoin', function (requestedData) {
             if (findIndex(channel.online, 'id', user.id) === -1) {
-                if (channel.status === 'public') {
-                    attemptJoin(requestedData.nick, requestedData.token);
-                } else {
-                    if (typeof requestedData.nick === 'string' && typeof requestedData.password === 'string') {
-                        joinLockedChannel(requestedData.nick, requestedData.token, requestedData.password);
+                dao.getChannelAtt(channelName, 'captcha').then(function(captcha){
+                    if (captcha) {
+                        attemptCaptcha(requestedData);
                     } else {
-                        socket.emit('locked');
+                        channelStatus(requestedData);
                     }
-                }
+                });
             } else {
                 showMessage(socket, 'Only one socket connection allowed', 'error');
             }

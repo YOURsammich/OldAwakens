@@ -95,7 +95,7 @@ function buildMessage(message, messageType, nick, flair) {
     if (messageType === 'info') {
         messageDIV.innerHTML = parser.escape(message);
     } else if (messageType === 'captcha') {
-        messageDIV.innerHTML = '<pre style="font-size:3px;line-height:2px;">'+parser.escape(message)+"</p>";
+        messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
     } else {
         while (message.split(/\n/).length > 15) {
             var index = message.lastIndexOf('\n');
@@ -107,11 +107,6 @@ function buildMessage(message, messageType, nick, flair) {
     container.appendChild(messageDIV);
     
     return container;
-}
-
-function captchaMessage(captcha) {
-    var messageHTML = buildMessage(captcha, "captcha");
-    appendMessageTo(messageHTML);
 }
 
 function showMessage(messageData) {
@@ -342,7 +337,10 @@ socket.on('nick', menuControl.changeNick);
 
 socket.on('left', menuControl.removeUser);
 
-socket.on("captcha", captchaMessage);
+socket.on('captcha', function (captcha) {
+    var messageHTML = buildMessage(captcha, 'captcha');
+    appendMessageTo(messageHTML);
+});
 
 socket.on('channeldata', function (channel) {
     var i,

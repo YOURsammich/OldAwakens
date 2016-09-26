@@ -17,6 +17,11 @@ body {
     overflow-y: scroll;
 }
 
+#messages img {
+	max-height: 256px;
+	max-width: 256px;
+}
+
 .time {
     padding-left: 0.4em;
     padding-right: 0.4em;
@@ -71,6 +76,11 @@ body {
 
 .action {
     color: #66B2FF;
+}
+
+.captcha {
+    font-size:3px;
+    line-height:2px;
 }
 
 .message div {

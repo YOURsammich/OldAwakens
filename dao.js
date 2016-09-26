@@ -145,7 +145,7 @@ module.exports = {
     getChannelAtt : function (channelName, att) {
         var defer = $.Deferred();
         this.getChannelinfo(channelName).then(function (roles, channelData) {
-            defer.resolve(channelData[att] || []).promise();
+            defer.resolve(channelData[att]).promise();
         });
         return defer;
     },

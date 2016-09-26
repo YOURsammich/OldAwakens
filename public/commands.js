@@ -70,6 +70,14 @@ var COMMANDS = {
     register : {
         handler : createRegisterPanel  
     },
+    code : {
+        params : ['code'],
+        handler : function (params) {
+            socket.emit('requestJoin', {
+                captcha : params.code
+            });
+        }  
+    },
     //server side commands
     nick : {
         params : ['nick']
@@ -126,6 +134,8 @@ var COMMANDS = {
     },
     access : {
         params : ['nick', 'role']
-    }
+    },
+    captchaOn : {},
+    captchaOff : {}
     
 };
