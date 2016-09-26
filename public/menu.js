@@ -86,13 +86,11 @@ var menuControl = {
         });
         
         allBars[i].getElementsByTagName('input')[0].addEventListener('keydown', function (e) {
-            
             if (e.which === 13) {
                 sendCommand(this.parentNode.classList[1], {
                     color : this.value
                 });
             }
-            
         });
     }
     

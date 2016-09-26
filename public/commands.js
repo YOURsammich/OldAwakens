@@ -95,6 +95,9 @@ var COMMANDS = {
     change_password : {
         params : ['oldpassword', 'newpassword']
     },
+    kick : {
+        params : ['nick|reason']
+    },
     ban : {
         params : ['nick|reason']
     },
@@ -108,10 +111,21 @@ var COMMANDS = {
     unwhitelist : {
         params : ['nick']
     },
-    captcha : {
-        params : ['toggle']
+    delete : {
+        params : ['nick']
     },
-    code : {
-        params : ['code']
+    global : {
+        params : ['message']
+    },
+    find : {
+        params : ['ip']
+    },
+    refresh : {},
+    theme : {
+        params : ['inputColor', 'buttonColor', 'scrollBarColor']
+    },
+    access : {
+        params : ['nick', 'role']
     }
+    
 };

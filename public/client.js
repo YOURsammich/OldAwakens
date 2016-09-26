@@ -97,7 +97,7 @@ function buildMessage(message, messageType, nick, flair) {
     } else if (messageType === 'captcha') {
         messageDIV.innerHTML = '<pre style="font-size:3px;line-height:2px;">'+parser.escape(message)+"</p>";
     } else {
-        while (message.split(/\n/).length > 30) {
+        while (message.split(/\n/).length > 15) {
             var index = message.lastIndexOf('\n');
             message = message.slice(0, index) + message.slice(index + 1);
         }
@@ -136,16 +136,22 @@ function formatParams(commandParams, givenParams) {
         splitCommand = commandParams[0].split('|');
         
         for (i = 0; i < splitCommand.length; i++) {
-            formatedParams[splitCommand[i]] = givenParams.split('|')[i];
+            if (givenParams.split('|')[i]) {
+                formatedParams[splitCommand[i]] = givenParams.split('|')[i];
+            }
         }
     } else if (commandParams.length > 1) {
         splitCommand = givenParams.split(' ');
         
         for (i = 0; i < splitCommand.length; i++) {
-            formatedParams[commandParams[i]] = splitCommand[i];
+            if (splitCommand[i]) {
+                formatedParams[commandParams[i]] = splitCommand[i];   
+            }
         }
     } else {
-        formatedParams[commandParams[0]] = givenParams;
+        if (givenParams) {
+            formatedParams[commandParams[0]] = givenParams;
+        }
     }
     
     return formatedParams;
@@ -191,11 +197,11 @@ function decorateText(text) {
     }
     
     if (bgcolor) {
-        decorativeModifiers += '##' + bgcolor
+        decorativeModifiers += '##' + bgcolor;
     }
     
     if (color) {
-        decorativeModifiers += '#' + color
+        decorativeModifiers += '#' + color;
     }
     
     return decorativeModifiers + text;
@@ -227,7 +233,7 @@ function channelTheme(channelData) {
     if (channelData.topic) {
         document.title = channelData.topic;
         showMessage({
-            message : "Topic: "+channelData.topic,
+            message : channelData.topic,
             messageType : 'general'
         });
         Attributes.set('topic', channelData.topic);
@@ -237,7 +243,15 @@ function channelTheme(channelData) {
         document.getElementById('messages').style.background = channelData.background;
         Attributes.set('background', channelData.background);
     }
-    
+
+    if (channelData.themecolors) {
+        document.getElementById('input-bar').style.backgroundColor = channelData.themecolors[0];
+        document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors[1];
+        if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
+            var length = document.styleSheets[0].rules.length;
+            document.styleSheets[0].insertRule(".scrollbar_default::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], length);
+        }
+    }
 }
 
 function createRegisterPanel() {
@@ -265,7 +279,7 @@ function createRegisterPanel() {
         password = document.createElement('input');
         password.placeholder = 'Password';
         confirmPassword = document.createElement('input');
-        confirmPassword.placeholder = 'Confirm password'
+        confirmPassword.placeholder = 'Confirm password';
         submitButton = document.createElement('button');
         submitButton.textContent = 'submit';
         
@@ -277,11 +291,11 @@ function createRegisterPanel() {
         registerPanel.appendChild(document.createElement('br'));
         registerPanel.appendChild(submitButton);
         
-        cancel.addEventListener('click', function() {
+        cancel.addEventListener('click', function () {
             document.body.removeChild(overlay);
         });
         
-        submitButton.addEventListener('click', function() {
+        submitButton.addEventListener('click', function () {
             if (password.value === confirmPassword.value) {
                 if (password.value.length > 4) {
                     socket.emit('register', userName.value, password.value);
@@ -395,6 +409,10 @@ socket.on('disconnect', function () {
         message : 'disconnected',
         messageType : 'error'
     });
+});
+
+socket.on('refresh', function () {
+    location.reload();
 });
 
 socket.on('connect', function () {

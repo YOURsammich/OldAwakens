@@ -72,6 +72,18 @@ module.exports = {
         });
         return defer;
     },
+    unregister : function(nick){
+        var defer = $.Deferred();
+        var sql = "DELETE FROM `awakens`.`users` WHERE `nick` = ?";
+        db.query(sql, nick, function(err, rows, fields){
+            if (err) {
+                defer.reject();
+            }  else {
+                defer.resolve().promise();
+            }
+        });
+        return defer;
+    },
     login : function (nick, password) {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `users` WHERE `nick` = ?";
@@ -154,6 +166,21 @@ module.exports = {
             channelData[att] = value;
             db.query("INSERT INTO `awakens`.`channel_info` (`channelName`, `roles`, `data`) VALUES (?, '{}', ?);", [channelName, JSON.stringify(channelData)]);
             defer.resolve().promise();   
+        });
+        return defer;
+    },
+    setChannelRole : function (channelName, nick, role) {
+        var defer = $.Deferred();
+        var sql = "UPDATE `awakens`.`channel_info` SET `roles` = ? WHERE `channel_info`.`channelName` = ?";
+        this.getChannelinfo(channelName).then(function (roles) {
+            if (role === 4) {
+                delete roles[nick];
+            } else {
+                roles[nick] = role;
+            }
+            db.query(sql, [JSON.stringify(roles), channelName], function (err, rows, fields) {
+                defer.resolve().promise();
+            });
         });
         return defer;
     },
