@@ -397,28 +397,6 @@ function createChannel(io, channelName) {
                     });
                 }
             },
-            code : {
-                params : ["code"],
-                handler : function(user, params) {
-                    dao.getChannelAtt(channelName, 'captcha').then(function(captcha){
-                        if (captcha.length > 0 && captcha === "true") {
-                            if (channel.captcha[user.id].toLowerCase() == params.code.toLowerCase()) {
-                                if (user.role) {
-                                    joinChannel(user.nick, user.role);
-                                } else if (user.nick) {
-                                    joinChannel(user.nick);
-                                } else {
-                                    joinChannel();
-                                }
-                            } else {
-                                showMessage(user.socket, "Captcha incorrect.", "error");
-                            }
-                        } else {
-                            showMessage(user.socket, "Captcha not enabled.", "error");
-                        }
-                    })
-                }
-            },
             delete : {
                 role : 0,
                 params : ['nick'],
@@ -698,6 +676,7 @@ function createChannel(io, channelName) {
             var code;
             if (channel.captcha[user.id]) {
                 if (channel.captcha[user.id].toUpperCase() === requestedData.captcha.toUpperCase()) {
+                    delete channel.captcha[user.id];
                     channelStatus(requestedData);
                 } else {
                     showMessage(socket, 'Incorrect captcha code!', 'error');
@@ -729,6 +708,9 @@ function createChannel(io, channelName) {
             if (index !== -1) {
                 roomEmit('left', user.id);
                 channel.online.splice(index, 1);
+            }
+            if (channel.captcha[user.id]) {
+                delete channel.captcha[user.id];
             }
         });
         
