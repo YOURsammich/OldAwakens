@@ -220,7 +220,7 @@ function channelTheme(channelData) {
     if (channelData.topic) {
         document.title = channelData.topic;
         showMessage({
-            message : channelData.topic,
+            message : "Topic: "+channelData.topic,
             messageType : 'general'
         });
         Attributes.set('topic', channelData.topic);
