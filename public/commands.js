@@ -70,18 +70,69 @@ var COMMANDS = {
     register : {
         handler : createRegisterPanel  
     },
+    code : {
+        params : ['code'],
+        handler : function (params) {
+            socket.emit('requestJoin', {
+                captcha : params.code,
+                nick : Attributes.get('nick'),
+                token : Attributes.get('token')
+            });
+        }  
+    },
+    echo : {
+        params : ['message'],
+        handler : function (params) {
+            showMessage({
+                message : decorateText(params.message),
+                nick : Attributes.get('nick')
+            });
+        }
+    },
+    captchaon : {
+        handler : function () {
+            socket.emit('channelStatus', {
+                captcha : true
+            });
+        }
+    },
+    captchaoff : {
+        handler : function () {
+            socket.emit('channelStatus', {
+                captcha : false
+            });
+        }
+    },
+    topic : {
+        params : ['topic'],
+        handler : function (params) {
+            socket.emit('channelStatus', {
+                topic : params.topic
+            });
+        }
+    },
+    note : {
+        params : ['note'],
+        handler : function (params) {
+            socket.emit('channelStatus', {
+                note : params.note
+            });
+        }
+    },
+    theme : {
+        params : ['inputColor', 'buttonColor', 'scrollBarColor'],
+        handler : function (params) {
+            socket.emit('channelStatus', {
+                topic : [params.inputColor, params.buttonColor, params.scrollBarColor]
+            });
+        }
+    },
     //server side commands
     nick : {
         params : ['nick']
     },
     login : {
         params : ['nick', 'password']
-    },
-    topic : {
-        params : ['topic']
-    },
-    note : {
-        params : ['note']
     },
     background : {
         params : ['background']
@@ -104,6 +155,7 @@ var COMMANDS = {
     unban : {
         params : ['nick']  
     },
+    unlock : {},
     lockdown : {},
     whitelist : {
         params : ['nick']
@@ -121,11 +173,10 @@ var COMMANDS = {
         params : ['ip']
     },
     refresh : {},
-    theme : {
-        params : ['inputColor', 'buttonColor', 'scrollBarColor']
-    },
     access : {
         params : ['nick', 'role']
+    },
+    pm : {
+        params : ['nick|message']
     }
-    
 };

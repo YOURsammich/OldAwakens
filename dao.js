@@ -145,15 +145,23 @@ module.exports = {
     getChannelAtt : function (channelName, att) {
         var defer = $.Deferred();
         this.getChannelinfo(channelName).then(function (roles, channelData) {
-            defer.resolve(channelData[att] || []).promise();
+            defer.resolve(channelData[att]).promise();
         });
         return defer;
     },
-    setChannelinfo : function (channelName, att, value){
-        var defer = $.Deferred();
-        var sql = "UPDATE `awakens`.`channel_info` SET `data` = ? WHERE `channel_info`.`channelName` = ?";
-        this.getChannelinfo(channelName).then(function(roles, channelData){
-            channelData[att] = value;
+    setChannelinfo : function (channelName, newValues){
+        var defer = $.Deferred(),
+            sql = "UPDATE `awakens`.`channel_info` SET `data` = ? WHERE `channel_info`.`channelName` = ?",
+            keys = Object.keys(newValues),
+            i;
+        
+        this.getChannelinfo(channelName).then(function (roles, channelData) {
+            
+            for (i = 0; i < keys.length; i++) {
+                channelData[keys[i]] = newValues[keys[i]];
+            }
+            
+            console.log(channelData);
             db.query(sql, [JSON.stringify(channelData), channelName], function(err, rows, fields){
                 if (err) {
                     defer.reject(err);
