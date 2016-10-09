@@ -49,7 +49,42 @@ var Attributes = {
 };
 
 function scrollToBottom(el) {
-    el.scrollTop = el.scrollHeight;
+        
+    function scrollTo(element, to, duration){
+        var start = element.scrollTop,
+            change = to - start,
+            increment = 20;
+
+            var animateScroll = function(elapsedTime){   
+                elapsedTime += increment;
+                var position = easeInOut(elapsedTime, start, change, duration);  
+                element.scrollTop = position; 
+                if (elapsedTime < duration) {
+                    setTimeout(function() {
+                        animateScroll(elapsedTime);
+                    }, increment);
+                }
+            };
+            animateScroll(0);
+        }
+    
+    function easeInOut(currentTime, start, change, duration){
+        currentTime /= duration / 2;
+        if(currentTime < 1){
+            return change / 2 * currentTime * currentTime + start;
+        }
+        currentTime -= 1;
+        return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
+    }
+    
+    if(typeof el == 'string'){
+        el = document.getElementById(el);
+    }
+    
+    var scrollDelta = el.scrollHeight - el.clientHeight;
+    if(scrollDelta - el.scrollTop < 300){
+        scrollTo(el, scrollDelta, 200);
+    }
 }
 
 function appendMessageTo(message, el) {
@@ -140,7 +175,7 @@ function formatParams(commandParams, givenParams) {
         
         for (i = 0; i < splitCommand.length; i++) {
             if (splitCommand[i]) {
-                formatedParams[commandParams[i]] = splitCommand[i];   
+                formatedParams[commandParams[i]] = splitCommand[i];
             }
         }
     } else {
@@ -199,7 +234,7 @@ function decorateText(text) {
         decorativeModifiers += '#' + color;
     }
     
-    return decorativeModifiers + text;
+    return decorativeModifiers + ' ' + text;
 }
 
 function sendMessage(message) {
@@ -243,9 +278,15 @@ function channelTheme(channelData) {
         document.getElementById('input-bar').style.backgroundColor = channelData.themecolors[0];
         document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors[1];
         if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
-            var length = document.styleSheets[0].rules.length;
-            document.styleSheets[0].insertRule(".scrollbar_default::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], length);
+            document.styleSheets[0].deleteRule(3);
+            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], 3);
         }
+    }
+    
+    if (channelData.captcha) {
+        showMessage({
+            message : 'captcha is now set to: ' + channelData.captcha
+        });
     }
 }
 
@@ -304,30 +345,55 @@ function createRegisterPanel() {
     }
 }
 
-$$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
-    var keyCode = e.which,
-        inputValue = this.value;
+(function () {
+    var history = [],
+        historyIndex = 0;
     
-    if (keyCode === 13) {
-        if (!e.shiftKey) {
-            e.preventDefault();
-            if (inputValue) {
-                this.value = '';
-                handleInput(inputValue);
+    $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
+        var keyCode = e.which,
+            inputValue = this.value;
+        
+        switch (keyCode) {
+        case 13:
+            if (!e.shiftKey) {
+                e.preventDefault();
+                if (inputValue) {
+                    historyIndex = 0,
+                    this.value = '';
+                    history.push(inputValue);
+                    handleInput(inputValue);
+                }
             }
+            break;
+        case 38:
+            if (e.shiftKey && historyIndex < history.length) {
+                historyIndex++;
+            }
+            break;
+        case 40:
+            if (e.shiftKey && historyIndex > 1) {
+                historyIndex--;
+            }
+            break;
+        default:
+            historyIndex = 0;
         }
-    }
-});
+        
+        if (historyIndex !== 0) {
+            this.value = history[history.length - historyIndex];
+        }
+    });
 
-$$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
-    this.style.height = '0px';
-    
-    var newHeight = Math.min(Math.max(this.scrollHeight, 30), screen.height / 3),
-        messageDiv = document.getElementById('messages');
-    
-    this.style.height = newHeight + 'px';
-    messageDiv.style.top = -(newHeight - 30) + 'px';
-});
+    $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
+        this.style.height = '0px';
+
+        var newHeight = Math.min(Math.max(this.scrollHeight, 30), screen.height / 3),
+            messageDiv = document.getElementById('messages');
+
+        this.style.height = newHeight + 'px';
+        messageDiv.style.top = -(newHeight - 30) + 'px';
+    });
+})();
 
 socket.on('message', showMessage);
 

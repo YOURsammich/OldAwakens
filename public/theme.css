@@ -4,6 +4,19 @@ body {
     overflow: hidden;
 }
 
+::-webkit-scrollbar{
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color:transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background:#5F5F5F;
+}
+
 .main-container {
     width: 100%;
     height: 100%;
@@ -31,7 +44,6 @@ body {
 }
 
 .nick {
-    padding-right: 5px;
     color: rgb(100, 100, 192);
     text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
 }
@@ -81,6 +93,16 @@ body {
 .captcha {
     font-size:3px;
     line-height:2px;
+}
+
+.personal {
+    color: RosyBrown;
+    font-weight: bold;
+}
+
+.personal .nick:before {
+    content: '==== ';
+    color: RosyBrown;
 }
 
 .message div {
