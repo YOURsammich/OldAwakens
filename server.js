@@ -554,14 +554,32 @@ function createChannel(io, channelName) {
             }
         });
         
-        socket.on('channelStatus', function (settings) {
-            dao.setChannelinfo(channelName, settings).then(function () {
-                roomEmit('channeldata', {
-                    data : settings
-                });
-            }).fail(function (err) {
-                console.log(err);
-            });
+        socket.on('channelStatus', function (settings) {  
+            var validSettings = {
+                captcha : 'boolean',
+                topic : 'string',
+                note : 'string',
+                background : 'string',
+                themecolors : 'string'
+            },
+                keys = Object.keys(validSettings),
+                savedSettings = {};
+            
+            if (typeof settings === 'object') {
+                for (i = 0; i < keys.length; i++) {
+                    if (typeof settings[keys[i]] === validSettings[keys[i]]) {
+                        savedSettings[keys[i]] = settings[keys[i]];
+                    }
+                }
+
+                dao.setChannelinfo(channelName, savedSettings).then(function () {
+                    roomEmit('channeldata', {
+                        data : savedSettings
+                    });
+                }).fail(function (err) {
+                    console.log(err);
+                });   
+            }
         });
         
         function joinChannel(nick, role) {
