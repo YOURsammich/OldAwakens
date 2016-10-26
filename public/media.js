@@ -29,8 +29,7 @@ function buildVideoOverlay(url) {
         document.body.appendChild(videoOverlay);
         $$$.draggable(videoOverlay);
     } else {
-        videoOverlay = videoOverlay[0];
-        videoOverlay.getElementsByClassName('container')[0].innerHTML = url;
+        videoOverlay[0].getElementsByClassName('container')[0].innerHTML = url;
     }
 }
 

@@ -1,5 +1,4 @@
 var COMMANDS = {
-    
     color : {
         params : ['color'],
         handler : function (params) {
@@ -123,7 +122,29 @@ var COMMANDS = {
         params : ['inputColor', 'buttonColor', 'scrollBarColor'],
         handler : function (params) {
             socket.emit('channelStatus', {
-                topic : [params.inputColor, params.buttonColor, params.scrollBarColor]
+                themecolors : [params.inputColor, params.buttonColor, params.scrollBarColor]
+            });
+        }
+    },
+    background : {
+        params : ['background'],
+        handler : function (params) {
+            socket.emit('channelStatus', {
+                background : params.background
+            });
+        }
+    },
+    unlock : {
+        handler : function () {
+            socket.emit('channelStatus', {
+                lock : false
+            });
+        }
+    },
+    lockdown : {
+        handler : function () {
+            socket.emit('channelStatus', {
+                lock : true
             });
         }
     },
@@ -133,9 +154,6 @@ var COMMANDS = {
     },
     login : {
         params : ['nick', 'password']
-    },
-    background : {
-        params : ['background']
     },
     me : {
         params : ['message']
@@ -155,8 +173,6 @@ var COMMANDS = {
     unban : {
         params : ['nick']  
     },
-    unlock : {},
-    lockdown : {},
     whitelist : {
         params : ['nick']
     },

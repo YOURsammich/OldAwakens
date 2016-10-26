@@ -37,7 +37,6 @@ body {
 
 .time {
     padding-left: 0.4em;
-    padding-right: 0.4em;
     font-size: 0.8em;
     padding-top: 0.2em;
     color: grey;
@@ -150,12 +149,13 @@ body {
     overflow: hidden;
 }
 
-#user-panel {
+.userPanel {
     margin-top: 20px;
     width: 300px;
+    display: none;
 }
 
-#user-panel h3 {
+.userPanel h3 {
     width: 80%;
     margin-left: 10%;
     border-bottom: 1px solid #333;
@@ -189,13 +189,21 @@ body {
     border: none;
 }
 
-#user-list {
+.userList {
     margin-top: 20px;
-    /*display: none;*/
+    width: 300px;
 }
 
-#user-list li {
+.userList .nickContain {
     list-style-type: none;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.userList .nickContain .informer {
+    color: lightgrey;
+    font-size: 12px;
+    font-style: italic;
 }
 
 #menu-tabs {
@@ -217,6 +225,15 @@ body {
     border-style: solid;
     border-color: rgb(17, 17, 17);
     width: 130px;
+}
+
+#menu-tabs .listIcon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    margin: -15px;
+    z-index: 5;
 }
 
 .toggle-menu {
@@ -360,6 +377,86 @@ body {
     color: white;
     font-family: Montserrat;
     margin: 15px;
+}
+
+/* pm panel */
+
+.pmPanel {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background-color: black;
+    width: 300px;
+    height: 300px;
+    min-width: 300px;
+    min-height: 300px;
+    border: 1px solid grey;
+}
+
+.pmPanel header {
+    cursor: pointer;
+    color: white;
+    height: 25px;
+    padding: 4px;
+}
+
+.pmPanel header .pm-controls {
+    position: absolute;
+    right: 5px;
+}
+
+.pmPanel .messages {
+    width: 100%;
+    height: calc(100% - 69px);
+    overflow-y: scroll;
+}
+
+.pmPanel .input-bar {
+    position: absolute;
+    bottom: 0px;
+    width: calc(100% - 10px);
+    background-color: grey;
+    padding: 5px;
+}
+
+.pmPanel .input-bar input {
+    width: 100%;
+    background-color: rgb(34, 34, 34);
+    color: white;
+    box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset;
+    padding: 4px 0px 5px;
+    border: 1px solid #0C0E0E;
+    border-radius: 5px;
+    outline: none;
+}
+
+/* context-menu */
+
+#context-menu {
+    position: absolute;
+    z-index: 100;
+    width: 100px;
+    background-color: #EEE;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 11px;
+}
+
+#context-menu header {
+    background-color: #DDD;
+    padding: 2px;
+    font-weight: bold;
+    word-wrap: break-word;
+}
+
+#context-menu li {
+    height: 15px;
+    cursor: pointer;
+    list-style: none;
+    padding: 2px 2px 2px 24px;
+}
+
+#context-menu li:hover {
+    background-color: #39F;
 }
 
 /* embed */

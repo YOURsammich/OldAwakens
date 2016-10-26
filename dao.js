@@ -161,7 +161,6 @@ module.exports = {
                 channelData[keys[i]] = newValues[keys[i]];
             }
             
-            console.log(channelData);
             db.query(sql, [JSON.stringify(channelData), channelName], function(err, rows, fields){
                 if (err) {
                     defer.reject(err);

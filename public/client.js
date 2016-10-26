@@ -50,39 +50,39 @@ var Attributes = {
 
 function scrollToBottom(el) {
         
-    function scrollTo(element, to, duration){
+    function scrollTo(element, to, duration) {
         var start = element.scrollTop,
             change = to - start,
             increment = 20;
 
-            var animateScroll = function(elapsedTime){   
-                elapsedTime += increment;
-                var position = easeInOut(elapsedTime, start, change, duration);  
-                element.scrollTop = position; 
-                if (elapsedTime < duration) {
-                    setTimeout(function() {
-                        animateScroll(elapsedTime);
-                    }, increment);
-                }
-            };
-            animateScroll(0);
-        }
+        var animateScroll = function (elapsedTime) {
+            elapsedTime += increment;
+            var position = easeInOut(elapsedTime, start, change, duration);
+            element.scrollTop = position;
+            if (elapsedTime < duration) {
+                setTimeout(function () {
+                    animateScroll(elapsedTime);
+                }, increment);
+            }
+        };
+        animateScroll(0);
+    }
     
-    function easeInOut(currentTime, start, change, duration){
+    function easeInOut(currentTime, start, change, duration) {
         currentTime /= duration / 2;
-        if(currentTime < 1){
+        if (currentTime < 1) {
             return change / 2 * currentTime * currentTime + start;
         }
         currentTime -= 1;
         return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
     }
     
-    if(typeof el == 'string'){
+    if (typeof el === 'string') {
         el = document.getElementById(el);
     }
     
     var scrollDelta = el.scrollHeight - el.clientHeight;
-    if(scrollDelta - el.scrollTop < 300){
+    if (scrollDelta - el.scrollTop < 300) {
         scrollTo(el, scrollDelta, 200);
     }
 }
@@ -110,7 +110,7 @@ function buildMessage(message, messageType, nick, flair) {
     }
     
     timeDIV.className = 'time';
-    timeDIV.textContent = time.format('shortTime');
+    timeDIV.textContent = time.format('shortTime') + ' ';
     container.appendChild(timeDIV);
     
     if (nick) {
@@ -136,6 +136,7 @@ function buildMessage(message, messageType, nick, flair) {
             var index = message.lastIndexOf('\n');
             message = message.slice(0, index) + message.slice(index + 1);
         }
+        parser.getAllFonts(message);
         messageDIV.innerHTML = parser.parse(message);
     }
     
@@ -144,9 +145,32 @@ function buildMessage(message, messageType, nick, flair) {
     return container;
 }
 
-function showMessage(messageData) {
+function showMessage(messageData, panel) {
     var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair);
-    appendMessageTo(messageHTML);
+    appendMessageTo(messageHTML, panel);
+}
+
+function handlePrivateMessage(messageData) {
+    var panel = document.getElementById('PmPanel-' + messageData.landOn),
+        pmUser = ONLINE.users[messageData.landOn],
+        informer;
+    
+    if (panel && panel.getElementsByClassName('messages')[0]) {
+        showMessage(messageData, panel.getElementsByClassName('messages')[0]);
+    } else if (pmUser) {
+        informer = pmUser.li.getElementsByClassName('informer')[0];    
+        if (!pmUser.listin) {
+            informer.textContent = 'unread PM(s)';
+            pmUser.listin = function () {
+                createPmPanel(messageData.landOn);
+            }
+            informer.addEventListener('click', pmUser.listin);
+        }
+        if (!pmUser.pm) {
+            pmUser.pm = [];
+        }    
+        pmUser.pm.push(messageData);
+    }
 }
 
 function sendCommand(commandName, params) {
@@ -237,6 +261,10 @@ function decorateText(text) {
     return decorativeModifiers + ' ' + text;
 }
 
+function sendPrivateMessage(message, userID) {
+    socket.emit('privateMessage', decorateText(message), Attributes.get('flair'), userID);
+}
+
 function sendMessage(message) {
     socket.emit('message', decorateText(message), Attributes.get('flair'));
 }
@@ -281,12 +309,6 @@ function channelTheme(channelData) {
             document.styleSheets[0].deleteRule(3);
             document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], 3);
         }
-    }
-    
-    if (channelData.captcha) {
-        showMessage({
-            message : 'captcha is now set to: ' + channelData.captcha
-        });
     }
 }
 
@@ -345,6 +367,86 @@ function createRegisterPanel() {
     }
 }
 
+function createPmPanel(id) {
+    var validUser = ONLINE.users[id],
+        panel = document.getElementById('PmPanel-' + id),
+        informer;
+    
+    function makePanel() {
+        var panelContainer = document.createElement('div'),
+            header,
+            nickName,
+            controls,
+            minimize,
+            cancel,
+            messages,
+            inputBar,
+            input,
+            i;
+        
+        panelContainer.id = 'PmPanel-' + id;
+        panelContainer.className = 'pmPanel';
+        header = document.createElement('header');
+        nickName = document.createElement('span');
+        nickName.textContent = validUser.nick;
+        controls = document.createElement('span');
+        controls.classList = 'pm-controls';
+        cancel = document.createElement('span');
+        cancel.textContent = 'x';
+        minimize = document.createElement('span');
+        minimize.textContent = '-';
+        minimize.style.margin = '5px';
+        messages = document.createElement('div');
+        messages.className = 'messages';
+        inputBar = document.createElement('div');
+        inputBar.className = 'input-bar';
+        input = document.createElement('input');
+        input.placeholder = 'Type anything then press enter';
+        
+        cancel.addEventListener('click', function () {
+            document.body.removeChild(panelContainer);
+        });
+        
+        input.addEventListener('keydown', function (e) {
+            if (e.which === 13 && this.value) {
+                sendPrivateMessage(this.value, id);
+                this.value = '';
+            }
+        });
+        
+        if (ONLINE.users[id].pm) {
+            for (i = 0; i < ONLINE.users[id].pm.length; i++) {
+                showMessage(ONLINE.users[id].pm[i], messages);
+            }
+            ONLINE.users[id].pm = [];
+        }
+        
+        controls.appendChild(minimize);
+        controls.appendChild(cancel);
+        header.appendChild(nickName);
+        header.appendChild(controls);
+        panelContainer.appendChild(header);
+        panelContainer.appendChild(messages);
+        inputBar.appendChild(input);
+        panelContainer.appendChild(inputBar);
+        
+        return panelContainer;
+    }
+    
+    if (validUser && !panel) {
+        if (validUser.listin) {
+            informer = validUser.li.getElementsByClassName('informer')[0];
+            informer.textContent = '';
+            informer.removeEventListener('click', validUser.listin);
+            delete validUser.listin;
+        }
+        panel = makePanel();
+        $$$.draggable(panel);
+        document.body.appendChild(panel);
+    }
+    
+}
+
 (function () {
     var history = [],
         historyIndex = 0;
@@ -358,7 +460,7 @@ function createRegisterPanel() {
             if (!e.shiftKey) {
                 e.preventDefault();
                 if (inputValue) {
-                    historyIndex = 0,
+                    historyIndex = 0;
                     this.value = '';
                     history.push(inputValue);
                     handleInput(inputValue);
@@ -396,6 +498,8 @@ function createRegisterPanel() {
 })();
 
 socket.on('message', showMessage);
+
+socket.on('pmMessage', handlePrivateMessage);
 
 socket.on('joined', menuControl.addUser);
 
@@ -475,9 +579,7 @@ socket.on('disconnect', function () {
     });
 });
 
-socket.on('refresh', function () {
-    location.reload();
-});
+socket.on('refresh', location.reload);
 
 socket.on('connect', function () {
     if (window.top !== window.self) {

@@ -7,7 +7,7 @@ var parser = {
     repnmliz : 'ÃƒÂ©ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂ¶EESCHEInoheÃƒÂ©ÃƒÂ¤',
     multiple : function (str, mtch, rep, limit) {
         var ct = 0;
-        limit = limit || 9;
+        limit = limit || 300;
         while (str.match(mtch) !== null && ct++ < limit) {
             str = str.replace(mtch, rep);
         }
@@ -73,13 +73,9 @@ var parser = {
         var normalize = /\/\`[^]/.test(str) ? str.match(/\/\`([^]+)$/)[1] : null;
         str = str.replace(/\/\`[^]+$/, this.repnmliz);
         
-        //match qoutes
-        str = str.replace(/&gt;&gt;/g,'>&gt;');
-        var check = str.match(/>&gt;\d+/g);
-        
         //match links
         var linkesc = str.match(this.linkreg);
-        str = str.replace(this.linkreg,this.replink);
+        str = str.replace(this.linkreg, this.replink);
         
         //green text
         str = this.multiple(str, /(^|^[&#36;A-z\s|]+\s|^&#35;[A-z0-9]+\s|^[&#36;A-z\s|]+&#35;[A-z]+\s|<br>)\s?&gt;(.*?)(<br>|$)/g, '$1<span style="color:#789922;">>$2</span><br>');
@@ -95,18 +91,14 @@ var parser = {
         str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>');
         str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<span class="shake">$1</span>');
         str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="glow">$1</span>');
-        /*
-        -!Rainbows
-        -ColourWrap
-        */
         
         // Replace colors
-        str = this.multiple(str, /&#35;&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="text-shadow: 0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1;">$2</span>', 1000);
-        str = this.multiple(str, /&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="background-color: #$1;">$2</span>', 1000);
-        str = this.multiple(str, /&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="color: #$1;">$2</span>', 1000);
-        str = this.multiple(str, RegExp('&#35;&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="text-shadow: 0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1;">$2</span>', 1000);
-        str = this.multiple(str, RegExp('&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="background-color: $1;">$2</span>',1000);
-        str = this.multiple(str, RegExp('&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="color: $1;">$2</span>', 1000);
+        str = this.multiple(str, /&#35;&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="text-shadow: 0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1;">$2</span>');
+        str = this.multiple(str, /&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="background-color: #$1;">$2</span>');
+        str = this.multiple(str, /&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="color: #$1;">$2</span>');
+        str = this.multiple(str, RegExp('&#35;&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="text-shadow: 0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1;">$2</span>');
+        str = this.multiple(str, RegExp('&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="background-color: $1;">$2</span>');
+        str = this.multiple(str, RegExp('&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="color: $1;">$2</span>');
         
         //replace fonts
         str = this.multiple(str, this.fontRegex, '<span style="font-family:\'$3\'">$4</span>');
@@ -121,37 +113,24 @@ var parser = {
             str = str.replace(this.replink, '<a target="_blank" href="' + link + '">' + link + '</a>');
         }
         
-        //replace qoutes
-        if(check){
-            for(var i in check){
-                var number = check[i].replace('>&gt;','');
-                var found = document.getElementsByClassName('msg-' + number);
-                if(found.length){
-                    str = str.replace(check[i],'<a onmouseenter="parser.qoute(' + number + ');" onmouseout="document.body.removeChild(document.getElementById(\'qoute\'));" onclick="parser.highlight(' + number + ')">&gt;>' + number + '</a>');
-                } else {
-                    str = str.replace(check[i],'<a style=\'color:#AD0000;\'>' + check[i] + '</a>');
-                }
-            }
-        }
-        
         //video embeds
         str = str.replace(/<a [^>]*href="[^"]*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?"]*)[^"]*">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'youtube\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="[^"]*vimeo.com\/(\d+)">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'vimeo\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="[^"]*(?:soundcloud.com\/[\w-]+\/[\w-]+)">([^<]*)<\/a>/, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="soundCloud(\'$1\')" class="show-video">[audio]</a>');
         str = str.replace(/<a [^>]*href="[^"]*liveleak.com\/ll_embed\?f=(\w+)">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'liveleak\', \'$1\')" class="show-video">[video]</a>');
-        str = str.replace(/<a [^>]*href="([^'"]*\.webm)">([^<]*)<\/a>/i, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="embed(\'html5\', \'$1\')" class="show-video">[video]</a>');
+        str = str.replace(/<a [^>]*href="([^'"]*\.webm)">([^<]*)<\/a>/i, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="embed(\'html5\', \'$1\')" class="show-video">[video]</a>');        
         str = str.replace(/<a [^>]*href="([^'"]*\.mp3)">([^<]*)<\/a>/i, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'audio\', \'$1\')" class="show-video">[audio]</a>');
         str = str.replace(/<a [^>]*href="([^'"]*\.wav)">([^<]*)<\/a>/i, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'audio\', \'$1\')" class="show-video">[audio]</a>');
         str = str.replace(/<a [^>]*href="[^"]*ustream.tv\/embed\/(\d+)\?v=3&amp;wmode=direct">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'ustream\', \'$1\')" class="show-video">[video]</a>');          
         
         var img = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:agif|apng|gif|jpg|jpeg|png|bmp|svg))<\/a>/gi.exec(str);
         if (img) {
-            str = this.multiple(str,img[0], img[1] + '<img src="' + img[2] + '" onload="awakens.scrollToBottom(\'messages\');"/></a>',3);
+            str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="awakens.scrollToBottom(\'messages\');"/></a>', 3);
         }
         
         //replace normalied text
-        if(normalize){
-            str = str.replace(this.repnmliz,'<textarea style="overflow:hidden;">' + normalize.replace(/<br>/g,'\n') + '</textarea>');
+        if (normalize) {
+            str = str.replace(this.repnmliz, '<textarea style="overflow:hidden;">' + normalize.replace(/<br>/g, '&#13;') + '</textarea>');
         }
         
         //convert spaces
