@@ -1,5 +1,8 @@
 var socket = io.connect(window.location.pathname);
 
+//idle/afk users should change positions on the userlist board after so long of inactivity
+//if your on a different tab the tab/title would tell you how many messages you havent seen yet
+
 var ONLINE = {
     users : {},
     getId : function (nick) {
@@ -14,14 +17,24 @@ var ONLINE = {
 };
 
 var Attributes = {
+    notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font'],
     set : function (attribute, value, notify) {
-        if (notify && this.get(attribute) !== value && attribute !== 'token') {
+        var oldValue = this.storedAttributes[attribute];
+        this.storedAttributes[attribute] = value;
+        
+        if (this.notifierAtt.includes(attribute)) {
+            showMessage({
+                nick : this.get('nick'),
+                flair : this.get('flair'),
+                message : decorateText('Now your messages look like this'),
+                messageType : 'chat'
+            });
+        } else if (notify && oldValue !== value && attribute !== 'token') {
             showMessage({
                 message : attribute + ' is now set to ' + value,
                 messageType : 'info'
             });
         }
-        this.storedAttributes[attribute] = value;
         localStorage.setItem('chat-' + attribute, value);
     },
     get : function (attribute) {
@@ -96,12 +109,13 @@ function appendMessageTo(message, el) {
     scrollToBottom(el);
 }
 
-function buildMessage(message, messageType, nick, flair) {
+function buildMessage(message, messageType, nick, flair, count) {
     var container = document.createElement('div'),
         time = new Date(),
         timeDIV = document.createElement('div'),
         nickDIV = document.createElement('div'),
-        messageDIV = document.createElement('div');
+        messageDIV = document.createElement('div'),
+        input;
     
     if (messageType === undefined) {
         container.className = 'message';
@@ -111,12 +125,26 @@ function buildMessage(message, messageType, nick, flair) {
     
     timeDIV.className = 'time';
     timeDIV.textContent = time.format('shortTime') + ' ';
+    
+    if (count) {
+        timeDIV.addEventListener('click', function () {
+            input = document.querySelector('#input-bar textarea');
+            if (input.value) {
+                input.value = input.value + ' >>' + count + ' ';
+            } else {
+                input.value = '>>' + count + ' ';
+            }
+            input.focus();
+        });
+    }
+    
     container.appendChild(timeDIV);
     
     if (nick) {
         nickDIV.className = 'nick';
         
         if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
+            parser.getAllFonts(flair);
             nickDIV.innerHTML = parser.parse(flair.replace(/\r?\n|\r/g, '')) + ':';
         } else {
             nickDIV.textContent = nick + ':';
@@ -132,6 +160,19 @@ function buildMessage(message, messageType, nick, flair) {
     } else if (messageType === 'captcha') {
         messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
     } else {
+        if (message.indexOf(Attributes.get('nick')) !== -1) {
+            timeDIV.style.color = 'yellow';
+            if (!Attributes.get('mute')) {
+                audioPlayer.name.play();
+            }
+        } else if (!Attributes.get('mute')) {
+            audioPlayer.chat.play();
+        }
+        
+        if (count) {
+            container.classList += ' msg-' + count;
+        }
+        
         while (message.split(/\n/).length > 15) {
             var index = message.lastIndexOf('\n');
             message = message.slice(0, index) + message.slice(index + 1);
@@ -146,7 +187,12 @@ function buildMessage(message, messageType, nick, flair) {
 }
 
 function showMessage(messageData, panel) {
-    var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair);
+    var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count);
+    
+    if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
+        Attributes.set('lastpm', messageData.nick);
+    }
+    
     appendMessageTo(messageHTML, panel);
 }
 
@@ -587,5 +633,6 @@ socket.on('connect', function () {
     } else {
         socket.emit('requestJoin', Attributes.storedAttributes);
         menuControl.updateValues();
+        menuControl.initMissedMessages(socket);
     }
 });

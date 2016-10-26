@@ -4,6 +4,12 @@ body {
     overflow: hidden;
 }
 
+a {
+    text-decoration: underline;
+    color: lightblue;
+    cursor: pointer;
+}
+
 ::-webkit-scrollbar{
     width: 10px;
 }

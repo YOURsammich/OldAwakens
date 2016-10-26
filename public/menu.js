@@ -61,14 +61,15 @@ var menuControl = {
         });
     },
     changeNick : function (id, newNick) {
-        var User = ONLINE.users[id];
+        var User = ONLINE.users[id],
+            nickContain = User.li.getElementsByClassName('nickText')[0];
         
         showMessage({
             message : User.nick + ' is now known as ' + newNick,
             messageType : 'general'
         });
         
-        User.li.textContent = newNick;
+        nickContain.textContent = newNick;
         User.nick = newNick;
         
     },
@@ -160,6 +161,29 @@ var menuControl = {
                 document.body.appendChild(menu);
             }
         }
+    },
+    initMissedMessages : function (socket) {
+        var blurred = false,
+            unread = 0;
+        
+        console.log('?')
+        
+        socket.on('message', function () {
+            console.log('???', unread, blurred)
+            if (blurred && ++unread) {
+                document.title = '(' + unread + ') ' + Attributes.get('topic');
+            }
+        });
+
+        window.addEventListener('focus', function () {
+            unread = 0;
+            blurred = false;
+            document.title = Attributes.get('topic');
+        });
+        
+        window.addEventListener('blur', function () {
+            blurred = true;
+        });
     }
 };
 
@@ -223,5 +247,6 @@ var menuControl = {
             }, 10);
         }
 
-    }); 
+    });
+    
 })();

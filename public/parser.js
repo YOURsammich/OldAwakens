@@ -35,6 +35,28 @@ var parser = {
             this.addFont(match[3]);
         }
     },
+    highlight : function (messageNumber) {
+        var message = document.getElementsByClassName('msg-' + messageNumber)[0];
+        message.scrollIntoView();
+    },
+    showQuote : function (messageNumber) {
+        var messageContainer = document.getElementsByClassName('msg-' + messageNumber)[0];
+        if (messageContainer) {
+            var quoteHolder = document.createElement('div');
+            quoteHolder.id = 'qoute';
+            quoteHolder.classList = 'message';
+            quoteHolder.style.position = 'absolute';
+            quoteHolder.style.pointerEvents = 'none';
+            quoteHolder.innerHTML = messageContainer.innerHTML;
+            
+            document.body.appendChild(quoteHolder);
+            //follow cursor
+            document.body.addEventListener('mousemove', function(e){
+                quoteHolder.style.left = e.clientX + 'px';
+                quoteHolder.style.top = e.clientY + 'px';
+            });
+        } 
+    },
     escape : function (str) {
         // Convert chars to html codes
         str = str.replace(/\n/g, '\\n');
@@ -72,6 +94,10 @@ var parser = {
         //normalize text
         var normalize = /\/\`[^]/.test(str) ? str.match(/\/\`([^]+)$/)[1] : null;
         str = str.replace(/\/\`[^]+$/, this.repnmliz);
+        
+        //match qoutes
+        str = str.replace(/&gt;&gt;/g,'>&gt;');
+        var check = str.match(/>&gt;\d+/g);
         
         //match links
         var linkesc = str.match(this.linkreg);
@@ -113,6 +139,20 @@ var parser = {
             str = str.replace(this.replink, '<a target="_blank" href="' + link + '">' + link + '</a>');
         }
         
+        //replace qoutes
+        if (check && check.length) {
+            for(var i in check){
+                var number = check[i].replace('>&gt;', '');
+                var found = document.getElementsByClassName('msg-' + number);
+                console.log(found.length);
+                if (found.length) {
+                    str = str.replace(check[i], '<a onmouseenter="parser.showQuote(' + number + ');" onmouseout="document.body.removeChild(document.getElementById(\'qoute\'));" onclick="parser.highlight(' + number + ')">&gt;&gt;' + number + '</a>');
+                } else {
+                    str = str.replace(check[i], '<a style=\'color:#AD0000;\'>' + check[i] + '</a>');
+                }
+            }
+        }
+        
         //video embeds
         str = str.replace(/<a [^>]*href="[^"]*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?"]*)[^"]*">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'youtube\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="[^"]*vimeo.com\/(\d+)">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'vimeo\', \'$1\')" class="show-video">[video]</a>');
@@ -125,7 +165,7 @@ var parser = {
         
         var img = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:agif|apng|gif|jpg|jpeg|png|bmp|svg))<\/a>/gi.exec(str);
         if (img) {
-            str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="awakens.scrollToBottom(\'messages\');"/></a>', 3);
+            str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="scrollToBottom(\'messages\');"/></a>', 3);
         }
         
         //replace normalied text

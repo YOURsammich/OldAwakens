@@ -1,3 +1,8 @@
+var audioPlayer = {
+    chat : new Audio('audio/Bing.mp3'),
+    name : new Audio('audio/Bwoop.wav')
+}
+
 function buildVideoOverlay(url) {
     var videoOverlay = document.getElementsByClassName('video-overlay'),
         header,
