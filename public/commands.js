@@ -32,6 +32,17 @@ var COMMANDS = {
             }
         }
     },
+    style : {
+        params : ['style'],
+        handler : function (params) {
+            if (params.style === 'none') {
+                Attributes.remove('style');
+            } else {
+                Attributes.set('style', params.style, true);
+                menuControl.updateValues();
+            }
+        }
+    },
     flair : {
         params : ['flair'],
         handler : function (params) {
