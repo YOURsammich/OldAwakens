@@ -17,24 +17,24 @@ var ONLINE = {
 
 var Attributes = {
     notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font'],
-    set : function (attribute, value, notify) {
+    set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
-        this.storedAttributes[attribute] = value;
+        this.storedAttributes[attribute] = newValue;
         
-        if (this.notifierAtt.includes(attribute)) {
+        if (this.notifierAtt.includes(attribute) && oldValue !== newValue) {
             showMessage({
                 nick : this.get('nick'),
                 flair : this.get('flair'),
                 message : decorateText('Now your messages look like this'),
                 messageType : 'chat'
             });
-        } else if (notify && oldValue !== value && attribute !== 'token') {
+        } else if (notify && oldValue !== newValue && attribute !== 'token') {
             showMessage({
-                message : attribute + ' is now set to ' + value,
+                message : attribute + ' is now set to ' + newValue,
                 messageType : 'info'
             });
         }
-        localStorage.setItem('chat-' + attribute, value);
+        localStorage.setItem('chat-' + attribute, newValue);
     },
     get : function (attribute) {
         return this.storedAttributes[attribute] || '';
@@ -310,10 +310,10 @@ function decorateText(text) {
     }
     
     if (style) {
-        decorativeModifiers += style + " ";
+        decorativeModifiers += style;
     }
     
-    return decorativeModifiers + ' ' + text;
+    return ' ' + decorativeModifiers + '\\' + text;
 }
 
 function sendPrivateMessage(message, userID) {
@@ -571,15 +571,55 @@ socket.on('channeldata', function (channel) {
     var i,
         channelData;
     
-    //document.getElementsByClassName('userList')[0].innerHTML = '';
-    
     if (channel.users) {
+        document.getElementsByClassName('userList')[0].innerHTML = '';
         for (i = 0; i < channel.users.length; i++) {
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, true);
         }
     }
 
     channelTheme(channel.data);
+});
+
+socket.on('banlist', function (banlist) {
+    var border = document.createElement('div'),
+        insideHolder = document.createElement('div'),
+        cancel,
+        table;
+    
+    border.className = 'banlist';
+    
+    border.appendChild(insideHolder);
+    
+    cancel = document.createElement('span');
+    cancel.style.cssText = 'position:absolute;top:0px;right:4px;cursor:pointer;';
+    cancel.textContent = 'x';
+    
+    cancel.onclick = function(){
+        document.body.removeChild(border);
+    }
+    
+    border.appendChild(cancel);
+    
+    table = document.createElement('table');   
+    table.innerHTML = '<tr><th>Nick</th><th>Banned by</th><th>Reason</th></tr>';
+    
+    banlist.map(function(user){
+        var tr = document.createElement('tr');
+        var keys = Object.keys(user);
+        for(var i = 0; i < 3; i++){
+            var key = keys[i];
+            var td = document.createElement('td');
+            td.textContent = user[key] || ' ';
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+    });
+    
+    insideHolder.appendChild(table);
+    $$$.draggable(border);
+    
+    document.body.appendChild(border);
 });
 
 socket.on('update', function (allAtt) {
@@ -644,6 +684,7 @@ socket.on('connect', function () {
     } else {
         socket.emit('requestJoin', Attributes.storedAttributes);
         menuControl.updateValues();
-        menuControl.initMissedMessages(socket);
     }
 });
+
+menuControl.initMissedMessages(socket);

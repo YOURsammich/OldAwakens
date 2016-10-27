@@ -244,7 +244,8 @@ var COMMANDS = {
     },
     pm : {
         params : ['nick|message']
-    }
+    },
+    banlist : {}
 };
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
