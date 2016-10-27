@@ -129,6 +129,15 @@ var COMMANDS = {
             Attributes.remove('mute', '');
         }
     },
+    clear : {
+        handler : function () {
+            var messages = document.getElementsByClassName('message'),
+                parent = document.getElementById('messages');
+            while (messages.length) {
+                parent.removeChild(messages[0]);
+            }
+        }  
+    },
     captchaon : {
         handler : function () {
             socket.emit('channelStatus', {
@@ -238,3 +247,4 @@ var COMMANDS = {
     }
 };
 COMMANDS.colour = COMMANDS.color;
+COMMANDS.cls = COMMANDS.clear;
