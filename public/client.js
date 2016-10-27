@@ -1,7 +1,6 @@
 var socket = io.connect(window.location.pathname);
 
 //idle/afk users should change positions on the userlist board after so long of inactivity
-//if your on a different tab the tab/title would tell you how many messages you havent seen yet
 
 var ONLINE = {
     users : {},
@@ -160,7 +159,7 @@ function buildMessage(message, messageType, nick, flair, count) {
     } else if (messageType === 'captcha') {
         messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
     } else {
-        if (message.indexOf(Attributes.get('nick')) !== -1) {
+        if (messageType === 'chat' && message.indexOf(Attributes.get('nick')) !== -1) {
             timeDIV.style.color = 'yellow';
             if (!Attributes.get('mute')) {
                 audioPlayer.name.play();
@@ -293,6 +292,7 @@ function decorateText(text) {
         bgcolor = Attributes.get('bgcolor'),
         glow = Attributes.get('glow'),
         style = Attributes.get('style');
+    
     if (font) {
         decorativeModifiers += "$" + font + "|";
     }
@@ -570,6 +570,8 @@ socket.on('captcha', function (captcha) {
 socket.on('channeldata', function (channel) {
     var i,
         channelData;
+    
+    //document.getElementsByClassName('userList')[0].innerHTML = '';
     
     if (channel.users) {
         for (i = 0; i < channel.users.length; i++) {

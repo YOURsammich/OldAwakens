@@ -166,10 +166,7 @@ var menuControl = {
         var blurred = false,
             unread = 0;
         
-        console.log('?')
-        
         socket.on('message', function () {
-            console.log('???', unread, blurred)
             if (blurred && ++unread) {
                 document.title = '(' + unread + ') ' + Attributes.get('topic');
             }
