@@ -288,12 +288,17 @@ function handleCommand(commandData) {
 
 function decorateText(text) {
     var decorativeModifiers = '',
+        font = Attributes.get('font'),
         color = Attributes.get('color'),
         bgcolor = Attributes.get('bgcolor'),
-        glow = Attributes.get('glow');
+        glow = Attributes.get('glow'),
+        style = Attributes.get('style');
+    if (font) {
+        decorativeModifiers += "$" + font + "|";
+    }
     
     if (glow) {
-        decorativeModifiers = '###' + glow;
+        decorativeModifiers += '###' + glow;
     }
     
     if (bgcolor) {
@@ -302,6 +307,10 @@ function decorateText(text) {
     
     if (color) {
         decorativeModifiers += '#' + color;
+    }
+    
+    if (style) {
+        decorativeModifiers += style + " ";
     }
     
     return decorativeModifiers + ' ' + text;
