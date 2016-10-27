@@ -1,3 +1,8 @@
+var audioPlayer = {
+    chat : new Audio('audio/Bing.mp3'),
+    name : new Audio('audio/Bwoop.wav')
+}
+
 function buildVideoOverlay(url) {
     var videoOverlay = document.getElementsByClassName('video-overlay'),
         header,
@@ -29,8 +34,7 @@ function buildVideoOverlay(url) {
         document.body.appendChild(videoOverlay);
         $$$.draggable(videoOverlay);
     } else {
-        videoOverlay = videoOverlay[0];
-        videoOverlay.getElementsByClassName('container')[0].innerHTML = url;
+        videoOverlay[0].getElementsByClassName('container')[0].innerHTML = url;
     }
 }
 
