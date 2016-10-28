@@ -635,7 +635,8 @@ function createChannel(io, channelName) {
                 if (valid) {
                     dao.setChannelinfo(channelName, settings).then(function () {
                         roomEmit('channeldata', {
-                            data : settings
+                            data : settings,
+                            updatedBy : user.nick
                         });
                     }).fail(function (err) {
                         console.log(err);
@@ -778,11 +779,11 @@ function createChannel(io, channelName) {
         }
         
         socket.on('requestJoin', function (requestedData) {
-            if (!requestedData) {
+            if (typeof requestedData !== 'object') {
                 requestedData = {};
             }
             
-            throttle.on(user.remote_addr + '-join').then(function (notSpam) {
+            throttle.on(user.remote_addr + '-join', 3).then(function (notSpam) {
                 if (notSpam) {
                     attemptJoin(requestedData);
                 } else {

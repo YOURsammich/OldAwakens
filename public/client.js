@@ -334,7 +334,7 @@ function handleInput(value) {
     }
 }
 
-function channelTheme(channelData) {
+function channelTheme(channelData, updatedBy) {
     if (channelData.note) {
         showMessage({
             message : channelData.note,
@@ -346,7 +346,7 @@ function channelTheme(channelData) {
     if (channelData.topic) {
         document.title = channelData.topic;
         showMessage({
-            message : channelData.topic,
+            message : 'Topic: ' + channelData.topic,
             messageType : 'general'
         });
         Attributes.set('topic', channelData.topic);
@@ -364,6 +364,19 @@ function channelTheme(channelData) {
             document.styleSheets[0].deleteRule(3);
             document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], 3);
         }
+    }
+    
+    if (channelData.lock !== undefined && updatedBy) {
+        var message;
+        if (channelData.lock) {
+            message = ' locked this channel';
+        } else {
+            message = ' unlocked this channel';
+        }
+        showMessage({
+            message : updatedBy + message,
+            messageType : 'general'
+        });
     }
 }
 
@@ -578,7 +591,7 @@ socket.on('channeldata', function (channel) {
         }
     }
 
-    channelTheme(channel.data);
+    channelTheme(channel.data, channel.updatedBy);
 });
 
 socket.on('banlist', function (banlist) {
@@ -676,7 +689,9 @@ socket.on('disconnect', function () {
     });
 });
 
-socket.on('refresh', location.reload);
+socket.on('refresh', function () {
+    location.reload();
+});
 
 socket.on('connect', function () {
     if (window.top !== window.self) {
