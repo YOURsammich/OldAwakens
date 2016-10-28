@@ -104,6 +104,11 @@ var menuControl = {
                     handleInput('/whois ' + nick);
                 }
             },
+            find : {
+                callback : function (nick) {
+                    handleInput('/find ' + nick);
+                }
+            },
             divider : '---',
             kick : {
                 callback : function (nick) {
