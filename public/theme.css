@@ -586,3 +586,32 @@ a {
   0%, 100% {
     transform: translate(0, 0) rotate(0); } 
 }
+
+.banlist{
+    position:absolute;
+    background-color:#34495e;
+    padding:15px;
+}
+
+.banlist div{
+    overflow-y:scroll;
+    max-height:400px;
+    padding:10px;
+    text-align:center;
+}
+
+.banlist table{
+    border:solid 1px black;
+    border-collapse: collapse;
+}
+
+.banlist table th{
+    border:1px black solid;
+}
+
+.banlist table td{
+    border-right:1px black solid;
+    border-bottom:1px black solid;
+    max-width:200px;
+    word-wrap:break-word;
+}

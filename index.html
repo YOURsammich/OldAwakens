@@ -2,17 +2,18 @@
 <html>
 
     <head>
+        <link id="icon" rel="icon" type="image/png" href="/images/awakenslogo.png" />
         <title>Awakens - The chat that never sleeps</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="keywords" content="chat,awakens,awakens.me" />
         <meta name="description" content="Suck a piss." />
         <link rel="stylesheet" href="/theme.css" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid%20Sans" />
+        <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     </head>
     
     <body>     
-        
-        <div class="main-container">            
+        <div class="main-container">
             <div id="messages"></div>
             <div id="input-bar">
                 <textarea placeholder="Type anything then press enter."></textarea>
@@ -22,12 +23,13 @@
         
         <div class="menu-container">
             <div id="menu-tabs">
-                <button>User Panel</button>
-                <button>Channel Panel</button>
+                <button id="userPanel">User Panel</button>
+                <button id="userList" class="listIcon">8</button>
+                <button id="channelPanel">Channel Panel</button>
             </div>
-            <div id="user-list"></div>
-            <div id="user-panel">
-                
+            <div class="channelPanel"></div>
+            <div class="userList"></div>
+            <div class="userPanel">
                 <h3>Text decoration</h3>
                 <div class="textDecoration">
                     <div class="bar color">
@@ -43,7 +45,6 @@
                         <div class="label">glow</div>
                     </div>
                 </div>
-                
             </div>
         </div>
         <script src="/socket.io/socket.io.js"></script>
