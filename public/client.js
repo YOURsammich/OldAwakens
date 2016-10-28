@@ -177,7 +177,7 @@ function buildMessage(message, messageType, nick, flair, count) {
             message = message.slice(0, index) + message.slice(index + 1);
         }
         parser.getAllFonts(message);
-        messageDIV.innerHTML = parser.parse(message);
+        messageDIV.innerHTML = ' ' + parser.parse(message);
     }
     
     container.appendChild(messageDIV);
@@ -294,7 +294,7 @@ function decorateText(text) {
         style = Attributes.get('style');
     
     if (font) {
-        decorativeModifiers += "$" + font + "|";
+        decorativeModifiers += '$' + font + '|';
     }
     
     if (glow) {
@@ -304,7 +304,7 @@ function decorateText(text) {
     if (bgcolor) {
         decorativeModifiers += '##' + bgcolor;
     }
-    
+   
     if (color) {
         decorativeModifiers += '#' + color;
     }
@@ -313,7 +313,7 @@ function decorateText(text) {
         decorativeModifiers += style;
     }
     
-    return ' ' + decorativeModifiers + '\\' + text;
+    return decorativeModifiers + ' ' + text;
 }
 
 function sendPrivateMessage(message, userID) {
