@@ -1,4 +1,52 @@
 var COMMANDS = {
+    help : {
+        handler : function () {
+        var container = document.createElement('div'),
+            cancel,
+            holder,
+            iframe;
+            
+
+            container.style.cssText = 'left:' + window.innerWidth/2 + 'px;top:' + window.innerHeight/2 + 'px;margin-left:-150px;margin-top:-80px;width:500px;height:200px;padding:20px;position:fixed;z-index:99;background-color:#222;cursor:crosshair;';
+
+            cancel = document.createElement('div');
+            cancel.style.cssText = 'position:absolute;top:0px;right:10px;color:white;cursor:pointer;'
+            cancel.textContent = 'x';
+            cancel.addEventListener('click', function () {
+                document.getElementById('messages').removeChild(container);
+            });
+
+            holder = document.createElement('div');
+            holder.style.width = '100%';
+            holder.style.height = '100%';
+
+            iframe = document.createElement('iframe');
+            iframe.height = '100%';
+            iframe.width = '100%';
+            iframe.src = window.location.origin + '/help/';
+
+            container.appendChild(cancel);
+            container.appendChild(holder);
+            holder.appendChild(iframe);
+            $$$.draggable(container);
+            document.getElementById('messages').appendChild(container);
+        }  
+    },
+    commands :  {
+            handler : function () {
+            var keys = Object.keys(COMMANDS);
+            var ava = [];
+            keys.forEach(function(key){
+                if(Attributes.get('role') <= COMMANDS[key].role || COMMANDS[key].role === undefined){
+                    ava.push(key);
+                }
+            });
+            showMessage({
+                message : 'Available Commands: /' + ava.join(', /'),
+                messageType : 'info'
+            });
+        }
+    },
     color : {
         params : ['color'],
         handler : function (params) {

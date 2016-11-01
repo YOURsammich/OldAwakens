@@ -8,8 +8,11 @@ window.$$$ = {
             clickY = 0;
         
         el.style.position = 'absolute';
-        el.style.left = el.offsetLeft + 'px';
-        el.style.top = el.offsetTop + 'px';
+        
+        if (!el.style.left) {
+            el.style.left = el.offsetLeft + 'px';
+            el.style.top = el.offsetTop + 'px';   
+        }
         
         function drag(event) {
             var movementX = (event.clientX - clickX) - parseInt(el.style.left, 10),

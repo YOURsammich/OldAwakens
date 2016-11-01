@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html><head><title>Awakens Help</title>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="AwakensHelp.css">
+<script src="AwakensHelp.js"></script>
+<script type="text/javascript">
+var images="banner/1.png banner/2.gif".split(" "),i=Math.floor(Math.random()*images.length);function randomImage(){document.getElementById("random").src=images[i]}onload=randomImage;
+</script>
+</head>
+<body>
+<div id="bannerBox">
+<!--BannerBox<p id="attention"> <a href="/"><img id="random" src="" height="100" width="300"></a><br></p>-->
+<!--Paypal X Donation--><!--USD-->
+<div id="Donation">
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank"> <input name="cmd" value="_s-xclick" type="hidden"> <input name="hosted_button_id" value="GVQCTR8DXGDBJ" type="hidden"> <input src="donate.png" name="submit" alt="Awakens - Thanks for donating! :)" border="0" type="image"> <img alt="" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" border="0" height="1" width="1"> </form>
+</div>
+<!--Close Banner/Paypal-->
+<!--Footer---------------------------------------------------------------------------------->
+<div id="footer"> Follow all of the latest updates: <a href="https://twitter.com/AwakensMe" target="_blank"><b>Follow us
+@AwakensMe</b></a>, <a href="https://www.facebook.com/AwakensMe/" target="_blank"><b>Like us
+on Facebook</b></a> and <a href="http://bit.do/AwakensYoutubeChannel" target="_blank"><b>Subscribe
+on Youtube!</b></a> </div>
+<!--Page-Info--------------------------------------------------------------------------------> <p class="secTitle" id="sec1">Information.</p> <p> This is the help page for Awakens.me, this page explains every command that is possible in the chat.<br> If you still have questions after reading through this page, you can look at the bottom where there is a FAQ.<br> If after this you still have any questions please re-read this help page; We're not holding out on you, at least we don't think we are. ;)<br> <p id="attention"><b>DISCLAIMER:</b> This chat may not be safe for work 'butt' who knows.<p> </p> <!------------------------------------------------------------> <p class="secTitle" id="sec2">Beginers Guide.</p> <p> At the bottom of your screen you'll see the input box. Go ahead and just click in that and type in your unimportant opinions.<br> In the input box, you'll have the capability to type in /commands. </p> <!------------------------------>
+<p class="subTitle">Crash course:</p>
+<p style="color: rgb(255, 153, 0);"> Change your name by
+typing <span style="color: rgb(51, 204, 0);" id="green">/nick
+UserName</span><br>
+Register your nick with <span style="color: rgb(51, 204, 0);" id="green">/register</span><br>
+Beginner users cannot change topics or backgrounds, sorry.<br>
+Change your font with <span style="color: rgb(51, 204, 0);" id="green">/font Lemon</span><br>
+Usable fonts <a href="http://www.google.com/fonts" target="_blank">www.google.com/fonts</a><br>
+Change your font color with<span style="color: rgb(51, 204, 0);">
+</span><span id="green"><span style="color: rgb(51, 204, 0);">/color Lime</span>
+or <span style="color: rgb(51, 204, 0);">/color 0F0</span></span><br>
+Usable colors <a href="http://en.wikipedia.org/wiki/Web_colors" target="_blank">en.wikipedia.org/wiki/Web_colors/</a><br>
+</p>
+<!------------------------------------------------------------>
+<p class="secTitle" id="sec3">Every Command Ever</p>
+<big><span style="text-decoration: underline;" id="miniTitle">Information retrieval</span></big><a href="##" class="button1">[Info]</a><br>
+/commands<br>
+<p class="open1" id="infos">Typing /commands will
+display a list of available commands. Typing the
+command with no syntax or the incorrect syntax will display the correct
+usage of a command if neccesary.
+</p>
+/help<br>
+<p class="open1" id="infos">Typing /help will
+display the help page via iframe; Allowing for a more detailed
+explanation of command functions and their usages.<br>
+<span style="color: red;">Note: This is currently <span style="font-weight: bold; text-decoration: underline;">FUCKED</span>;
+don't try it unless you want to refresh the chat.</span>
+</p>
+/whoami<br>
+<p class="open1" id="infos">This command will
+display a basic overview of your current profile.<br>
+This will include your current Nick, Role, IP, Mask as well as if
+you've registered or not.<br>
+</p>
+<form name="RoleOverviewHide" class="open1" id="infos">
+<div id="RoleOverview"><span style="color: rgb(255, 153, 0);">A brief overview of roles:</span><br>
+</div>
+<span style="color: red;">Not Implemented:</span><span style="color: rgb(255, 153, 0);">(4
+Mute) Your text will not be seen by other users.</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">(3 Basic) General
+User limited access to most commands.</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">(2 Mod) Currently
+able to change background and topic. Not
+Implemented:Mod Abilities will vary by channel, depending on channel
+Admin.</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">(1 Admin) Able to
+Ban/Kick, Change Access Levels, Delete Users,
+Lock/Unlock a Channel, View Indepth User Profile, Refresh All Channel
+Users, </span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">(0 God) Access to
+all commands</span><br>
+</form>
+/whois<br>
+<p class="open1" id="infos">This command will alow
+you to review a brief profile of another user. Depending on your role
+some features may not be available.<br>
+Basic's can see a user's Nick, Role, Mask and if that user has
+registered or
+not.<br>
+Admins and Gods will see all of the above; Including the IP of the user.</p>
+/get topic<br>
+<p class="open1" id="infos">This will return the
+current Topic set in plain text.</p>
+/get note<br>
+<p class="open1" id="infos">This will display the
+current Note set in plain text.
+</p>
+/get flair<br>
+<p class="open1" id="infos">This will display your
+current Flair set in plain text.
+</p>
+<big><span style="text-decoration: underline;" id="miniTitle">Nickname/Registration Overview</span></big><a href="##" class="button2">[Info]</a><br>
+/nick<br>
+<p class="open2" id="infos">This command will allow
+you to set an unregistered nickname.<br>
+<span style="color: yellow;">Example: /nick Batman</span>
+</p>
+/login<br>
+<p class="open2" id="infos">If you've registered a
+nickname, you will need to login using this command.<br>
+<span style="color: yellow;">Example: /login Batman
+Password123!</span><br>
+See below for an example on registration.
+</p>
+/register<br>
+<p class="open2" id="infos">This will allow you to
+register the current nickname you have set.<br>
+<span style="color: yellow;">Example: If your current nick
+was "Robin" and you wanted to register
+"Batman" then you will have to change your name with the /nick command
+(as seen above.)
+To register Batman, type /register and you will be presented with a
+visual prompt that looks like this:</span> <img style="width: 567px; height: 382px;" alt="Enable Images" src="RegExample.png"><br>
+</p>
+<p class="open2" id="infos">You'll need to insert a
+secure password which includes a Capital,
+Lowercase, Number and Symbol. You'll also need to choose one of the
+default secret questions, or create your own; in case you ever forget
+your password or lose access to your account.
+</p>
+<span style="color: red;">Not Implemented:</span>
+/unregister<br>
+<p class="open2" id="infos">This command will
+completely unregister your current nickname.
+Example: /unregister
+You will then be prompted to input your current password, and your
+account will be deleted from the system.
+</p>
+/change_password<br>
+<p class="open2" id="infos">This
+command will allow you to change your password if for some reason your
+password ever becomes compromised, or you're simply no longer happy
+with it.<br>
+<span style="color: yellow;">Example: /change_password
+OldPassword123! NewPassword124!</span><br>
+</p>
+<big><span style="text-decoration: underline;" id="miniTitle">Ban List</span></big><a href="##" class="button3">[Info]</a><br>
+/banlist<br>
+<p class="open3" id="infos">This command will allow
+you to see IPs and users currently banned from your channel by you and
+other Administrators.
+</p>
+<span style="color: red;">Not Implemented:</span>/globalbanlist<br>
+<p class="open3" id="infos">This command is to
+allow Gods to see who is currently banned globally across the domain.
+</p>
+<big><span style="text-decoration: underline;" id="miniTitle">Banning</span></big><a href="##" class="button4">[Info]</a><br>
+/ban<br>
+<p class="open4" id="infos">This command will allow
+you to remove unwanted guests from your channel permanently.<br>
+<span style="color: yellow;">Example: /ban Bane&nbsp;</span><br>
+This will ban the username "Bane" from your channel.
+You can provide optional reason messasges as well&nbsp;<br>
+<span style="color: yellow;">Example 2: /ban Bane|You
+broke
+my back</span>
+</p>
+/unban<br>
+<p class="open4" id="infos">Unbanning someone will
+alow you to welcome them back to the channel.<br>
+<span style="color: yellow;">Example: /unban Robin</span>
+</p>
+/globalban<br>
+<p class="open4" id="infos">This command is for
+Gods to globally ban selected users from the domain.&nbsp;<br>
+<span style="color: yellow;">Example: /globalban
+Bane|Go back to the darkness</span>
+</p>
+/unglobalban<br>
+<p class="open4" id="infos">Unglobalban allows for
+Gods to globally unban selected users and welcome them back to the
+domain.&nbsp;<br>
+<span style="color: yellow;">Example: /unglobalban
+Robin|Alfred is sorry</span>
+</p>
+/kick<br>
+<p class="open4" id="infos">If someone is being
+annoying you can kick them. This will allow you to temporarily remove a
+user from your channel either as a warning or punishment. This will for
+the user to manually refresh if they wish to rejoin an take part in the
+chat again.<br>
+<span style="color: yellow;">Example: /kick TheRiddler</span><br>
+Again you can provide an optional message&nbsp;<br>
+<span style="color: yellow;">Example 2: /kick
+TheRiddle|Enough riddles wise guy</span> </p>
+<big><span style="text-decoration: underline;" id="miniTitle">Admin Commands</span></big><a href="##" class="button5">[Info]</a><br>
+/refresh<br>
+<p class="open5" id="infos">The
+refresh command will allow Admins and Gods to force all users of a
+channel to refresh the domain. The main purpose of this is to force
+client updates.
+</p>
+/bg<br>
+<p class="open5" id="infos">Background is
+for&nbsp;stylizing a channel. It's used to inject CSS into
+the page, which will change the background.<br>
+<span style="color: yellow;">Example: /bg
+url('https://www.google.ca/someimage.jpg')center /cover
+/no-repeat #111</span><br style="color: yellow;">
+<span style="color: rgb(255, 153, 0);">URL is the address
+of the
+image you'd like to use. Center is to ensure
+the image appears in the center of the chat /cover ensures the picture
+stretches to fit the background /no-repeat prevents a small image from
+tiling and #111 is the hex color that will appear behind the image or
+in any uncovered areas.</span>
+</p>
+/delete<br>
+<p class="open5" id="infos">Deleting a user will
+allow Gods and Admins to set a user to it's default settings removing
+profile and registration information.<br>
+<span style="color: yellow;">Example: /delete HarveyDent</span>
+</p>
+/find<br>
+<p class="open5" id="infos">The find command will
+allow Gods and Admins to troubleshoot if an IP has been registered or
+used by another nickname. <br>
+<span style="color: yellow;">Example: /find 127.0.0.1</span>
+</p>
+/access<br>
+<p class="open5" id="infos">The access command
+will allow Gods and Admins to set another registered user's Role.
+Allowing them to appoint a role beneath their own.&nbsp;<br>
+<a href="#RoleOverview">View Role Overview</a></p>
+<p class="open5" id="infos"><span style="color: yellow;">Example: /access Robin 1</span><br>
+</p>
+/note<br>
+<p class="open5" id="infos">The note command is
+to set important information users should be presented with upon
+joining. A great place to display your rules or advertise!<br>
+This command is only available to Admin or higher.&nbsp;</p>
+<p class="open5" id="infos"><span style="color: yellow;">Example: /note Robin, don't forget to
+clean the Bat suit, it's filth and could use a press.</span>
+</p>
+<p class="open5" id="infos"></p>
+<big><span style="font-weight: bold; text-decoration: underline;" id="miniTitle">Simple Commands</span></big><a href="##" class="button6">[Info]</a><br>
+/pm<br>
+<p class="open6" id="infos">This
+will allow you to take advantage of command private messages. Allowing
+you to share secrets with another user without anyone else knowing!<br>
+</p>
+<p class="open6" id="infos"><span style="color: yellow;">Example: /pm Robin|Quick to the
+Batcave!</span><br>
+Visual private messaging windows are also available.
+You can acccess these VIA the user menu button or the commands
+below.&nbsp;</p>
+<p class="open6" id="infos"><span style="color: yellow;">Image Example:</span>&nbsp;<img style="width: 235px; height: 233px;" alt="Enable Images" src="PMExample.png">
+</p>
+/query or /vpm<br>
+<p class="open6" id="infos">Query or VPM will allow
+you to take advantage of Visual PM's
+<span style="color: yellow;">/query &lt;nick&gt;</span>
+or <span style="color: yellow;">/vpm &lt;nick&gt;</span>
+will open a
+Visual PM window
+connecting with the user you've defined.
+An alternative way to access this menu is also VIA the user menu
+button.&nbsp;</p>
+<p class="open6" id="infos"><span style="color: yellow;">Image Example:</span>&nbsp;<img style="width: 235px; height: 233px;" alt="Enable Images" src="PMExample.png">
+</p>
+/topic<br>
+<p class="open6" id="infos">This command will allow
+you to set a topic of conversation for the current channel.
+The topic command is currently only available to Mods or
+higher.&nbsp;</p>
+<p class="open6" id="infos"><span style="color: yellow;">Example: /topic How'd you find the
+Batcave?</span>
+</p>
+<big><span style="text-decoration: underline;" id="miniTitle">Style
+and Customizations</span></big><a href="##" class="button7">[Info]</a><br>
+/color<br>
+<p class="open7" id="infos">/color or /colour will
+change your message color on the chat. (To change your name font, color
+and style see
+<a href="#FlairOverview">/flair</a> information.)<br>
+Example: /color Lime or /color 0f0<br>
+See all of the colors available: <a href="http://en.wikipedia.org/wiki/Web_colors" target="_blank">http://en.wikipedia.org/wiki/Web_colors</a>
+</p>
+/font<br>
+<p class="open7" id="infos">This command will allow
+you to apply any Google Font to your <br>
+Example: /font MS Comic Sans<br>
+(Fonts are case sensitive, meaning you need to use capitals when
+indicated.)<br>
+See all of the fonts available: <a href="http://google.com/fonts" target="_blank">http://google.com/fonts</a>
+</p>
+<div id="FlairOverview"></div>
+/flair<br>
+<p class="open7" id="infos">The flair command will
+allow you to add a color, font and style of your current nickname.<br>
+<span style="color: yellow;"> Example: /flair #redNickname</span><br>
+<span style="color: rgb(226, 226, 0);"><span style="color: rgb(51, 204, 255);"> Indepth Example: For easy
+review I will provide two references one with 'Nickname' and another as
+if my name was 'Robin'</span> </span><br>
+</p>
+<p class="open7" id="infos">Creating a basic flair:<br>
+<span style="color: rgb(226, 226, 0);">/flair #redNickname
+</span><br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(51, 204, 255);">/flair #redRobin</span><br style="color: rgb(226, 226, 0);">
+<br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(255, 153, 0);"> Adding a font:</span><br style="color: rgb(226, 226, 0);">
+<span style="color: yellow;"> /flair $font|nickname</span><br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(51, 204, 255);"> /flair $Play|Robin</span><br style="color: rgb(226, 226, 0);">
+<br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(255, 153, 0);"> Adding a font and
+colour.</span><br style="color: rgb(226, 226, 0);">
+<span style="color: yellow;"> /flair $font|#colornickname</span><br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(51, 204, 255);"> /flair
+$Play|#redRobin</span><br style="color: rgb(226, 226, 0);">
+<br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(255, 153, 0);"> Adding an
+additional style:</span><br style="color: rgb(226, 226, 0);">
+<span style="color: yellow;"> /flair $font|/*#colornickname</span><br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(51, 204, 255);"> /flair
+$Play|/*#redRobin</span><br style="color: rgb(226, 226, 0);">
+<br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(255, 153, 0);"> Adding additional
+colors and styles:</span><br style="color: rgb(226, 226, 0);">
+<span style="color: yellow;"> /flair
+$font|/*#colorus#colorer#colorname</span><br style="color: rgb(226, 226, 0);">
+<span style="color: rgb(51, 204, 255);"> /flair
+$Play|/*#red/^/^Ro#blueb#greenin</span><br>
+<br>
+Usable fonts <a href="http://www.google.com/fonts" target="_blank">http://www.google.com/fonts</a><br>
+Usable colors <a href="http://en.wikipedia.org/wiki/Web_colors" target="_blank">http://en.wikipedia.org/wiki/Web_colors</a>
+</p>
+<form class="open7" id="infos" name="FlairHowToHide"><span style="color: rgb(255, 153, 0);"> If you're still
+having issues there is a</span> <a href="https://www.youtube.com/watch?v=Nk1rN853XbE" target="_blank">Flair HowTo</a> <span style="color: rgb(255, 153, 0);">on our</span> <a href="http://bit.do/AwakensYoutubeChannel" target="_blank">YouTube
+Channel</a><br>
+</form>
+/style<br>
+<p class="open7" id="infos">Styles are to add <span style="font-weight: bold;">bold</span>, <span style="font-style: italic;">italic</span>, or just
+plain <span style="color: rgb(51, 51, 255);">f</span><span style="color: rgb(51, 255, 51);">u</span><span style="color: red;">n</span> to your messages.<br>
+The set up for styles are pretty simple.<br>
+<span style="color: yellow;"> Just type: /style /*/%</span><br>
+("/*" is <span style="font-weight: bold;">bold</span>)
+("/%" is for <span style="font-style: italic;">italic</span>)
+(See further&nbsp;styles below.)<br>
+<br>
+Remove your styles with <span style="color: red;">Bugged:</span>/style
+none <span style="color: red;">(Currently you must type
+"/style &nbsp;" = "/style(space)(space)"</span><br>
+<br>
+<br>
+If you don't want <span style="font-weight: bold;">bold</span>
+appended to every message, add the style code to
+your messages manually as done in the examples below.<br>
+<span style="color: yellow;"></span></p>
+<p class="open7" id="infos"><span style="color: yellow;"> Example: /* Hi there everyone!</span><br>
+Only want part of a message stylized? <br>
+<span style="color: yellow;">Example2: /* Hi there|
+everyone!</span><br>
+The "|" symbol tells the style to stop. So now only "Hi there" will be
+bold and "everyone!" will appear in regular text.<br>
+<br style="color: rgb(255, 153, 0);">
+</p>
+<form class="open7" id="infos" name="StyleOverviewHide">
+<div id="Style Overview"><span style="color: rgb(255, 153, 0);">HERE IS A LIST OF EVERY
+STYLE!</span><br>
+</div>
+<span style="color: red;"> Not Implemented: </span><span style="color: rgb(255, 153, 0);">/!</span><span style="color: red;">r</span><span style="color: rgb(255, 153, 0);">a</span><span style="color: yellow;">i</span><span style="color: rgb(51, 204, 0);">n</span><span style="color: rgb(0, 0, 153);">b</span><span style="color: rgb(153, 51, 153);">o</span><span style="color: rgb(204, 102, 204);">w</span><span style="color: rgb(255, 153, 0);"> text|</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/@spooky text|</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/#spoiler text|</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/%</span><span style="font-style: italic; color: rgb(255, 153, 0);">italic</span><span style="color: rgb(255, 153, 0);">
+text|</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/^</span><big style="color: rgb(255, 153, 0);"><big>big text</big></big><span style="color: rgb(255, 153, 0);">|</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/&amp;wtfdoesthisdo</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/*</span><span style="font-weight: bold; color: rgb(255, 153, 0);">bold</span><span style="color: rgb(255, 153, 0);"> text|</span><br>
+<span style="color: red;"> Not Implemented:</span>
+<span style="color: rgb(255, 153, 0);">/_ </span><span style="text-decoration: underline; color: rgb(255, 153, 0);">underline
+text</span><span style="color: rgb(255, 153, 0);">|</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/-strikethrough
+text|</span><br>
+<span style="color: red;"></span><span style="color: rgb(255, 153, 0);">/+shaky
+text|</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/~</span><small style="color: rgb(255, 153, 0);">small text</small><span style="color: rgb(255, 153, 0);">|</span><br style="color: rgb(255, 153, 0);">
+<span style="color: rgb(255, 153, 0);">/`normalize| </span><br>
+</form>
+<big><span style="font-weight: bold; text-decoration: underline;" id="miniTitle">Fun Commands</span></big><a href="##" class="button8">[Info]</a><br>
+/echo<br>
+<p class="open8" id="infos">Echo will send a
+message that only you can see.<br>
+It's designed for testing colors and junk.<br>
+Example: /echo #red Hello </p>
+/me<br>
+<p class="open8" id="infos">/me is a fairly
+universal command used to act out an action.<br>
+Example: /me goes to the Batcave<br>
+Which will reply "<span style="color: rgb(51, 204, 255);">**
+Batman goes to the Batcave **</span>"</p>
+/snake<br>
+<p class="open8" id="infos">Looking to kill some
+time? Everyone in your channel AFK? <br>
+/snake is exactly what you think it is; mindless fun.</p>
+/snek<br>
+<p class="open8" id="infos">/snake not doing it for
+you? <br>
+Crank it up a notch with our personal touch on the classic. :)</p>
+<big><span style="font-weight: bold; text-decoration: underline;" id="miniTitle">Clearing / Safety</span></big><a href="##" class="button10">[Info]</a><br>
+/clear or /cls<br>
+<p class="open10" id="infos">Clear
+will remove all of the previous messages from your page. It only
+effects you and does not remove the text from anyone else's screen. </p>
+/mute<br>
+<p class="open10" id="infos">This will allow you to
+mute or unmute all chat sounds from your client. </p>
+/toggle images<br>
+<p class="open10" id="infos">This will stop the
+automatic thumb-nailing of the images posted to on your client. </p>
+/toggle bg<br>
+<p class="open10" id="infos">This will disable the
+current background and return it to default on your screen.</p>
+/safe<br>
+<p class="open10" id="infos">This will immediately
+turn off images, backgrounds and sounds. <br>
+If you are at school or work, this command is ideal. </p>
+/unsafe<br>
+<p class="open10" id="infos">This will immediately
+turn on images, backgrounds and sounds. <br>
+If you're no longer at school or work, this command will reverse the
+effect of /safe.&nbsp;<br>
+</p>
+<big><span style="font-weight: bold; text-decoration: underline;" id="miniTitle">FAQ</span></big><a href="##" class="button11">[Info]</a><br>
+<b>Q:</b> How do I make a flair? / How do I make my
+nickname look cool?<br>
+<p class="open11" id="infos"><b>A:</b>
+Check out the <a class="button7" href="#FlairOverview">flair
+information</a> on this page!
+</p>
+<b>Q:</b> How do I get a hat?<br>
+<p class="open11" id="infos"><b>A:</b>&nbsp;<span style="color: rgb(255, 0, 0); font-family: 'Droid Sans',sans-serif; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; text-align: start; text-indent: -62.4px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; display: inline ! important; float: none;"></span><span style="font-family: 'Droid Sans',sans-serif; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; text-align: start; text-indent: -62.4px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; color: rgb(255, 153, 0);">All
+donors of <span style="color: rgb(0, 153, 0);">$5USD+</span>
+will get their choice of a pre-made hat. <span style="color: rgb(0, 153, 0);">12USD+</span> </span>We
+will have our resident artist draw a personal request for you; as
+thanks for your support of the Awakens team!<br>
+</p>
+<b>Q:</b> How do I donate?<br>
+<p class="open11" id="infos"><b>A:</b>
+If you would like to to donate any amount, simply
+click the big <a href="#Donation">donate button</a>
+at the top of the page or you can use the <span style="color: red;">Not
+Implemented:</span>/donate
+command.<br>
+</p>
+<div id="lazyfootspace"></div>
+</div>
+</body></html>
