@@ -117,8 +117,8 @@ function createChannel(io, channelName) {
                                 dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {//check for channel roles
                                     if (dbuser.role === 0) {// check if god role
                                         userRole = 0;
-                                    } else if (channelRoles) {
-                                        if (channelRoles[dbuser.nick] && channelRoles[dbuser.nick] !== 0) {
+                                    } else if (channelRoles[dbuser.nick]) {
+                                        if (channelRoles[dbuser.nick] !== 0) {
                                             userRole = channelRoles[dbuser.nick];
                                         } else {
                                             userRole = 4;
@@ -126,6 +126,11 @@ function createChannel(io, channelName) {
                                     } else {
                                         userRole = 4;
                                     }
+                                    
+                                    if (dbuser.hat) {
+                                        user.hat = JSON.parse(dbuser.hat).current;
+                                    }
+                                    
                                     updateUserData(user, {
                                         nick : dbuser.nick,
                                         token : dao.makeId(),
@@ -452,6 +457,88 @@ function createChannel(io, channelName) {
                     user.socket.emit('banlist', banData);
                 });
             }
+        },
+        give_hat : {
+            params : ['nick', 'hat'],
+            handler : function (user, parmas) {
+                var allHats,
+                    hatIndex,
+                    hatName,
+                    usersHats,
+                    userIndex;
+                    
+                dao.find(parmas.nick).then(function (dbuser) {
+                    allHats = dao.getHats();
+                    hatIndex = allHats.lowercase.indexOf(parmas.hat);
+                    userIndex = findIndex(channel.online, 'nick', dbuser.nick);
+                    
+                    if (dbuser.hat) {
+                        try {
+                            usersHats = JSON.parse(dbuser.hat);
+                        } catch (err) {
+                            usersHats = {
+                                available : ['none'],
+                                current : ''
+                            }
+                        }
+                    } else {
+                        usersHats = {
+                            available : ['none'],
+                            current : ''
+                        }
+                    }
+                    
+                    if (hatIndex !== -1) {
+                        hatName = allHats.lowercase[hatIndex];
+                        usersHats.available.push(hatName);
+                        dao.setUserinfo(dbuser.nick, 'hat', usersHats).then(function () {
+                            if (userIndex !== -1) {
+                                showMessage(channel.online[userIndex].socket, 'You now have access to hat: ' + hatName, 'info');
+                            }
+                        });
+                    } else {
+                        showMessage(user.socket, 'That hat doesn\'t exist', 'error');
+                    }
+                }).fail(function () {
+                    showMessage(user.socket, 'That user isn\'t registered', 'error');
+                });
+            }
+        },
+        hat : {
+            params : ['hat'],
+            handler : function (user, params) {
+                var usersHats,
+                    userHatIndex,
+                    hatIndex,
+                    allHats;
+                    
+                dao.find(user.nick).then(function (dbuser) {
+                    allHats = dao.getHats();
+                    if (dbuser.hat) {
+                        usersHats = JSON.parse(dbuser.hat);
+                        hatIndex = allHats.lowercase.indexOf(params.hat);
+
+                        if (hatIndex !== -1) {
+                            userHatIndex = usersHats.available.indexOf(params.hat);
+                            if (userHatIndex !== -1) {
+                                usersHats.current = allHats.name[hatIndex];
+                                dao.setUserinfo(dbuser.nick, 'hat', usersHats).then(function () {
+                                    user.hat = allHats.name[hatIndex];
+                                    showMessage(user.socket, 'You are now wearing hat: ' + allHats.lowercase[hatIndex], 'info');
+                                });
+                            } else {
+                                showMessage(user.socket, 'You don\'t have access to that hat', 'error');
+                            }
+                        } else {
+                            showMessage(user.socket, 'That hat doesn\'t exist', 'error');
+                        }
+                    } else {
+                        showMessage(user.socket, 'You don\'t have any hats', 'error'); 
+                    }
+                }).fail(function () {
+                    showMessage(user.socket, 'Must be registered to own a hat', 'error'); 
+                });
+            }
         }
     };
     
@@ -464,16 +551,21 @@ function createChannel(io, channelName) {
             id : dao.makeId()
         };
         
+        if (socket.request.headers['cf-connecting-ip']) {//if header is present replace clients ip with header
+            user.remote_addr = socket.request.headers['cf-connecting-ip'];
+        }
+        
         socket.on('message', function (message, flair) {
             throttle.on(user.remote_addr + '-message').then(function (notSpam) {
                 if (notSpam) {
-                    if (typeof message === 'string' && typeof flair === 'string') {
-                        if (message.length < 10000 && flair.length < 500) {
+                    if (typeof message === 'string' && (typeof flair === 'string' || !flair)) {
+                        if (message.length < 10000 && (flair && flair.length < 500 || !flair)) {
                             roomEmit('message', {
                                 message : message,
                                 messageType : 'chat',
                                 nick : user.nick,
                                 flair : flair,
+                                hat : user.hat,
                                 count : ++channel.messageCount
                             });      
                         }
@@ -595,7 +687,7 @@ function createChannel(io, channelName) {
                 },
                 topic : {
                     type : 'string',
-                    role : 2
+                    role : 3
                 },
                 note : {
                     type : 'string',
@@ -647,16 +739,21 @@ function createChannel(io, channelName) {
             }
         });
         
-        function joinChannel(requestedData, overRide) {
+        function joinChannel(requestedData, channelRoles, channelData, overRide) {
             var i,
                 onlineUsers = [],
-                roleNames = ['God', 'Admin', 'Mod', 'Basic'];
+                roleNames = ['God', 'Admin', 'Mod', 'Basic'],
+                userRole;
             
-            function join(channelData, nick, role) {
+            function join(channelData, nick, role, hat) {
                 if (nick && /^[\x21-\x7E]*$/i.test(nick)) {
                     user.nick = nick;
                     user.token = dao.makeId();
                     tokens[user.nick] = user.token;
+                    
+                    if (hat) {
+                        user.hat = JSON.parse(hat).current;
+                    }
                     
                     if (role !== undefined) {
                         user.role = role;
@@ -693,33 +790,36 @@ function createChannel(io, channelName) {
                 roomEmit('joined', user.id, user.nick);
             }
             
-            dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
-                var index = findIndex(channel.online, 'nick', requestedData.nick);
-                
-                if (requestedData.nick && index === -1) {
-                    dao.find(requestedData.nick).then(function (dbuser) {
-                        if (tokens[requestedData.nick] === requestedData.token || overRide) {
-                            join(channelData, dbuser.nick, dbuser.role);
+            var index = findIndex(channel.online, 'nick', requestedData.nick);
+            
+            if (requestedData.nick && index === -1) {
+                dao.find(requestedData.nick).then(function (dbuser) {
+                    if (tokens[requestedData.nick] === requestedData.token || overRide) {
+                        if (dbuser.role === 0) {
+                            userRole = 0;
                         } else {
-                            join(channelData);
+                            userRole = channelRoles[requestedData.nick];
                         }
-                    }).fail(function () {
-                        join(channelData, requestedData.nick);
-                    });
-                } else {
-                    join(channelData);
-                }
-            });
+                        join(channelData, dbuser.nick, userRole, dbuser.hat);
+                    } else {
+                        join(channelData);
+                    }
+                }).fail(function () {
+                    join(channelData, requestedData.nick);
+                });
+            } else {
+                join(channelData);
+            }
         }
         
-        function attemptLockedChannel(requestedData) {
+        function attemptLockedChannel(requestedData, channelRoles, channelData) {
             if (requestedData.nick) {
                 if (requestedData.token && tokens[requestedData.nick] === requestedData.token) {
                     joinChannel(requestedData, true);
                 } else if (requestedData.password) {
                     dao.login(requestedData.nick, requestedData.password).then(function (correctPassword, dbuser) {
                         if (correctPassword) {
-                            joinChannel(requestedData, true);
+                            joinChannel(requestedData, channelRoles, channelData, true);
                         } else {
                             showMessage(socket, 'Incorrect password', 'error');
                         }
@@ -734,13 +834,13 @@ function createChannel(io, channelName) {
             }        
         }
         
-        function attemptCaptcha(requestedData) {
+        function attemptCaptcha(requestedData, channelRoles, channelData) {
             var code;
             if (channel.captcha[user.id]) {
                 if (requestedData.captcha) {
                     if (channel.captcha[user.id].toUpperCase() === requestedData.captcha.toUpperCase()) {
                         delete channel.captcha[user.id];
-                        joinChannel(requestedData);
+                        joinChannel(requestedData, channelRoles, channelData);
                     } else {
                         showMessage(socket, 'Incorrect captcha code!', 'error');
                     }   
@@ -762,11 +862,11 @@ function createChannel(io, channelName) {
                     if (banlist.indexOf(user.remote_addr) === -1 && banlist.indexOf(requestedData.nick) === -1) {
                         dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
                             if (channelData.lock) {
-                                attemptLockedChannel(requestedData);
+                                attemptLockedChannel(requestedData, channelRoles, channelData);
                             } else if (channelData.captcha) {
-                                attemptCaptcha(requestedData);
+                                attemptCaptcha(requestedData, channelRoles, channelData);
                             } else {
-                                joinChannel(requestedData);
+                                joinChannel(requestedData, channelRoles, channelData);
                             }
                         });
                     } else {

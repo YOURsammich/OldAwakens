@@ -29,7 +29,7 @@ a {
 }
 
 #messages {
-    height: calc(100% - 40px);
+    height: calc(100vh - 38px);
     width: 100%;
     background-color: black;
     position: relative;
@@ -39,6 +39,18 @@ a {
 #messages img {
 	max-height: 256px;
 	max-width: 256px;
+}
+
+.hat {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    display: inline-block !important;
+    background-size: 30px 20px;
+    margin-right: -50px;
+    margin-top: -50px;
+    top: 4px;
+    left: -27px;
 }
 
 .time {
@@ -118,13 +130,16 @@ a {
     position: absolute;
     bottom: 0px;
     background-color: rgb(58, 58, 58);
-    padding: 5px;
-    width: calc(100% - 10px);
+    padding-top: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-bottom: 1px;
+    width: calc(100% - 8px);
 }
 
 #input-bar textarea {
-    width: calc(100% - 45px);
-    height: 30px;
+    width: calc(100% - 55px);
+    height: 18px;
     resize: none;
     padding-top: 4px;
     padding-bottom: 4px;

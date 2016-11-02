@@ -25,7 +25,7 @@ var Attributes = {
             showMessage({
                 nick : this.get('nick'),
                 flair : this.get('flair'),
-                message : decorateText('Now your messages look like this'),
+                message : clientSubmit.message.decorateText('Now your messages look like this'),
                 messageType : 'chat'
             });
         } else if (notify && oldValue !== newValue && attribute !== 'token') {
@@ -37,7 +37,15 @@ var Attributes = {
         localStorage.setItem('chat-' + attribute, newValue);
     },
     get : function (attribute) {
-        return this.storedAttributes[attribute] || '';
+        var value = '';
+        
+        if (this.storedAttributes[attribute] === undefined && attribute.substr(0, 6) === 'toggle') {
+            value = true;
+        } else {
+            value = this.storedAttributes[attribute];
+        }
+        
+        return value;
     },
     remove : function (attribute) {
         delete this.storedAttributes[attribute];
@@ -52,7 +60,11 @@ var Attributes = {
         for (i = 0; allKeys.length > i; i++) {
             key = allKeys[i];
             if (key !== '__proto__' && key.substr(0, 4) === 'chat') {
-                allAtt[key.substr(5)] = localStorage[key];
+                try {
+                    allAtt[key.substr(5)] = JSON.parse(localStorage[key]);
+                } catch (err) {
+                    allAtt[key.substr(5)] = localStorage[key];
+                }
             }
         }
         
@@ -60,139 +72,171 @@ var Attributes = {
     }())
 };
 
-function scrollToBottom(el) {
-        
-    function scrollTo(element, to, duration) {
-        var start = element.scrollTop,
-            change = to - start,
-            increment = 20;
+var messageBuilder = {
+    createMessage : function (message, messageType, nick, flair, count, hat) {
+        var container = document.createElement('div'),
+            time = new Date(),
+            timeDIV = document.createElement('div'),
+            nickDIV = document.createElement('div'),
+            messageDIV = document.createElement('div'),
+            hatSpan,
+            input;
 
-        var animateScroll = function (elapsedTime) {
-            elapsedTime += increment;
-            var position = easeInOut(elapsedTime, start, change, duration);
-            element.scrollTop = position;
-            if (elapsedTime < duration) {
-                setTimeout(function () {
-                    animateScroll(elapsedTime);
-                }, increment);
-            }
-        };
-        animateScroll(0);
-    }
-    
-    function easeInOut(currentTime, start, change, duration) {
-        currentTime /= duration / 2;
-        if (currentTime < 1) {
-            return change / 2 * currentTime * currentTime + start;
-        }
-        currentTime -= 1;
-        return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
-    }
-    
-    if (typeof el === 'string') {
-        el = document.getElementById(el);
-    }
-    
-    var scrollDelta = el.scrollHeight - el.clientHeight;
-    if (scrollDelta - el.scrollTop < 300) {
-        scrollTo(el, scrollDelta, 200);
-    }
-}
-
-function appendMessageTo(message, el) {
-    if (el === undefined) {
-        el = document.getElementById('messages');
-    }
-    
-    el.appendChild(message);
-    scrollToBottom(el);
-}
-
-function buildMessage(message, messageType, nick, flair, count) {
-    var container = document.createElement('div'),
-        time = new Date(),
-        timeDIV = document.createElement('div'),
-        nickDIV = document.createElement('div'),
-        messageDIV = document.createElement('div'),
-        input;
-    
-    if (messageType === undefined) {
-        container.className = 'message';
-    } else {
-        container.className = 'message ' + messageType;
-    }
-    
-    timeDIV.className = 'time';
-    timeDIV.textContent = time.format('shortTime') + ' ';
-    
-    if (count) {
-        timeDIV.addEventListener('click', function () {
-            input = document.querySelector('#input-bar textarea');
-            if (input.value) {
-                input.value = input.value + ' >>' + count + ' ';
-            } else {
-                input.value = '>>' + count + ' ';
-            }
-            input.focus();
-        });
-    }
-    
-    container.appendChild(timeDIV);
-    
-    if (nick) {
-        nickDIV.className = 'nick';
-        
-        if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
-            parser.getAllFonts(flair);
-            nickDIV.innerHTML = parser.parse(flair.replace(/\r?\n|\r/g, '')) + ':';
+        if (messageType === undefined) {
+            container.className = 'message';
         } else {
-            nickDIV.textContent = nick + ':';
+            container.className = 'message ' + messageType;
         }
 
-        container.appendChild(nickDIV);
-    }
-    
-    messageDIV.className = 'messageContent';
-    
-    if (messageType === 'info') {
-        messageDIV.innerHTML = parser.escape(message);
-    } else if (messageType === 'captcha') {
-        messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
-    } else {
-        if (messageType === 'chat' && message.indexOf(Attributes.get('nick')) !== -1) {
-            timeDIV.style.color = 'yellow';
-            if (!Attributes.get('mute')) {
-                audioPlayer.name.play();
-            }
-        } else if (!Attributes.get('mute')) {
-            audioPlayer.chat.play();
-        }
-        
+        timeDIV.className = 'time';
+        timeDIV.textContent = time.format('shortTime') + ' ';
+
         if (count) {
-            container.classList += ' msg-' + count;
+            timeDIV.addEventListener('click', function () {
+                input = document.querySelector('#input-bar textarea');
+                if (input.value) {
+                    input.value = input.value + ' >>' + count + ' ';
+                } else {
+                    input.value = '>>' + count + ' ';
+                }
+                input.focus();
+            });
+        }
+
+        container.appendChild(timeDIV);
+            if (hat && hat !== 'none') {
+                hatSpan = document.createElement('div');
+                hatSpan.className = 'hat';
+                hatSpan.style.backgroundImage = "url('/hats/" + hat + "')";
+                hatSpan.style.backgroundPosition = "center";
+                hatSpan.style.backgroundRepeat = "no-repeat";
+                hatSpan.style.backgroundSize = "30px 29px";
+                container.appendChild(hatSpan);
+            }
+        if (nick) {
+            nickDIV.className = 'nick';
+
+            if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
+                parser.getAllFonts(flair);
+                nickDIV.innerHTML = parser.parse(flair.replace(/\r?\n|\r/g, '')) + ':';
+            } else {
+                nickDIV.textContent = nick + ':';
+            }
+            
+            container.appendChild(nickDIV);
+        }
+
+        messageDIV.className = 'messageContent';
+
+        if (messageType === 'info') {
+            messageDIV.innerHTML = parser.escape(message);
+        } else if (messageType === 'captcha') {
+            messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
+        } else {
+            
+            if (this.alertMessage(message, messageType, nick)) {
+                timeDIV.style.color = 'yellow';
+                if (!Attributes.get('mute')) {
+                    audioPlayer.name.play();
+                }
+            } else if (!Attributes.get('mute')) {
+                audioPlayer.chat.play();
+            }
+
+            if (count) {
+                container.classList += ' msg-' + count;
+            }
+
+            while (message.split(/\n/).length > 15) {
+                var index = message.lastIndexOf('\n');
+                message = message.slice(0, index) + message.slice(index + 1);
+            }
+            parser.getAllFonts(message);
+            messageDIV.innerHTML = ' ' + parser.parse(message, messageType === 'chat');
+        }
+
+        container.appendChild(messageDIV);
+
+        return container;
+    },
+    alertMessage : function (message, messageType, nick) {
+        var myNick = Attributes.get('nick'),
+            quote = message.match(/>>\d+/g),
+            quoteAlert = false,
+            quotedMessage,
+            quotedNick,
+            i;
+        
+        if (quote) {
+            for (i = 0; i < quote.length; i++) {
+                quotedMessage = document.getElementsByClassName('msg-' + quote[i].replace('>>', ''));
+                if (quotedMessage.length) {
+                    quotedNick = quotedMessage[0].getElementsByClassName('nick')[0].textContent;
+                    if (quotedNick.substr(0, quotedNick.length-1) === myNick) {
+                        quoteAlert = true;
+                    } 
+                }
+            }   
         }
         
-        while (message.split(/\n/).length > 15) {
-            var index = message.lastIndexOf('\n');
-            message = message.slice(0, index) + message.slice(index + 1);
+        return messageType === 'chat' && nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert)
+    },
+    appendMessageTo : function (message, el) {
+        if (el === undefined) {
+            el = document.getElementById('messages');
         }
-        parser.getAllFonts(message);
-        messageDIV.innerHTML = ' ' + parser.parse(message);
+
+        el.appendChild(message);
+        this.scrollToBottom(el);
+    },
+    scrollToBottom : function (el) {
+
+        function scrollTo(element, to, duration) {
+            var start = element.scrollTop,
+                change = to - start,
+                increment = 20;
+
+            var animateScroll = function (elapsedTime) {
+                elapsedTime += increment;
+                var position = easeInOut(elapsedTime, start, change, duration);
+                element.scrollTop = position;
+                if (elapsedTime < duration) {
+                    setTimeout(function () {
+                        animateScroll(elapsedTime);
+                    }, increment);
+                }
+            };
+            animateScroll(0);
+        }
+
+        function easeInOut(currentTime, start, change, duration) {
+            currentTime /= duration / 2;
+            if (currentTime < 1) {
+                return change / 2 * currentTime * currentTime + start;
+            }
+            currentTime -= 1;
+            return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
+        }
+
+        if (typeof el === 'string') {
+            el = document.getElementById(el);
+        }
+
+        var scrollDelta = el.scrollHeight - el.clientHeight;
+        if (scrollDelta - el.scrollTop < 300) {
+            scrollTo(el, scrollDelta, 200);
+        }
     }
-    
-    container.appendChild(messageDIV);
-    
-    return container;
 }
 
-function showMessage(messageData, panel) {
-    var messageHTML = buildMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count);
+function showMessage(messageData, panel) {console.log(messageData);
+    var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
     
     if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
         Attributes.set('lastpm', messageData.nick);
     }
     
-    appendMessageTo(messageHTML, panel);
+    messageBuilder.appendMessageTo(messageHTML, panel);
 }
 
 function handlePrivateMessage(messageData) {
@@ -218,119 +262,119 @@ function handlePrivateMessage(messageData) {
     }
 }
 
-function sendCommand(commandName, params) {
-    if (COMMANDS[commandName].handler) {
-        COMMANDS[commandName].handler(params);
-    } else {
-        socket.emit('command', commandName, params);
-    }
-}
-
-function formatParams(commandParams, givenParams) {
-    var formatedParams = {},
-        splitCommand,
-        i;
-    
-    if (commandParams[0].indexOf('|') !== -1) {
-        splitCommand = commandParams[0].split('|');
-        
-        for (i = 0; i < splitCommand.length; i++) {
-            if (givenParams.split('|')[i]) {
-                formatedParams[splitCommand[i]] = givenParams.split('|')[i];
+var clientSubmit = {
+    command : {
+        send : function (commandName, params) {
+            if (COMMANDS[commandName].handler) {
+                COMMANDS[commandName].handler(params);
+            } else {
+                socket.emit('command', commandName, params);
             }
-        }
-    } else if (commandParams.length > 1) {
-        splitCommand = givenParams.split(' ');
-        
-        for (i = 0; i < splitCommand.length; i++) {
-            if (splitCommand[i]) {
-                formatedParams[commandParams[i]] = splitCommand[i];
-            }
-        }
-    } else {
-        if (givenParams) {
-            formatedParams[commandParams[0]] = givenParams;
-        }
-    }
-    
-    return formatedParams;
-}
+        },
+        formatParams : function (commandParams, givenParams) {
+            var formatedParams = {},
+                splitCommand,
+                i;
 
-function handleCommand(commandData) {
-    var commandName = commandData[1],
-        params = commandData[2],
-        formatedParams;
-    
-    if (COMMANDS[commandName]) {
-        if (COMMANDS[commandName].params) {
-            
-            formatedParams = formatParams(COMMANDS[commandName].params, params);
-            
-            if (COMMANDS[commandName].params.length <= Object.keys(formatedParams).length) {
-                sendCommand(commandName, formatedParams);
+            if (commandParams[0].indexOf('|') !== -1) {
+                splitCommand = commandParams[0].split('|');
+
+                for (i = 0; i < splitCommand.length; i++) {
+                    if (givenParams.split('|')[i]) {
+                        formatedParams[splitCommand[i]] = givenParams.split('|')[i];
+                    }
+                }
+            } else if (commandParams.length > 1) {
+                splitCommand = givenParams.split(' ');
+
+                for (i = 0; i < splitCommand.length; i++) {
+                    if (splitCommand[i]) {
+                        formatedParams[commandParams[i]] = splitCommand[i];
+                    }
+                }
+            } else {
+                if (givenParams) {
+                    formatedParams[commandParams[0]] = givenParams;
+                }
+            }
+
+            return formatedParams;
+        },
+        handle : function (commandData) {
+            var commandName = commandData[1],
+                params = commandData[2],
+                formatedParams;
+
+            if (COMMANDS[commandName]) {
+                if (COMMANDS[commandName].params) {
+
+                    formatedParams = this.formatParams(COMMANDS[commandName].params, params);
+
+                    if (COMMANDS[commandName].params.length <= Object.keys(formatedParams).length) {
+                        this.send(commandName, formatedParams);
+                    } else {
+                        showMessage({
+                            message : 'Invalid: /' + commandName + ' <' + COMMANDS[commandName].params.join('> <') + '>',
+                            messageType : 'error'
+                        });
+                    }
+                } else {
+                    this.send(commandName);
+                }
             } else {
                 showMessage({
-                    message : 'Invalid: /' + commandName + ' <' + COMMANDS[commandName].params.join('> <') + '>',
+                    message : 'That isn\'t a command',
                     messageType : 'error'
                 });
             }
-        } else {
-            sendCommand(commandName);
         }
-    } else {
-        showMessage({
-            message : 'That isn\'t a command',
-            messageType : 'error'
-        });
-    }
-}
+    },
+    message : {
+        decorateText : function (text) {
+            var decorativeModifiers = '',
+                font = Attributes.get('font'),
+                color = Attributes.get('color'),
+                bgcolor = Attributes.get('bgcolor'),
+                glow = Attributes.get('glow'),
+                style = Attributes.get('style');
 
-function decorateText(text) {
-    var decorativeModifiers = '',
-        font = Attributes.get('font'),
-        color = Attributes.get('color'),
-        bgcolor = Attributes.get('bgcolor'),
-        glow = Attributes.get('glow'),
-        style = Attributes.get('style');
-    
-    if (font) {
-        decorativeModifiers += '$' + font + '|';
-    }
-    
-    if (glow) {
-        decorativeModifiers += '###' + glow;
-    }
-    
-    if (bgcolor) {
-        decorativeModifiers += '##' + bgcolor;
-    }
-   
-    if (color) {
-        decorativeModifiers += '#' + color;
-    }
-    
-    if (style) {
-        decorativeModifiers += style;
-    }
-    
-    return decorativeModifiers + ' ' + text;
-}
+            if (font) {
+                decorativeModifiers += '$' + font + '|';
+            }
 
-function sendPrivateMessage(message, userID) {
-    socket.emit('privateMessage', decorateText(message), Attributes.get('flair'), userID);
-}
+            if (glow) {
+                decorativeModifiers += '###' + glow;
+            }
 
-function sendMessage(message) {
-    socket.emit('message', decorateText(message), Attributes.get('flair'));
-}
+            if (bgcolor) {
+                decorativeModifiers += '##' + bgcolor;
+            }
 
-function handleInput(value) {
-    var command = /^\/(\w+) ?([\s\S]*)/.exec(value);
-    
-    if (command) {
-        handleCommand(command);
-    } else {
-        sendMessage(value);
+            if (color) {
+                decorativeModifiers += '#' + color;
+            }
+
+            if (style) {
+                decorativeModifiers += style;
+            }
+
+            return decorativeModifiers + ' ' + text;
+        },
+        send : function (message) {
+            socket.emit('message', this.decorateText(message), Attributes.get('flair'));
+        },
+        sendPrivate : function (message, userID) {
+            socket.emit('privateMessage', decorateText(message), Attributes.get('flair'), userID);
+        }
+    },
+    handleInput : function (value) {
+        var command = /^\/(\w+) ?([\s\S]*)/.exec(value);
+
+        if (command) {
+            this.command.handle(command);
+        } else {
+            this.message.send(value);
+        }
     }
 }
 
@@ -353,7 +397,9 @@ function channelTheme(channelData, updatedBy) {
     }
     
     if (channelData.background) {
-        document.getElementById('messages').style.background = channelData.background;
+        if (Attributes.get('toggle-background')) {
+            document.getElementById('messages').style.background = channelData.background;   
+        }
         Attributes.set('background', channelData.background);
     }
 
@@ -531,7 +577,7 @@ function createPmPanel(id) {
                     historyIndex = 0;
                     this.value = '';
                     history.push(inputValue);
-                    handleInput(inputValue);
+                    clientSubmit.handleInput(inputValue);
                 }
             }
             break;
@@ -557,11 +603,11 @@ function createPmPanel(id) {
     $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
         this.style.height = '0px';
 
-        var newHeight = Math.min(Math.max(this.scrollHeight, 30), screen.height / 3),
+        var newHeight = Math.min(Math.floor(this.scrollHeight / 18) * 18, screen.height / 3),
             messageDiv = document.getElementById('messages');
-
+        
         this.style.height = newHeight + 'px';
-        messageDiv.style.top = -(newHeight - 30) + 'px';
+        messageDiv.style.top = -(newHeight - 18) + 'px';
     });
 })();
 
@@ -576,7 +622,7 @@ socket.on('nick', menuControl.changeNick);
 socket.on('left', menuControl.removeUser);
 
 socket.on('captcha', function (captcha) {
-    var messageHTML = buildMessage(captcha, 'captcha');
+    var messageHTML = messageBuilder.createMessage(captcha, 'captcha');
     appendMessageTo(messageHTML);
 });
 
@@ -635,7 +681,7 @@ socket.on('banlist', function (banlist) {
     document.body.appendChild(border);
 });
 
-socket.on('update', function (allAtt) {
+socket.on('update', function (allAtt) {console.log(allAtt);
     var keys = Object.keys(allAtt),
         i;
     

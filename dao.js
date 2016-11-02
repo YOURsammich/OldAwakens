@@ -194,6 +194,11 @@ module.exports = {
     setUserinfo : function (nick, att, value) {
         var defer = $.Deferred();
         var sql = "UPDATE `awakens`.`users` SET ?? = ? WHERE `nick` = ?";
+        
+        if (typeof value) {
+            value = JSON.stringify(value);
+        }
+        
         db.query(sql, [att, value, nick], function (err, rows, fields) {
             if (err) {
                 defer.reject(err);
@@ -203,7 +208,7 @@ module.exports = {
         });
         return defer;
     },
-    banlist : function(channelName){
+    banlist : function(channelName) {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `channel_banned` WHERE `channelName` = ?;"
         db.query(sql, channelName, function (err, rows, fields) {
@@ -271,5 +276,18 @@ module.exports = {
             text += possible.charAt(Math.floor(Math.random() * possible.length));
 
         return text;
+    },
+    getHats : function(){
+        var list = fs.readdirSync('public/hats');
+        var name = [];
+        var lowercase = [];
+        list.forEach(function(i){
+            name.push(i);
+            lowercase.push(i.toLowerCase().substr(0,i.length-4));
+        });
+        return {
+            name : name,
+            lowercase : lowercase
+        }
     }
 }

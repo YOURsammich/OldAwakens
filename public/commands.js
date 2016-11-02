@@ -152,7 +152,7 @@ var COMMANDS = {
         params : ['message'],
         handler : function (params) {
             showMessage({
-                message : decorateText(params.message),
+                message : clientSubmit.message.decorateText(params.message),
                 nick : Attributes.get('nick'),
                 flair : Attributes.get('flair')
             });
@@ -185,6 +185,30 @@ var COMMANDS = {
                 parent.removeChild(messages[0]);
             }
         }  
+    },
+    toggle : {
+        params : ['attr'],
+        handler : function (params) {
+            var validAtts = ['background', 'images'],
+                attValue = Attributes.get('toggle-' + params.attr);
+            
+            if (validAtts.indexOf(params.attr) !== -1) {
+                console.log(attValue,'??????')
+                Attributes.set('toggle-' + params.attr, !attValue, true);
+                
+                if (params.attr === 'background') {
+                    if (!attValue) {
+                        document.getElementById('messages').style.background = Attributes.get('background');
+                    } else {
+                        document.getElementById('messages').style.background = 'black';
+                    }   
+                }
+            } else {
+                showMessage({
+                    message : 'Not a toggleable attribue'
+                });
+            }
+        }
     },
     captchaon : {
         handler : function () {
@@ -293,7 +317,13 @@ var COMMANDS = {
     pm : {
         params : ['nick|message']
     },
-    banlist : {}
+    banlist : {},
+    give_hat : {
+        params : ['nick', 'hat']
+    },
+    hat : {
+        params : ['hat']
+    }
 };
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
