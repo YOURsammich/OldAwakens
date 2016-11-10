@@ -229,14 +229,17 @@ var messageBuilder = {
     }
 }
 
-function showMessage(messageData, panel) {console.log(messageData);
-    var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
+function showMessage(messageData, panel) {
+    var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat),
+        blockUsers = Attributes.get('blocked') || [];
     
     if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
         Attributes.set('lastpm', messageData.nick);
     }
     
-    messageBuilder.appendMessageTo(messageHTML, panel);
+    if (blockUsers.indexOf(messageData.nick) === -1) {
+        messageBuilder.appendMessageTo(messageHTML, panel);   
+    }
 }
 
 function handlePrivateMessage(messageData) {
@@ -301,7 +304,7 @@ var clientSubmit = {
             return formatedParams;
         },
         handle : function (commandData) {
-            var commandName = commandData[1],
+            var commandName = commandData[1].toLowerCase(),
                 params = commandData[2],
                 formatedParams;
 
@@ -364,7 +367,7 @@ var clientSubmit = {
             socket.emit('message', this.decorateText(message), Attributes.get('flair'));
         },
         sendPrivate : function (message, userID) {
-            socket.emit('privateMessage', decorateText(message), Attributes.get('flair'), userID);
+            socket.emit('privateMessage', this.decorateText(message), Attributes.get('flair'), userID);
         }
     },
     handleInput : function (value) {
@@ -523,7 +526,7 @@ function createPmPanel(id) {
         
         input.addEventListener('keydown', function (e) {
             if (e.which === 13 && this.value) {
-                sendPrivateMessage(this.value, id);
+                clientSubmit.message.sendPrivate(this.value, id);
                 this.value = '';
             }
         });
@@ -681,7 +684,7 @@ socket.on('banlist', function (banlist) {
     document.body.appendChild(border);
 });
 
-socket.on('update', function (allAtt) {console.log(allAtt);
+socket.on('update', function (allAtt) {
     var keys = Object.keys(allAtt),
         i;
     

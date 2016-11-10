@@ -101,18 +101,18 @@ var menuControl = {
             },
             whois : {
                 callback : function (nick) {
-                    handleInput('/whois ' + nick);
+                    clientSubmit.handleInput('/whois ' + nick);
                 }
             },
             find : {
                 callback : function (nick) {
-                    handleInput('/find ' + nick);
+                    clientSubmit.handleInput('/find ' + nick);
                 }
             },
             divider : '---',
             kick : {
                 callback : function (nick) {
-                    handleInput('/kick ' + nick);
+                    clientSubmit.handleInput('/kick ' + nick);
                 }
             }
         },

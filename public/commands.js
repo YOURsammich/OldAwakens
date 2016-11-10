@@ -130,9 +130,7 @@ var COMMANDS = {
     },
     whoami : {
         handler : function () {
-            sendCommand('whois', {
-                nick : Attributes.get('nick') 
-            });
+            clientSubmit.handleInput('/whois ' + Attributes.get('nick'));
         }
     },
     register : {
@@ -163,7 +161,7 @@ var COMMANDS = {
         handler: function (params) {
             var lastPm = Attributes.get('lastpm');
             if (lastPm) {
-                handleInput('/pm ' + lastPm + '|' + params.message);
+                clientSubmit.handleInput('/pm ' + lastPm + '|' + params.message);
             }
         }
     },
@@ -193,7 +191,6 @@ var COMMANDS = {
                 attValue = Attributes.get('toggle-' + params.attr);
             
             if (validAtts.indexOf(params.attr) !== -1) {
-                console.log(attValue,'??????')
                 Attributes.set('toggle-' + params.attr, !attValue, true);
                 
                 if (params.attr === 'background') {
@@ -268,6 +265,52 @@ var COMMANDS = {
             socket.emit('channelStatus', {
                 lock : true
             });
+        }
+    },
+    block : {
+        params : ['nick'],
+        handler : function (params) {
+            var blockedUsers = Attributes.get('blocked');
+            if (!blockedUsers) {
+                blockedUsers = [];
+            } else {
+                blockedUsers = blockedUsers.split(',');
+            }
+            
+            blockedUsers.push(params.nick);
+            Attributes.set('blocked', blockedUsers.join(','));
+            showMessage({
+                message : params.nick + ' is now blocked',
+                messageType : 'info'
+            });
+        }
+    },
+    unblock : {
+        params : ['nick'],
+        handler : function (params) {
+            var blockedUsers = Attributes.get('blocked'),
+                index;
+            
+            if (!blockedUsers) {
+                blockedUsers = [];
+            } else {
+                blockedUsers = blockedUsers.split(',');
+            }
+            
+            index = blockedUsers.indexOf(params.nick);
+            if (index !== -1) {
+                blockedUsers.splice(index, 1);
+                Attributes.set('blocked', blockedUsers.join(','));
+                showMessage({
+                    message : params.nick + ' is now unblocked',
+                    messageType : 'info'
+                });
+            } else {
+                showMessage({
+                    message : params.nick + ' isn\'t now unblocked',
+                    messageType : 'info'
+                });
+            }
         }
     },
     //server side commands

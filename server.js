@@ -18,7 +18,7 @@ process.on('uncaughtException', function (err) {
 function findIndex(channel, att, value) {
     var i;
     for (i = 0; i < channel.length; i++) {
-        if (channel[i][att] === value) {
+        if (channel[i][att].toLowerCase() === value.toLowerCase()) {
             return i;
         }
     }
@@ -188,18 +188,33 @@ function createChannel(io, channelName) {
             params : ['nick'],
             handler : function (user, params) {
                 var index = findIndex(channel.online, 'nick', params.nick),
+                    message,
                     userData;
                 
-                if (index !== -1) {
-                    userData = channel.online[index];
-                    showMessage(user.socket, `Nick: ${userData.nick}\n Role: ${userData.role}\n IP: ${userData.remote_addr}\n Registered: No`, 'info');
-                } else {
+                dao.getChannelinfo(channelName).then(function (channelRoles) {
+                    if (index !== -1) {
+                        userData = channel.online[index];
+                    }
+
                     dao.find(params.nick).then(function (dbuser) {
-                        showMessage(user.socket, `Nick: ${dbuser.nick}\n Role: ${dbuser.role}\n IP: ${dbuser.remote_addr}\n Registered: Yes`, 'info');
+                        if (userData) {
+                            message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + userData.remote_addr;
+                        } else {
+                            message = 'Nick: ' + dbuser.nick + '\nRole: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\nIP: ' + dbuser.remote_addr;  
+                        }
+                        message += '\nRegistered: Yes';
+                        showMessage(user.socket, message, 'info');   
                     }).fail(function () {
-                        showMessage(user.socket, params.nick + ' doesn\'t exist', 'info');
+                        if (userData) {
+                            message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + userData.remote_addr;
+                        } else {
+                            message = params.nick + ' doesn\'t exist'
+                        }
+                        message += '\nRegistered: No';
+                        showMessage(user.socket, message, 'info');   
                     });
-                }
+                });
+                
             }
         },
         change_password : {
@@ -545,7 +560,7 @@ function createChannel(io, channelName) {
     room.on('connection', function (socket) {
         
         var user = {
-            remote_addr : socket.request.connection.remoteAddress,
+            remote_addr : socket.conn.remoteAddress,
             socket : socket,
             role : 4,
             id : dao.makeId()
@@ -746,6 +761,7 @@ function createChannel(io, channelName) {
                 userRole;
             
             function join(channelData, nick, role, hat) {
+                
                 if (nick && /^[\x21-\x7E]*$/i.test(nick)) {
                     user.nick = nick;
                     user.token = dao.makeId();
@@ -764,6 +780,7 @@ function createChannel(io, channelName) {
                     user.nick = dao.getNick();
                 }
                 
+                console.log('USER JOIN', nick, role, user.remote_addr);
                 
                 for (i = 0; i < channel.online.length; i++) {
                     onlineUsers.push({
@@ -773,7 +790,7 @@ function createChannel(io, channelName) {
                 }
 
                 channel.online.push(user);
-
+                
                 socket.join('chat');
                 
                 socket.emit('channeldata', {
