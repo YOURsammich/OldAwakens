@@ -18,8 +18,10 @@ process.on('uncaughtException', function (err) {
 function findIndex(channel, att, value) {
     var i;
     for (i = 0; i < channel.length; i++) {
-        if (channel[i][att].toLowerCase() === value.toLowerCase()) {
-            return i;
+        if (channel[i][att] && value) {
+            if (channel[i][att].toLowerCase() === value.toLowerCase()) {
+                return i;
+            }
         }
     }
     return -1;
