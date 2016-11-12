@@ -89,7 +89,7 @@ var messageBuilder = {
         }
 
         timeDIV.className = 'time';
-        timeDIV.textContent = time.format('shortTime') + ' ';
+        timeDIV.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
 
         if (count) {
             timeDIV.addEventListener('click', function () {
@@ -410,8 +410,8 @@ function channelTheme(channelData, updatedBy) {
         document.getElementById('input-bar').style.backgroundColor = channelData.themecolors[0];
         document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors[1];
         if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
-            document.styleSheets[0].deleteRule(3);
-            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], 3);
+            document.styleSheets[0].deleteRule(4);
+            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], 4);
         }
     }
     
@@ -635,6 +635,7 @@ socket.on('channeldata', function (channel) {
     
     if (channel.users) {
         document.getElementsByClassName('userList')[0].innerHTML = '';
+        ONLINE.users = {};
         for (i = 0; i < channel.users.length; i++) {
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, true);
         }
