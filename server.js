@@ -807,23 +807,28 @@ function createChannel(io, channelName) {
                 roomEmit('joined', user.id, user.nick);
             }
             
-            var index = findIndex(channel.online, 'nick', requestedData.nick);
-            
-            if (requestedData.nick && index === -1) {
-                dao.find(requestedData.nick).then(function (dbuser) {
-                    if (tokens[requestedData.nick] === requestedData.token || overRide) {
-                        if (dbuser.role === 0) {
-                            userRole = 0;
+            if (typeof requestedData.nick === 'string') {
+                
+                var index = findIndex(channel.online, 'nick', requestedData.nick);
+                
+                if (index === -1) {
+                    dao.find(requestedData.nick).then(function (dbuser) {
+                        if (tokens[requestedData.nick] === requestedData.token || overRide) {
+                            if (dbuser.role === 0) {
+                                userRole = 0;
+                            } else {
+                                userRole = channelRoles[requestedData.nick];
+                            }
+                            join(channelData, dbuser.nick, userRole, dbuser.hat);
                         } else {
-                            userRole = channelRoles[requestedData.nick];
+                            join(channelData);
                         }
-                        join(channelData, dbuser.nick, userRole, dbuser.hat);
-                    } else {
-                        join(channelData);
-                    }
-                }).fail(function () {
-                    join(channelData, requestedData.nick);
-                });
+                    }).fail(function () {
+                        join(channelData, requestedData.nick);
+                    });   
+                } else {
+                    join(channelData);
+                }
             } else {
                 join(channelData);
             }
