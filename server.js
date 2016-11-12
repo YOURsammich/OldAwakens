@@ -200,15 +200,15 @@ function createChannel(io, channelName) {
 
                     dao.find(params.nick).then(function (dbuser) {
                         if (userData) {
-                            message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + userData.remote_addr;
+                            message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
                         } else {
-                            message = 'Nick: ' + dbuser.nick + '\nRole: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\nIP: ' + dbuser.remote_addr;  
+                            message = 'Nick: ' + dbuser.nick + '\nRole: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\nIP: ' + (user.role <= 1 ? dbuser.remote_addr : 'Private');  
                         }
                         message += '\nRegistered: Yes';
                         showMessage(user.socket, message, 'info');   
                     }).fail(function () {
                         if (userData) {
-                            message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + userData.remote_addr;
+                            message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
                         } else {
                             message = params.nick + ' doesn\'t exist'
                         }
@@ -243,12 +243,16 @@ function createChannel(io, channelName) {
                     message = params.reason ? 'You\'ve been kicked: ' + params.reason : 'You\'ve been kicked';
                 
                 if (index !== -1) {
-                    roomEmit('message', {
-                        message : user.nick + ' kicked ' + params.nick,
-                        messageType : 'general'
-                    });
-                    showMessage(channel.online[index].socket, message, 'error');
-                    channel.online[index].socket.disconnect();
+                    if (user.role <= channel.online[index].role) {
+                            roomEmit('message', {
+                            message : user.nick + ' kicked ' + params.nick,
+                            messageType : 'general'
+                        });
+                        showMessage(channel.online[index].socket, message, 'error');
+                        channel.online[index].socket.disconnect();
+                    } else {
+                        showMessage(user.socket, params.nick + ' is not kickable');
+                    }
                 } else {
                     showMessage(user.socket, params.nick + ' is not online');
                 }
@@ -715,7 +719,7 @@ function createChannel(io, channelName) {
                     role : 2
                 },
                 themecolors : {
-                    type : 'string',
+                    type : 'object',
                     role : 2
                 }
             },

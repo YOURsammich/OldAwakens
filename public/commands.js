@@ -187,7 +187,7 @@ var COMMANDS = {
     toggle : {
         params : ['attr'],
         handler : function (params) {
-            var validAtts = ['background', 'images'],
+            var validAtts = ['background', 'images', '12h'],
                 attValue = Attributes.get('toggle-' + params.attr);
             
             if (validAtts.indexOf(params.attr) !== -1) {
@@ -202,7 +202,7 @@ var COMMANDS = {
                 }
             } else {
                 showMessage({
-                    message : 'Not a toggleable attribue'
+                    message : 'Not a toggleable attribute'
                 });
             }
         }
@@ -370,3 +370,4 @@ var COMMANDS = {
 };
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
+COMMANDS.bg = COMMANDS.background;
