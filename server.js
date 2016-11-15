@@ -42,7 +42,7 @@ function createChannel(io, channelName) {
     };
     
     function updateUserData(user, newData) {
-        var roles = ['God', 'Admin', 'Mod', 'Basic'];
+        var roles = ['God', 'Channel Owner', 'Admin', 'Mod', 'Basic'];
         
         if (newData.nick) {
             user.nick = newData.nick;
@@ -92,7 +92,7 @@ function createChannel(io, channelName) {
                         }).fail(function () {
                             updateUserData(user, {
                                 nick : params.nick,
-                                role : 3
+                                role : 4
                             });
                         });   
                     } else {
