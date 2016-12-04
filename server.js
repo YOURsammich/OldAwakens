@@ -10,10 +10,11 @@ var captchaGen = require('ascii-captcha');
 var channels = {};
 var tokens = {};
 
-process.on('uncaughtException', function (err) {
-    // handle the error safely
-    console.log(err);
-});
+function handleException(err) {
+    // handle the error safely and verbosely
+    console.log(err.stack);
+}
+process.on('uncaughtException', handleException);
 
 function findIndex(channel, att, value) {
     var i;
@@ -59,9 +60,7 @@ function createChannel(io, channelName) {
         }
         
         if (newData.remote_addr) {//if true save current ip to database
-            dao.setUserinfo(user.nick, 'remote_addr', user.remote_addr).fail(function (err) {
-                console.log(err);
-            });
+            dao.setUserinfo(user.nick, 'remote_addr', user.remote_addr).fail(handleException);
             delete newData.remote_addr;
         }
         
@@ -164,7 +163,7 @@ function createChannel(io, channelName) {
                                 nick : params.nick
                             });
                         }).fail(function (err) {
-                            console.log(err);
+                            handleException(err);
                             showMessage(user.socket, params.nick + ' is already registered', 'error');
                         });
                     } else {
@@ -751,9 +750,7 @@ function createChannel(io, channelName) {
                             data : settings,
                             updatedBy : user.nick
                         });
-                    }).fail(function (err) {
-                        console.log(err);
-                    });     
+                    }).fail(handleException);     
                 } else {
                     showMessage(user.socket, errorMessage, 'error');
                 }
