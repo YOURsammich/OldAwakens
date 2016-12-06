@@ -83,7 +83,7 @@ function createChannel(io, channelName) {
             params : ['nick'],
             handler : function (user, params) {
                 var index;
-                if (params.nick.length < 50 && /^[\x21-\x7E]*$/i.test(params.nick)) {
+                if (params.nick.length > 0 && params.nick.length < 50 && /^[\x21-\x7E]*$/i.test(params.nick)) {
                     index = findIndex(channel.online, 'nick', params.nick);
                     if (index === -1) {
                         dao.find(params.nick).then(function () {
@@ -163,7 +163,6 @@ function createChannel(io, channelName) {
                                 nick : params.nick
                             });
                         }).fail(function (err) {
-                            handleException(err);
                             showMessage(user.socket, params.nick + ' is already registered', 'error');
                         });
                     } else {
@@ -224,13 +223,15 @@ function createChannel(io, channelName) {
                 if (params.oldpassword && params.newpassword && params.newpassword.length > 3) {
                     dao.login(user.nick, params.oldpassword).then(function (correctPassword, dbuser) {
                         dao.encrypt(params.newpassword).then(function (hash) {
-                            dao.setUserinfo(dbuser.nick, 'password', hash).than(function () {
+                            dao.setUserinfo(dbuser.nick, 'password', hash).then(function () {
                                 showMessage(user.socket, 'Password has been changed', 'info');
                             });
                         });
                     }).fail(function () {
                         showMessage(user.socket, 'Wrong password, if you\'ve forgot your password contact an admin', 'error'); 
                     });
+                } else {
+                    showMessage(user.socket, 'Please pick a more secure password', 'error');
                 }
             }
         },
