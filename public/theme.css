@@ -15,12 +15,12 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-    background-color:transparent;
+    background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
     border-radius: 5px;
-    background:#5F5F5F;
+    background: #5F5F5F;
 }
 
 .main-container {
@@ -153,18 +153,6 @@ a {
     box-shadow: rgba(255, 255, 255, 0.1) 0 1px 0, rgba(0, 0, 0, 0.8) 0 1px 7px 0px inset;
 }
 
-#autocomplete {
-    display: none;
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    width: 100%;
-    padding: 4px 0 0 4px;
-    background: #3A3A3A;
-    color: #E0E0E0;
-    z-index: 5;
-}
-
 .menu-container {
     position: absolute;
     z-index: 5;
@@ -278,7 +266,7 @@ a {
     width: 29px;
     right: 0px;
     height: 30px;
-    top: 3px;
+    bottom: 3px;
     box-shadow: rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgb(0, 0, 0) 0px -1px 0px 0px inset, rgba(0, 0, 0, 0.901961) 0px 3px 10px;
     line-height: 206%;
     text-align: center;
@@ -288,7 +276,7 @@ a {
 }
 
 .toggle-menu:active{
-    bottom:-3px;
+    bottom: 2px;
     box-shadow: inset 0px 1px 0px 0px rgba(255,255,255,.2),
 	        inset 0px -1px 0px 0px rgba(0,0,0,1),
 	        0px 3px 3px rgba(0,0,0,.2);

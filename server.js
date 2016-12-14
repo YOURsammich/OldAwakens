@@ -579,17 +579,19 @@ function createChannel(io, channelName) {
         socket.on('message', function (message, flair) {
             throttle.on(user.remote_addr + '-message').then(function (notSpam) {
                 if (notSpam) {
-                    if (typeof message === 'string' && (typeof flair === 'string' || !flair)) {
-                        if (message.length < 10000 && (flair && flair.length < 500 || !flair)) {
-                            roomEmit('message', {
-                                message : message,
-                                messageType : 'chat',
-                                nick : user.nick,
-                                flair : flair,
-                                hat : user.hat,
-                                count : ++channel.messageCount
-                            });      
-                        }
+                    if (findIndex(channel.online, 'id', user.id) != -1) {
+                        if (typeof message === 'string' && (typeof flair === 'string' || !flair)) {
+                            if (message.length < 10000 && (flair && flair.length < 500 || !flair)) {
+                                roomEmit('message', {
+                                    message : message,
+                                    messageType : 'chat',
+                                    nick : user.nick,
+                                    flair : flair,
+                                    hat : user.hat,
+                                    count : ++channel.messageCount
+                                });      
+                            }
+                        }   
                     }
                 } else {
                     showMessage(user.socket,'You are spamming, stop or you will be temporarily banned.', 'error');
@@ -696,7 +698,7 @@ function createChannel(io, channelName) {
             }
         });
         
-        socket.on('channelStatus', function (settings) {  
+        socket.on('channelStatus', function (settings) {
             var validSettings = {
                 captcha : {
                     type : 'boolean',
@@ -766,7 +768,7 @@ function createChannel(io, channelName) {
             
             function join(channelData, nick, role, hat) {
                 
-                if (nick && /^[\x21-\x7E]*$/i.test(nick)) {
+                if (typeof nick === 'string' && nick.length > 0 && nick.length < 50 && /^[\x21-\x7E]*$/i.test(nick)) {
                     user.nick = nick;
                     user.token = dao.makeId();
                     tokens[user.nick] = user.token;
@@ -784,7 +786,7 @@ function createChannel(io, channelName) {
                     user.nick = dao.getNick();
                 }
                 
-                console.log('USER JOIN', nick, role, user.remote_addr);
+                console.log('USER JOIN', nick, user.role, user.remote_addr);
                 
                 for (i = 0; i < channel.online.length; i++) {
                     onlineUsers.push({

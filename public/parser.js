@@ -7,7 +7,7 @@ var parser = {
     repnmliz : 'ÃƒÂ©ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂ¶EESCHEInoheÃƒÂ©ÃƒÂ¤',
     multiple : function (str, mtch, rep, limit) {
         var ct = 0;
-        limit = limit || 300;
+        limit = limit || 3000;
         while (str.match(mtch) !== null && ct++ < limit) {
             str = str.replace(mtch, rep);
         }
@@ -112,7 +112,8 @@ var parser = {
         str = str.replace(/(loli )+?/gi, '<div>&#35;ff0c00S&#35;ff0012E&#35;ff0032M&#35;ff0051E&#35;ff0070N&#35;ff0090&#35;ff00afD&#35;ff00ceE&#35;ff00eeM&#35;f000ffO&#35;d100ffN&#35;b100ff!</div>'); 
         str = str.replace(/(semen)+?/gi,'&#35;27ff00m&#35;47ff00a&#35;66ff00y&#35;85ff00o&#35;a5ff00n&#35;c4ff00a&#35;e3ff00i&#35;fffa00s&#35;ffdb00e</div>');
         str = str.replace(/(edgy)+?/gi, '<div>&#35;cb0b0be&#35;971717d&#35;632323g&#35;2f2f2fy</div>');
-        str = str.replace(/(awakens)+?/gi, '<div>&#35;ffffffS&#35;ccccccp&#35;999999o&#35;666666o&#35;333333k&#35;000000s</div>')
+        str = str.replace(/(sex)+?/gi, '<div>&#35;00ff00c&#35;00aa55a&#35;0055aat&#35;0000ffs</div>');
+        str = str.replace(/(fuck)+?/gi, '<div>&#35;ff00ffd&#35;aa55ffu&#35;55aaffc&#35;00ffffk</div>');
         
         return str;
     },

@@ -187,7 +187,7 @@ var COMMANDS = {
     toggle : {
         params : ['attr'],
         handler : function (params) {
-            var validAtts = Object.keys(Attributes.toggleAtt),
+            var validAtts = ['background', 'images', '12h', 'filters'],
                 attValue = Attributes.get('toggle-' + params.attr);
             
             if (validAtts.indexOf(params.attr) !== -1) {

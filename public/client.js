@@ -16,8 +16,7 @@ var ONLINE = {
 };
 
 var Attributes = {
-    notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font'],
-    toggleAtt : {'background' : true, 'images' : true, '24h' : false},
+    notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters'],
     altAtt : {colour : 'color', bg : 'background'},
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
@@ -44,8 +43,9 @@ var Attributes = {
         if (this.altAtt[attribute]) {
             attribute = this.altAtt[attribute];
         }
+        
         if (this.storedAttributes[attribute] === undefined && attribute.substr(0, 6) === 'toggle') {
-            value = this.toggleAtt[attribute.substr(7)];
+            value = true;
         } else {
             value = this.storedAttributes[attribute];
         }
@@ -94,7 +94,7 @@ var messageBuilder = {
         }
 
         timeDIV.className = 'time';
-        timeDIV.textContent = (Attributes.get('toggle-24h') ? time.format('HH:MM') : time.format('shortTime')) + ' ';
+        timeDIV.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
 
         if (count) {
             timeDIV.addEventListener('click', function () {
@@ -109,6 +109,8 @@ var messageBuilder = {
         }
 
         container.appendChild(timeDIV);
+        if (nick) {
+            
             if (hat && hat !== 'none') {
                 hatSpan = document.createElement('div');
                 hatSpan.className = 'hat';
@@ -118,7 +120,7 @@ var messageBuilder = {
                 hatSpan.style.backgroundSize = "30px 29px";
                 container.appendChild(hatSpan);
             }
-        if (nick) {
+            
             nickDIV.className = 'nick';
 
             if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
@@ -157,7 +159,7 @@ var messageBuilder = {
                 message = message.slice(0, index) + message.slice(index + 1);
             }
             parser.getAllFonts(message);
-            messageDIV.innerHTML = ' ' + parser.parse(message, messageType === 'chat');
+            messageDIV.innerHTML = ' ' + parser.parse(message, messageType === 'chat' && Attributes.get('toggle-filters'));
         }
 
         container.appendChild(messageDIV);
@@ -569,76 +571,28 @@ function createPmPanel(id) {
     
 }
 
-(function () {
-    var autoCompleteList = false,
-        autoComplete = document.createElement('div');
-        
-    autoComplete.id = 'autocomplete';
-    document.getElementById('input-bar').appendChild(autoComplete);
+function autoComplete(word) {
+    var autocomp = document.createElement('div'),
+        span,
+        keys = Object.keys(ONLINE.users),
+        i;
     
-    $$$.query('#input-bar textarea').addEventListener('keyup', function(e) {
-        if (e.keyCode === 9 && !e.shiftKey && !autoCompleteList) {
-            var lastWord = this.value.match(/\S+?$/);
-            
-            lastWord = lastWord && lastWord[0].toLowerCase();
-            autoCompleteList = [];
-            for (var i in ONLINE.users) {
-                if (!lastWord || ONLINE.users[i].nick.toLowerCase().indexOf(lastWord) === 0) {
-                    autoCompleteList.push(ONLINE.users[i].nick);
-                }
-            }
-            if (autoCompleteList[0]) {
-                autoComplete.style.display = 'block';
-                autoComplete.innerHTML = '';
-                autoCompleteList.map(function(i) {
-                    autoComplete.innerHTML += '<span>' + parser.escape(i) + ' </span>';
-                });
-            }
-        } else if (autoCompleteList) {
-            if ((e.keyCode === 9 || e.keyCode === 13) && !e.shiftKey) {
-                if (autoCompleteList.length === 1 || e.keyCode === 13) {
-                    if (!this.value || this.value.match(/\s+?$/)) {
-                        this.value += autoCompleteList[0];
-                    } else {
-                        this.value = this.value.replace(/\S+?$/, autoCompleteList[0]);
-                    }
-                    autoComplete.style.display = 'none';
-                    autoCompleteList = false;
-                } else {
-                    autoCompleteList.push(autoCompleteList.shift());
-                    autoComplete.innerHTML = '';
-                    autoCompleteList.map(function(i) {
-                        autoComplete.innerHTML += '<span>' + parser.escape(i) + ' </span>';
-                    });
-                }
-            } else {
-                if (e.keyCode !== 8) {
-                    var lastWord = this.value.match(/\S+?$/),
-                        list = [];
-                        
-                    for (var i = 0; i < autoCompleteList.length; i++) {
-                        if (lastWord && autoCompleteList[i].toLowerCase().indexOf(lastWord[0].toLowerCase()) === 0) {
-                            list.push(autoCompleteList[i]);
-                        }
-                    }
-                    if (list[0]) {
-                        autoComplete.innerHTML = '';
-                        list.map(function(i) {
-                            autoComplete.innerHTML += '<span>' + parser.escape(i) + ' </span>';
-                        });
-                        autoCompleteList = list;
-                    } else {
-                        autoComplete.style.display = 'none';
-                        autoCompleteList = false;
-                    }
-                } else {
-                    autoComplete.style.display = 'none';
-                    autoCompleteList = false;
-                }
-            }
+    autocomp.className = 'autocomplete';
+    autocomp.style.cssText = 'width:100%;position:relative;margin-bottom:5px;';
+    
+    for (i = 0; i < keys.length; i++) {
+        if (ONLINE.users[keys[i]].nick.match(word)) {
+            span = document.createElement('span');
+            span.textContent = ONLINE.users[keys[i]].nick;
+            autocomp.appendChild(span);
         }
-    });
+    }
     
+    document.getElementById('input-bar').prepend(autocomp);
+    
+}
+
+(function () {
     var history = [],
         historyIndex = 0;
     
@@ -647,15 +601,10 @@ function createPmPanel(id) {
             inputValue = this.value;
         
         switch (keyCode) {
-        case 9:
-            if (!e.shiftKey) {
-                e.preventDefault();
-            }
-            break;
         case 13:
             if (!e.shiftKey) {
                 e.preventDefault();
-                if (inputValue && !autoCompleteList) {
+                if (inputValue) {
                     historyIndex = 0;
                     this.value = '';
                     history.push(inputValue);
