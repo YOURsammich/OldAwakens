@@ -560,6 +560,19 @@ function createChannel(io, channelName) {
                     showMessage(user.socket, 'Must be registered to own a hat', 'error'); 
                 });
             }
+        },
+        afk : {
+            params : ['message'],
+            handler : function (user, params) {
+                if (params.message.length < 200) {
+                    if (params.message === 'none') {
+                        delete user.afk;
+                    } else {
+                        user.afk = params.message;
+                    }
+                    roomEmit('afk', user.id, user.afk);
+                }
+            }
         }
     };
     
@@ -608,8 +621,8 @@ function createChannel(io, channelName) {
             var index,
                 sendUser;
             
-            if (typeof message === 'string' && typeof flair === 'string' && typeof userID === 'string') {
-                if (message.length < 10000 && flair.length < 500) {
+            if (typeof message === 'string' && (!flair || typeof flair === 'string') && typeof userID === 'string') {
+                if (message.length < 10000 && (!flair || flair.length < 500)) {
                     index = findIndex(channel.online, 'id', userID);
                     if (index !== -1) {
                         channel.online[index].socket.emit('pmMessage', {
@@ -640,7 +653,7 @@ function createChannel(io, channelName) {
             if (command.role === undefined || command.role >= user.role) {
                 if (command.params) {
                     for (i = 0; i < command.params.length; i++) {
-                        if (typeof command.params[i] !== 'string') {
+                        if (typeof params[command.params[i]] !== 'string') {
                             valid = false;
                         }
                     }
@@ -791,7 +804,8 @@ function createChannel(io, channelName) {
                 for (i = 0; i < channel.online.length; i++) {
                     onlineUsers.push({
                         nick : channel.online[i].nick,
-                        id : channel.online[i].id
+                        id : channel.online[i].id,
+                        afk : channel.online[i].afk
                     });
                 }
 
@@ -843,7 +857,7 @@ function createChannel(io, channelName) {
         function attemptLockedChannel(requestedData, channelRoles, channelData) {
             if (requestedData.nick) {
                 if (requestedData.token && tokens[requestedData.nick] === requestedData.token) {
-                    joinChannel(requestedData, true);
+                    joinChannel(requestedData, channelRoles, channelData, true);
                 } else if (requestedData.password) {
                     dao.login(requestedData.nick, requestedData.password).then(function (correctPassword, dbuser) {
                         if (correctPassword) {
@@ -855,7 +869,7 @@ function createChannel(io, channelName) {
                         showMessage(socket, 'That account doesn\'t exist', 'error');
                     });
                 } else {
-                    socket.emit('locked')
+                    socket.emit('locked');
                 }
             } else {
                 socket.emit('locked');

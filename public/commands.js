@@ -54,8 +54,8 @@ var COMMANDS = {
                 Attributes.remove('color');
             } else {
                 Attributes.set('color', params.color.replace(/#/g,''));
-                menuControl.updateValues();
             }
+            menuControl.updateValues();
         }
     },
     bgcolor : {
@@ -65,8 +65,8 @@ var COMMANDS = {
                 Attributes.remove('bgcolor');
             } else {
                 Attributes.set('bgcolor', params.color.replace(/#/g,''));
-                menuControl.updateValues();
             }
+            menuControl.updateValues();
         }
     },
     glow : {
@@ -76,8 +76,8 @@ var COMMANDS = {
                 Attributes.remove('glow');
             } else {
                 Attributes.set('glow', params.color.replace(/#/g,''));
-                menuControl.updateValues();
             }
+            menuControl.updateValues();
         }
     },
     style : {
@@ -87,7 +87,6 @@ var COMMANDS = {
                 Attributes.remove('style');
             } else {
                 Attributes.set('style', params.style, true);
-                menuControl.updateValues();
             }
         }
     },
@@ -134,7 +133,23 @@ var COMMANDS = {
         }
     },
     register : {
-        handler : createRegisterPanel  
+        handler : function () {
+        var userName = document.createElement('input'),
+            password = document.createElement('input'),
+            confirmPassword = document.createElement('input');
+            
+            userName.value = Attributes.get('nick');
+            password.placeholder = 'Password';
+            confirmPassword.placeholder = 'Confirm password';
+            
+            createPanel('register', [userName, password, confirmPassword], function () {
+                if (password.value === confirmPassword.value) {
+                    if (password.value.length > 4) {
+                        socket.emit('register', userName.value, password.value);
+                    }
+                }
+            });
+        }  
     },
     code : {
         params : ['code'],
@@ -313,12 +328,40 @@ var COMMANDS = {
             }
         }
     },
+    login : {
+        params : ['nick', 'password'],
+        paramsOptional : true,
+        handler : function (params) {
+            var nickInput,
+                passwordInput;
+            
+            if (params.nick && params.password) {
+                socket.emit('command', 'login', {
+                    nick : params.nick,
+                    password : params.password
+                });
+            } else {
+                nickInput = document.createElement('input');
+                passwordInput = document.createElement('input');
+                nickInput.placeholder = 'Username';
+                nickInput.value = params.nick || ''
+                passwordInput.placeholder = 'Password';
+                passwordInput.value = params.password || '';
+                passwordInput.type = 'password';
+
+                createPanel('Login', [nickInput, passwordInput], function () {
+                    socket.emit('command', 'login', {
+                        nick : nickInput.value,
+                        password : passwordInput.value
+                    });
+                    document.body.removeChild(document.getElementsByClassName('LoginPanel')[0].parentNode);
+                });
+            }
+        }
+    },
     //server side commands
     nick : {
         params : ['nick']
-    },
-    login : {
-        params : ['nick', 'password']
     },
     me : {
         params : ['message']
@@ -366,6 +409,9 @@ var COMMANDS = {
     },
     hat : {
         params : ['hat']
+    },
+    afk : {
+        params : ['message']
     }
 };
 COMMANDS.colour = COMMANDS.color;

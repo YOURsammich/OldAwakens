@@ -190,7 +190,7 @@ var messageBuilder = {
     },
     appendMessageTo : function (message, el) {
         if (el === undefined) {
-            el = document.getElementById('messages');
+            el = document.getElementsByClassName('messages')[0];
         }
 
         el.appendChild(message);
@@ -257,14 +257,14 @@ function handlePrivateMessage(messageData) {
     if (panel && panel.getElementsByClassName('messages')[0]) {
         showMessage(messageData, panel.getElementsByClassName('messages')[0]);
     } else if (pmUser) {
-        informer = pmUser.li.getElementsByClassName('informer')[0];    
-        if (!pmUser.listin) {
-            informer.textContent = 'unread PM(s)';
-            pmUser.listin = function () {
+        informer = pmUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm'); 
+        
+        if (informer.length === 0) {
+            menuControl.inform(messageData.landOn, 'pm', 'unread PM(s)', function () {
                 createPmPanel(messageData.landOn);
-            }
-            informer.addEventListener('click', pmUser.listin);
+            });
         }
+        
         if (!pmUser.pm) {
             pmUser.pm = [];
         }    
@@ -320,7 +320,7 @@ var clientSubmit = {
 
                     formatedParams = this.formatParams(COMMANDS[commandName].params, params);
 
-                    if (COMMANDS[commandName].params.length <= Object.keys(formatedParams).length) {
+                    if (COMMANDS[commandName].params.length <= Object.keys(formatedParams).length || COMMANDS[commandName].paramsOptional) {
                         this.send(commandName, formatedParams);
                     } else {
                         showMessage({
@@ -408,7 +408,7 @@ function channelTheme(channelData, updatedBy) {
     
     if (channelData.background) {
         if (Attributes.get('toggle-background')) {
-            document.getElementById('messages').style.background = channelData.background;   
+            document.getElementsByClassName('messages')[0].style.background = channelData.background;   
         }
         Attributes.set('background', channelData.background);
     }
@@ -436,8 +436,8 @@ function channelTheme(channelData, updatedBy) {
     }
 }
 
-function createRegisterPanel() {
-    var registerPanel = document.getElementsByClassName('registerPanel'),
+function createPanel(title, html, func) {
+    var panel = document.getElementsByClassName(title + 'Panel'),
         overlay,
         header,
         cancel,
@@ -446,48 +446,37 @@ function createRegisterPanel() {
         confirmPassword,
         submitButton;
     
-    if (registerPanel.length === 0) {
+    if (panel.length === 0) {
         overlay = document.createElement('div');
         overlay.className = 'overlay';
-        registerPanel = document.createElement('div');
-        registerPanel.className = 'registerPanel';
+        panel = document.createElement('div');
+        panel.className = title + 'Panel panel';
         cancel = document.createElement('span');
         cancel.textContent = 'x';
         cancel.id = 'cancel';
         header = document.createElement('header');
-        header.textContent = 'Register';
-        userName = document.createElement('input');
-        userName.value = Attributes.get('nick');
-        password = document.createElement('input');
-        password.placeholder = 'Password';
-        confirmPassword = document.createElement('input');
-        confirmPassword.placeholder = 'Confirm password';
+        header.textContent = title;
         submitButton = document.createElement('button');
         submitButton.textContent = 'submit';
         
-        registerPanel.appendChild(cancel);
-        registerPanel.appendChild(header);
-        registerPanel.appendChild(userName);
-        registerPanel.appendChild(password);
-        registerPanel.appendChild(confirmPassword);
-        registerPanel.appendChild(document.createElement('br'));
-        registerPanel.appendChild(submitButton);
+        panel.appendChild(cancel);
+        panel.appendChild(header);
+        
+        html.forEach(function (ele) {
+            panel.appendChild(ele);
+        })
+        
+        panel.appendChild(document.createElement('br'));
+        panel.appendChild(submitButton);
         
         cancel.addEventListener('click', function () {
             document.body.removeChild(overlay);
         });
         
-        submitButton.addEventListener('click', function () {
-            if (password.value === confirmPassword.value) {
-                if (password.value.length > 4) {
-                    socket.emit('register', userName.value, password.value);
-                }
-            }
-        });
+        submitButton.addEventListener('click', func);
         
-        overlay.appendChild(registerPanel);
+        overlay.appendChild(panel);
         document.body.appendChild(overlay);
-        userName.focus();
     }
 }
 
@@ -558,17 +547,14 @@ function createPmPanel(id) {
     }
     
     if (validUser && !panel) {
-        if (validUser.listin) {
-            informer = validUser.li.getElementsByClassName('informer')[0];
-            informer.textContent = '';
-            informer.removeEventListener('click', validUser.listin);
-            delete validUser.listin;
+        informer = validUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm');
+        if (informer.length !== 0) {
+            validUser.li.getElementsByClassName('informer')[0].removeChild(informer[0]);
         }
         panel = makePanel();
         $$$.draggable(panel);
         document.body.appendChild(panel);
     }
-    
 }
 
 function autoComplete(word) {
@@ -635,7 +621,7 @@ function autoComplete(word) {
         this.style.height = '0px';
 
         var newHeight = Math.min(Math.floor(this.scrollHeight / 18) * 18, screen.height / 3),
-            messageDiv = document.getElementById('messages');
+            messageDiv = document.getElementsByClassName('messages')[0];
         
         this.style.height = newHeight + 'px';
         messageDiv.style.top = -(newHeight - 18) + 'px';
@@ -649,6 +635,8 @@ socket.on('pmMessage', handlePrivateMessage);
 socket.on('joined', menuControl.addUser);
 
 socket.on('nick', menuControl.changeNick);
+
+socket.on('afk', menuControl.afk);
 
 socket.on('left', menuControl.removeUser);
 
@@ -665,7 +653,7 @@ socket.on('channeldata', function (channel) {
         document.getElementsByClassName('userList')[0].innerHTML = '';
         ONLINE.users = {};
         for (i = 0; i < channel.users.length; i++) {
-            menuControl.addUser(channel.users[i].id, channel.users[i].nick, true);
+            menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
         }
     }
 
@@ -723,41 +711,20 @@ socket.on('update', function (allAtt) {
 });
 
 socket.on('locked', function () {
-    var loginPanel = document.getElementsByClassName('loginPanel'),
-        header,
-        nickInput,
-        passwordInput,
-        submitButton;
-    
-    if (loginPanel.length === 0) {
-        loginPanel = document.createElement('div');
-        loginPanel.className = 'loginPanel';
-        header = document.createElement('header');
-        header.textContent = 'Channel is locked';
-        submitButton = document.createElement('button');
-        submitButton.textContent = 'login';
-        nickInput = document.createElement('input');
-        nickInput.placeholder = 'Username';
+    var nickInput = document.createElement('input'),
         passwordInput = document.createElement('input');
-        passwordInput.placeholder = 'Password';
-        passwordInput.type = 'password';
-
-        loginPanel.appendChild(header);
-        loginPanel.appendChild(nickInput);
-        loginPanel.appendChild(passwordInput);
-        loginPanel.appendChild(document.createElement('br'));
-        loginPanel.appendChild(submitButton);
-        
-        submitButton.addEventListener('click', function () {
-            socket.emit('requestJoin', {
-                nick : nickInput.value,
-                password : passwordInput.value,
-                token : Attributes.get('token')
-            });
+    
+    nickInput.placeholder = 'Username';
+    passwordInput.placeholder = 'PassWord';
+    passwordInput.type = 'password';
+    
+    createPanel('Login', [nickInput, passwordInput], function () {
+        socket.emit('requestJoin', {
+            nick : nickInput.value,
+            password : passwordInput.value,
+            token : Attributes.get('token')
         });
-        
-        document.body.appendChild(loginPanel);
-    }
+    });
 });
 
 socket.on('disconnect', function () {

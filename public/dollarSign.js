@@ -3,7 +3,7 @@ window.$$$ = {
         return document.querySelector(identifier);
     },
     draggable : function (el) {
-        var container = document.getElementById('messages'),
+        var container = document.getElementsByClassName('messages')[0],
             clickX = 0,
             clickY = 0;
         

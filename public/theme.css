@@ -23,12 +23,13 @@ a {
     background: #5F5F5F;
 }
 
-.main-container {
+#main-container {
     width: 100%;
     height: 100%;
 }
 
-#messages {
+.messages {
+    transition: width 1s;
     height: calc(100vh - 38px);
     width: 100%;
     background-color: black;
@@ -36,7 +37,7 @@ a {
     overflow-y: scroll;
 }
 
-#messages img {
+.messages img {
 	max-height: 256px;
 	max-width: 256px;
 }
@@ -128,6 +129,7 @@ a {
 
 #input-bar {
     position: absolute;
+    z-index: 1;
     bottom: 0px;
     background-color: rgb(58, 58, 58);
     padding-top: 5px;
@@ -153,9 +155,8 @@ a {
     box-shadow: rgba(255, 255, 255, 0.1) 0 1px 0, rgba(0, 0, 0, 0.8) 0 1px 7px 0px inset;
 }
 
-.menu-container {
+#menu-container {
     position: absolute;
-    z-index: 5;
     top: 0px;
     right: -4px;
     text-align: center;
@@ -193,11 +194,11 @@ a {
 
 .textDecoration .bar .label {
     width: 100%;
-    height: 100%;
+    height: 22px;
     background-color: white;
     color: black;
     position: relative;
-    top: -20px;
+    top: -22px;
     overflow: hidden;
     transition: height .3s, top .3s;
     font-family: "Droid Sans", sans-serif;
@@ -205,9 +206,14 @@ a {
 
 .textDecoration .bar input {
     width: 100%;
-    height: 100%;
+    height: 20px;
     outline: none;
     border: none;
+}
+
+.transparent { 
+    background-color: #fcfcfc;
+    background-image: url("https://www.transparenttextures.com/patterns/az-subtle.png");
 }
 
 .userList {
@@ -314,7 +320,7 @@ a {
     }
 }
 
-.registerPanel {
+.panel {
     animation-name: slideOpen;
     animation-duration: 1s;
     animation-fill-mode: forwards;
@@ -336,14 +342,14 @@ a {
     }
 }
 
-.registerPanel header {
+.panel header {
     font-size: 30px;
     color: white;
     font-family: Montserrat;
     margin: 15px;
 }
 
-.registerPanel input {
+.panel input {
     width: 60%;
     height: 30px;
     box-sizing: border-box;
@@ -356,7 +362,7 @@ a {
     outline: none;
 }
 
-.registerPanel #cancel {
+.panel #cancel {
     position: relative;
     float: right;
     cursor: pointer;
@@ -364,40 +370,6 @@ a {
     right: 20px;
     top: 13px;
     color: white;
-}
-
-/*login panel*/
-
-.loginPanel {
-    width: 300px;
-    height: 300px;
-    position: absolute;
-    top: 30%;
-    left: calc(50% - 150px);
-    text-align: center;
-    box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset, rgba(255, 255, 255, 0.2) 0px -1px 0px 0px;
-    border: solid 4px #222;
-    background-color: #545454;
-}
-
-.loginPanel input {
-    width: 60%;
-    height: 25px;
-    box-sizing: border-box;
-    margin-bottom: 10px;
-    font-size: 14px;
-    font-family: Montserrat;
-    border-radius: 5px;
-    border: solid 1px #ccc;
-    padding: 0px 20px;
-    outline: none;
-}
-
-.loginPanel header {
-    font-size: 30px;
-    color: white;
-    font-family: Montserrat;
-    margin: 15px;
 }
 
 /* pm panel */

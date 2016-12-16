@@ -1,5 +1,5 @@
 var menuControl = {
-    addUser : function (id, nick, noShow) {
+    addUser : function (id, nick, afk, noShow) {
         var nickContain = document.createElement('div'),
             nickText = document.createElement('div'),
             extraInfo = document.createElement('div');
@@ -26,11 +26,15 @@ var menuControl = {
             li : nickContain
         };
         
-        if (document.getElementsByClassName('loginPanel').length !== 0 && nick === Attributes.get('nick')) {
-            document.body.removeChild(document.getElementsByClassName('loginPanel')[0]);
+        if (document.getElementsByClassName('LoginPanel').length !== 0 && nick === Attributes.get('nick')) {
+            document.body.removeChild(document.getElementsByClassName('LoginPanel')[0].parentNode);
         }
         
         menuControl.updateCount();
+        
+        if (afk) {
+            menuControl.afk(id, afk);
+        }
         
         if (noShow === undefined) {
             showMessage({
@@ -73,6 +77,30 @@ var menuControl = {
         User.nick = newNick;
         
     },
+    inform : function (id, type, message, func) {
+        var user = ONLINE.users[id],
+            newEle = user.li.getElementsByClassName(type);
+        if (newEle.length === 0) {
+            newEle = document.createElement('div');
+            newEle.textContent = message;
+            newEle.className = type;
+            
+            if (func) {
+                newEle.addEventListener('click', func);
+            }
+            
+            user.li.getElementsByClassName('informer')[0].appendChild(newEle);
+        } else {
+            newEle[0].textContent = message;
+        }
+    },
+    afk : function (id, message) {
+        var user = ONLINE.users[id];
+        if (user) {
+            menuControl.inform(id, 'afk', message);
+        }
+        console.log(id, message);
+    },
     updateCount : function () {
         var length = Object.keys(ONLINE.users).length;
         $$$.query('.toggle-menu span').textContent = length;
@@ -80,15 +108,20 @@ var menuControl = {
     },
     updateValues : function () {
         var allBars = document.getElementsByClassName('bar'),
-            className,
-            i;
+            i,
+            color;
         
         for (i = 0; i < allBars.length; i++) {
-            className = allBars[i].classList[1];
-
-            allBars[i].getElementsByClassName('label')[0].style.backgroundColor = Attributes.get(className);
-            allBars[i].getElementsByClassName('label')[0].style.borderBottom = 'solid 2px #' + Attributes.get(className);
-            allBars[i].getElementsByTagName('input')[0].value = Attributes.get(className);
+            color = Attributes.get(allBars[i].classList[1]);
+            if (color) {
+                allBars[i].getElementsByTagName('input')[0].value = color;
+                allBars[i].getElementsByClassName('label')[0].style.backgroundColor = color;
+                allBars[i].getElementsByClassName('label')[0].classList.remove('transparent');
+            } else {
+                allBars[i].getElementsByTagName('input')[0].value = '';
+                allBars[i].getElementsByClassName('label')[0].style.backgroundColor = '';
+                allBars[i].getElementsByClassName('label')[0].classList.add('transparent');
+            }
         }
         
     },
@@ -191,24 +224,26 @@ var menuControl = {
 
 (function () {
     var allBars = document.getElementsByClassName('bar'),
-        i;
+        i,
+        closing = false,
+        timeOut;
     
     for (i = 0; i < allBars.length; i++) {
         allBars[i].addEventListener('mousemove', function () {
             this.getElementsByTagName('input')[0].focus();
-            this.getElementsByClassName('label')[0].style.height = '0px';
+            this.getElementsByClassName('label')[0].style.height = '0%';
             this.getElementsByClassName('label')[0].style.top = '0px';
         });
         
         allBars[i].addEventListener('mouseleave', function () {
             $$$.query('#input-bar textarea').focus();
-            this.getElementsByClassName('label')[0].style.height = '100%';
-            this.getElementsByClassName('label')[0].style.top = '-20px';
+            this.getElementsByClassName('label')[0].style.height = '22px';
+            this.getElementsByClassName('label')[0].style.top = '-22px';
         });
         
         allBars[i].getElementsByTagName('input')[0].addEventListener('keydown', function (e) {
             if (e.which === 13) {
-                sendCommand(this.parentNode.classList[1], {
+                clientSubmit.command.send(this.parentNode.classList[1], {
                     color : this.value
                 });
             }
@@ -234,21 +269,29 @@ var menuControl = {
     });
     
     $$$.query('.toggle-menu').addEventListener('click', function () {
+        var menuContainer = document.getElementById('menu-container'),
+            messages = document.getElementsByClassName('messages')[0],
+            currentScroll = messages.scrollTop
 
-        var menuContainer = document.getElementsByClassName('menu-container')[0];
-
-        if (menuContainer.style.width === '300px') {
+        if (closing) {
             menuContainer.style.width = '0px';
-            setTimeout(function () {
-                menuContainer.style.display = 'none'; 
+            messages.style.width = '100%';
+            closing = false;
+            messages.scrollTop = currentScroll;
+            clearTimeout(timeOut);
+            timeOut = setTimeout(function () {
+                menuContainer.style.display = 'none';
             }, 1000);
         } else {
-            menuContainer.style.display = 'block'; 
-            setTimeout(function () {
+            menuContainer.style.display = 'block';
+            closing = true;
+            messages.scrollTop = currentScroll;
+            clearTimeout(timeOut);
+            timeOut = setTimeout(function () {
                 menuContainer.style.width = '300px';
+                messages.style.width = 'calc(100% - 300px)';
             }, 10);
         }
-
     });
     
 })();
