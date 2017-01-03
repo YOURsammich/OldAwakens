@@ -5,6 +5,7 @@ var parser = {
     repslsh : 'ÃƒÂ¸ÃƒÂº!#@&5nÃƒÂ¥ÃƒÂ¶EESCHEInoheÃƒÂ©ÃƒÂ¤',
     replink : 'ÃƒÂ©ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂºENONHEInoheÃƒÂ¥ÃƒÂ¶',
     repnmliz : 'ÃƒÂ©ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂ¶EESCHEInoheÃƒÂ©ÃƒÂ¤',
+    matches : 6,
     multiple : function (str, mtch, rep, limit) {
         var ct = 0;
         limit = limit || 3000;
@@ -48,14 +49,14 @@ var parser = {
             quoteHolder.style.position = 'absolute';
             quoteHolder.style.pointerEvents = 'none';
             quoteHolder.innerHTML = messageContainer.innerHTML;
-            
+
             document.body.appendChild(quoteHolder);
             //follow cursor
             document.body.addEventListener('mousemove', function(e){
                 quoteHolder.style.left = e.clientX + 'px';
                 quoteHolder.style.top = e.clientY + 'px';
             });
-        } 
+        }
     },
     escape : function (str) {
         // Convert chars to html codes
@@ -69,16 +70,16 @@ var parser = {
         str = str.replace(/\$/gi, '&#36;');
         str = str.replace(/'/gi, '&#39;');
         str = str.replace(/~/gi, '&#126;');
-        
+
         //convert spaces
         str = str.replace(/\s{2}/gi, ' &nbsp;');
         return str;
     },
     wordReplace : function (str) {
-        str = str.replace(/(roody poo)+?/gi, '<div>&#35;ff0000r&#35;ff001fo&#35;ff003eo&#35;ff005ed&#35;ff007dy&#35;ff009c&#35;ff00bcp&#35;ff00dbo&#35;ff00fao</div>'); 
-        str = str.replace(/(nigger)+?/gi, '<div>&#35;ff0000r&#35;ff001fo&#35;ff003eo&#35;ff005ed&#35;ff007dy&#35;ff009c&#35;ff00bcp&#35;ff00dbo&#35;ff00fao</div>'); 
-        str = str.replace(/(faggot)+?/gi, '<div>&#35;e300ffc&#35;c400ffa&#35;a500ffn&#35;8500ffd&#35;6600ffy&#35;4700ff&#35;2700ffa&#35;0800ffs&#35;0016ffs</div>'); 
-        str = str.replace(/(candy ass)+?/gi, '<div>&#35;e300ffc&#35;c400ffa&#35;a500ffn&#35;8500ffd&#35;6600ffy&#35;4700ff&#35;2700ffa&#35;0800ffs&#35;0016ffs</div>'); 
+        str = str.replace(/(roody poo)+?/gi, '<div>&#35;ff0000r&#35;ff001fo&#35;ff003eo&#35;ff005ed&#35;ff007dy&#35;ff009c&#35;ff00bcp&#35;ff00dbo&#35;ff00fao</div>');
+        str = str.replace(/(nigger)+?/gi, '<div>&#35;ff0000r&#35;ff001fo&#35;ff003eo&#35;ff005ed&#35;ff007dy&#35;ff009c&#35;ff00bcp&#35;ff00dbo&#35;ff00fao</div>');
+        str = str.replace(/(faggot)+?/gi, '<div>&#35;e300ffc&#35;c400ffa&#35;a500ffn&#35;8500ffd&#35;6600ffy&#35;4700ff&#35;2700ffa&#35;0800ffs&#35;0016ffs</div>');
+        str = str.replace(/(candy ass)+?/gi, '<div>&#35;e300ffc&#35;c400ffa&#35;a500ffn&#35;8500ffd&#35;6600ffy&#35;4700ff&#35;2700ffa&#35;0800ffs&#35;0016ffs</div>');
         str = str.replace(/(moot)+?/gi, '<div>&#35;ff00bcm&#35;ff00dbi&#35;ff00fas&#35;e300ffs&#35;c400ffi&#35;a500ffn&#35;8500ffg&#35;6600ffn&#35;4700ffo</div>');
         str = str.replace(/(missingno)+?/gi, '<div>&#35;ff00bcm&#35;ff00dbi&#35;ff00fas&#35;e300ffs&#35;c400ffi&#35;a500ffn&#35;8500ffg&#35;6600ffn&#35;4700ffo</div>');
         str = str.replace(/(PENIS)+?/gi, '<div>&#35;2700ffP&#35;0800ffE&#35;0016ffN&#35;0036ffI&#35;0055ffS</div>');
@@ -87,9 +88,9 @@ var parser = {
         str = str.replace(/(bronies)+?/gi, '<div>&#35;ffd500j&#35;ffb500a&#35;ff9600b&#35;ff7700r&#35;ff5700o&#35;ff3800n&#35;ff1900i&#35;ff0006s</div>');
         str = str.replace(/(VAGINA)+?/gi, '<div>&#35;ff0083V&#35;ff00a3A&#35;ff00c2G&#35;ff00e1I&#35;fc00ffN&#35;dd00ffA</div>');
         str = str.replace(/(pony)+?/gi, '<div>&#35;00ffc6n&#35;00ffa7e&#35;00ff87w&#35;00ff68t&#35;00ff49&#35;00ff29g&#35;00ff0ai&#35;14ff00n&#35;34ff00g&#35;53ff00r&#35;72ff00i&#35;92ff00c&#35;b1ff00h</div>');
-        str = str.replace(/(ponies)+?/gi, '<div>&#35;d1ff00s&#35;f0ff00t&#35;ffee00e&#35;ffce00v&#35;ffaf00e&#35;ff9000&#35;ff7000j&#35;ff5100o&#35;ff3200b&#35;ff1200s</div>'); 
-        str = str.replace(/(4chan )+?/gi, '<div>&#35;8500ff9&#35;6600ffg&#35;4700ffa&#35;2700ffg</div>'); 
-        str = str.replace(/( 4chan)+?/gi, '<div>&#35;8500ff9&#35;6600ffg&#35;4700ffa&#35;2700ffg</div>'); 
+        str = str.replace(/(ponies)+?/gi, '<div>&#35;d1ff00s&#35;f0ff00t&#35;ffee00e&#35;ffce00v&#35;ffaf00e&#35;ff9000&#35;ff7000j&#35;ff5100o&#35;ff3200b&#35;ff1200s</div>');
+        str = str.replace(/(4chan )+?/gi, '<div>&#35;8500ff9&#35;6600ffg&#35;4700ffa&#35;2700ffg</div>');
+        str = str.replace(/( 4chan)+?/gi, '<div>&#35;8500ff9&#35;6600ffg&#35;4700ffa&#35;2700ffg</div>');
         str = str.replace(/(9gag)+?/gi, '<div>&#35;0800ffr&#35;0016ffe&#35;0036ffd&#35;0055ffd&#35;0075ffi&#35;0094fft</div>');
         str = str.replace(/(reddit)+?/gi, '<div>&#35;ff00db4&#35;ff00fac&#35;e300ffh&#35;c400ffa&#35;a500ffn</div>');
         str = str.replace(/(twitter)+?/gi, '<div>&#35;00b3fff&#35;00d3ffa&#35;00f2ffc&#35;00ffece&#35;00ffccb&#35;00ffado&#35;00ff8eo&#35;00ff6ek</div>');
@@ -106,15 +107,15 @@ var parser = {
         str = str.replace(/(Illuminati)+?/gi, '<div>&#35;dd00ffN&#35;be00ffS&#35;9e00ffA</div>');
         str = str.replace(/(tumblr)+?/gi, '<div>&#35;555555cancer</div>');
         str = str.replace(/(gay)+?/gi, '<div>&#35;ff0000k&#35;ff001fa&#35;ff003ew&#35;ff005ea&#35;ff007di&#35;ff009ci</div>');
-        str = str.replace(/(fag )+?/gi, '<div>&#35;ddff00c&#35;fcff00i&#35;ffe100s&#35;ffc200&#35;ffa300s&#35;ff8300c&#35;ff6400u&#35;ff4400m </div>'); 
+        str = str.replace(/(fag )+?/gi, '<div>&#35;ddff00c&#35;fcff00i&#35;ffe100s&#35;ffc200&#35;ffa300s&#35;ff8300c&#35;ff6400u&#35;ff4400m </div>');
         str = str.replace(/(rape)+?/gi, '<div>&#35;ff0000t&#35;ff001fi&#35;ff003ec&#35;ff005ek&#35;ff007dl&#35;ff009ce</div>');
         str = str.replace(/(piss)+?/gi, '<div>&#35;00ff04l&#35;1bff00e&#35;3aff00m&#35;59ff00o&#35;79ff00n&#35;98ff00a&#35;b7ff00d&#35;d7ff00e</div>');
-        str = str.replace(/(loli )+?/gi, '<div>&#35;ff0c00S&#35;ff0012E&#35;ff0032M&#35;ff0051E&#35;ff0070N&#35;ff0090&#35;ff00afD&#35;ff00ceE&#35;ff00eeM&#35;f000ffO&#35;d100ffN&#35;b100ff!</div>'); 
+        str = str.replace(/(loli )+?/gi, '<div>&#35;ff0c00S&#35;ff0012E&#35;ff0032M&#35;ff0051E&#35;ff0070N&#35;ff0090&#35;ff00afD&#35;ff00ceE&#35;ff00eeM&#35;f000ffO&#35;d100ffN&#35;b100ff!</div>');
         str = str.replace(/(semen)+?/gi,'&#35;27ff00m&#35;47ff00a&#35;66ff00y&#35;85ff00o&#35;a5ff00n&#35;c4ff00a&#35;e3ff00i&#35;fffa00s&#35;ffdb00e</div>');
         str = str.replace(/(edgy)+?/gi, '<div>&#35;cb0b0be&#35;971717d&#35;632323g&#35;2f2f2fy</div>');
         str = str.replace(/(sex)+?/gi, '<div>&#35;00ff00c&#35;00aa55a&#35;0055aat&#35;0000ffs</div>');
         str = str.replace(/(fuck)+?/gi, '<div>&#35;ff00ffd&#35;aa55ffu&#35;55aaffc&#35;00ffffk</div>');
-        
+
         return str;
     },
     parse : function (str, wordReplace) {
@@ -128,41 +129,45 @@ var parser = {
         str = str.replace(/\\n/g, '<br>');
         str = str.replace(/\$/gi, '&#36;');
         str = str.replace(/'/gi, '&#39;');
-        str = str.replace(/~/gi, '&#126;'); 
-        
+        str = str.replace(/~/gi, '&#126;');
+
         //match user escaping
         var escs = str.match(/\\./g);
         str = str.replace(/\\./g, this.repslsh);
-        
+
         //normalize text
         var normalize = /\/\`[^]/.test(str) ? str.match(/\/\`([^]+)$/)[1] : null;
         str = str.replace(/\/\`[^]+$/, this.repnmliz);
-        
+
         //match qoutes
         str = str.replace(/&gt;&gt;/g,'>&gt;');
         var check = str.match(/>&gt;\d+/g);
-        
+
         //match links
         var linkesc = str.match(this.linkreg);
         str = str.replace(this.linkreg, this.replink);
-        
+
         //green text
         str = this.multiple(str, /(^|^[&#36;A-z\s|]+\s|^&#35;[A-z0-9]+\s|^[&#36;A-z\s|]+&#35;[A-z]+\s|<br>)\s?&gt;(.*?)(<br>|$)/g, '$1<span style="color:#789922;">>$2</span><br>');
-        
+
         //styles
-        str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', 6);
-        str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', 6);
-        str = this.multiple(str, /\/\%([^\|]+)\|?/g, '<i>$1</i>', 6);
-        str = this.multiple(str, /\/\_([^\|]+)\|?/g, '<u>$1</u>', 6);
-        str = this.multiple(str, /\/\-([^\|]+)\|?/g, '<strike>$1</strike>', 6);
-        str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', 6);
-        str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoil">$1</span>', 6);
-        str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>', 6);
-        
+        str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', this.matches);
+        str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', this.matches);
+        str = this.multiple(str, /\/\%([^\|]+)\|?/g, '<i>$1</i>', this.matches);
+        str = this.multiple(str, /\/\_([^\|]+)\|?/g, '<u>$1</u>', this.matches);
+        str = this.multiple(str, /\/\-([^\|]+)\|?/g, '<strike>$1</strike>', this.matches);
+        str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', this.matches);
+        str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoil">$1</span>', this.matches);
+        str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<span class="spin">$1</span>', this.matches);
+        str = this.multiple(str, /\/\&([^\|]+)\|?/g, '<span class="marquee">$1</span>', this.matches);
+        str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="rainbow">$1</span>', this.matches);
+        str = this.multiple(str, /\/\$([^\|]+)\|?/g, '<span class="shake">$1</span>', this.matches);
+        str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>', this.matches);
+
         if (wordReplace) {
             str = this.wordReplace(str);
         }
-        
+
         // Replace colors
         str = this.multiple(str, /&#35;&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="text-shadow: 0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1;">$2</span>');
         str = this.multiple(str, /&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="background-color: #$1;">$2</span>');
@@ -170,20 +175,20 @@ var parser = {
         str = this.multiple(str, RegExp('&#35;&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="text-shadow: 0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1;">$2</span>');
         str = this.multiple(str, RegExp('&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="background-color: $1;">$2</span>');
         str = this.multiple(str, RegExp('&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="color: $1;">$2</span>');
-        
+
         //replace fonts
         str = this.multiple(str, this.fontRegex, '<span style="font-family:\'$3\'">$4</span>');
-                
+
         //replace user escaping
         for (var i in escs)
             str = str.replace(this.repslsh, escs[i][1]);
-              
+
         //replace links
         for (var i in linkesc){
             var link = linkesc[i];
             str = str.replace(this.replink, '<a target="_blank" href="' + link + '">' + link + '</a>');
         }
-        
+
         //replace qoutes
         if (check && check.length) {
             for(var i in check){
@@ -196,27 +201,27 @@ var parser = {
                 }
             }
         }
-        
+
         //video embeds
         str = str.replace(/<a [^>]*href="[^"]*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?"]*)[^"]*">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'youtube\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="[^"]*vimeo.com\/(\d+)">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'vimeo\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="[^"]*(?:soundcloud.com\/[\w-]+\/[\w-]+)">([^<]*)<\/a>/, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="soundCloud(\'$1\')" class="show-video">[audio]</a>');
         str = str.replace(/<a [^>]*href="[^"]*liveleak.com\/ll_embed\?f=(\w+)">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'liveleak\', \'$1\')" class="show-video">[video]</a>');
-        str = str.replace(/<a [^>]*href="([^'"]*\.webm)">([^<]*)<\/a>/i, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="embed(\'html5\', \'$1\')" class="show-video">[video]</a>');        
+        str = str.replace(/<a [^>]*href="([^'"]*\.webm)">([^<]*)<\/a>/i, '<a target="_blank" href="$1">$1</a> <a href="javascript:void(0)" onclick="embed(\'html5\', \'$1\')" class="show-video">[video]</a>');
         str = str.replace(/<a [^>]*href="([^'"]*\.mp3)">([^<]*)<\/a>/i, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'audio\', \'$1\')" class="show-video">[audio]</a>');
         str = str.replace(/<a [^>]*href="([^'"]*\.wav)">([^<]*)<\/a>/i, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'audio\', \'$1\')" class="show-video">[audio]</a>');
-        str = str.replace(/<a [^>]*href="[^"]*ustream.tv\/embed\/(\d+)\?v=3&amp;wmode=direct">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'ustream\', \'$1\')" class="show-video">[video]</a>');          
-        
+        str = str.replace(/<a [^>]*href="[^"]*ustream.tv\/embed\/(\d+)\?v=3&amp;wmode=direct">([^<]*)<\/a>/, '<a target="_blank" href="$2">$2</a> <a href="javascript:void(0)" onclick="embed(\'ustream\', \'$1\')" class="show-video">[video]</a>');
+
         var img = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:agif|apng|gif|jpg|jpeg|png|bmp|svg))<\/a>/gi.exec(str);
         if (img && Attributes.get('toggle-images')) {
             str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="messageBuilder.scrollToBottom(\'messages\');"/></a>', 3);
         }
-        
+
         //replace normalied text
         if (normalize) {
             str = str.replace(this.repnmliz, '<textarea style="overflow:hidden;">' + normalize.replace(/<br>/g, '&#13;') + '</textarea>');
         }
-        
+
         //convert spaces
         str = str.replace(/\s{2}/gi, '&nbsp;');
         return str;
