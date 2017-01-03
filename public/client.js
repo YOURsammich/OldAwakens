@@ -1,5 +1,5 @@
 var socket = io.connect(window.location.pathname);
-var blurred = false;
+
 //idle/afk users should change positions on the userlist board after so long of inactivity
 
 var ONLINE = {
@@ -146,7 +146,7 @@ var messageBuilder = {
                 if (!Attributes.get('mute')) {
                     audioPlayer.name.play();
                 }
-                if (blurred) {
+                if (window.blurred) {
                     document.getElementById("icon").href = "images/awakenslogo2.png";
                 }
             } else if (!Attributes.get('mute')) {
@@ -583,6 +583,7 @@ function autoComplete(word) {
 }
 
 (function () {
+    window.blurred = false;
     var history = [],
         historyIndex = 0;
 
@@ -630,13 +631,12 @@ function autoComplete(word) {
         this.style.height = newHeight + 'px';
         messageDiv.style.top = -(newHeight - 18) + 'px';
     });
-
     window.onblur = function() {
-        blurred = true;
+        window.blurred = true;
     };
     window.onfocus = function() {
+        window.blurred = false;
         document.getElementById("icon").href = "images/awakenslogo.png";
-        blurred = false;
     };
 })();
 
