@@ -21,7 +21,7 @@ var Attributes = {
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
-        
+
         if (this.notifierAtt.includes(attribute) && oldValue !== newValue) {
             showMessage({
                 nick : this.get('nick'),
@@ -39,17 +39,17 @@ var Attributes = {
     },
     get : function (attribute) {
         var value = '';
-        
+
         if (this.altAtt[attribute]) {
             attribute = this.altAtt[attribute];
         }
-        
+
         if (this.storedAttributes[attribute] === undefined && attribute.substr(0, 6) === 'toggle') {
             value = true;
         } else {
             value = this.storedAttributes[attribute];
         }
-        
+
         return value;
     },
     remove : function (attribute) {
@@ -61,7 +61,7 @@ var Attributes = {
             allAtt = {},
             key,
             i;
-        
+
         for (i = 0; allKeys.length > i; i++) {
             key = allKeys[i];
             if (key !== '__proto__' && key.substr(0, 4) === 'chat') {
@@ -72,7 +72,7 @@ var Attributes = {
                 }
             }
         }
-        
+
         return allAtt;
     }())
 };
@@ -110,7 +110,7 @@ var messageBuilder = {
 
         container.appendChild(timeDIV);
         if (nick) {
-            
+
             if (hat && hat !== 'none') {
                 hatSpan = document.createElement('div');
                 hatSpan.className = 'hat';
@@ -120,7 +120,7 @@ var messageBuilder = {
                 hatSpan.style.backgroundSize = "30px 29px";
                 container.appendChild(hatSpan);
             }
-            
+
             nickDIV.className = 'nick';
 
             if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
@@ -129,7 +129,7 @@ var messageBuilder = {
             } else {
                 nickDIV.textContent = nick + ':';
             }
-            
+
             container.appendChild(nickDIV);
         }
 
@@ -140,7 +140,7 @@ var messageBuilder = {
         } else if (messageType === 'captcha') {
             messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
         } else {
-            
+
             if (this.alertMessage(message, messageType, nick)) {
                 timeDIV.style.color = 'yellow';
                 if (!Attributes.get('mute')) {
@@ -173,7 +173,7 @@ var messageBuilder = {
             quotedMessage,
             quotedNick,
             i;
-        
+
         if (quote) {
             for (i = 0; i < quote.length; i++) {
                 quotedMessage = document.getElementsByClassName('msg-' + quote[i].replace('>>', ''));
@@ -181,11 +181,11 @@ var messageBuilder = {
                     quotedNick = quotedMessage[0].getElementsByClassName('nick')[0].textContent;
                     if (quotedNick.substr(0, quotedNick.length-1) === myNick) {
                         quoteAlert = true;
-                    } 
+                    }
                 }
-            }   
+            }
         }
-        
+
         return messageType === 'chat' && nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert)
     },
     appendMessageTo : function (message, el) {
@@ -239,13 +239,13 @@ var messageBuilder = {
 function showMessage(messageData, panel) {
     var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat),
         blockUsers = Attributes.get('blocked') || [];
-    
+
     if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
         Attributes.set('lastpm', messageData.nick);
     }
-    
+
     if (blockUsers.indexOf(messageData.nick) === -1) {
-        messageBuilder.appendMessageTo(messageHTML, panel);   
+        messageBuilder.appendMessageTo(messageHTML, panel);
     }
 }
 
@@ -253,21 +253,21 @@ function handlePrivateMessage(messageData) {
     var panel = document.getElementById('PmPanel-' + messageData.landOn),
         pmUser = ONLINE.users[messageData.landOn],
         informer;
-    
+
     if (panel && panel.getElementsByClassName('messages')[0]) {
         showMessage(messageData, panel.getElementsByClassName('messages')[0]);
     } else if (pmUser) {
-        informer = pmUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm'); 
-        
+        informer = pmUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm');
+
         if (informer.length === 0) {
             menuControl.inform(messageData.landOn, 'pm', 'unread PM(s)', function () {
                 createPmPanel(messageData.landOn);
             });
         }
-        
+
         if (!pmUser.pm) {
             pmUser.pm = [];
-        }    
+        }
         pmUser.pm.push(messageData);
     }
 }
@@ -396,7 +396,7 @@ function channelTheme(channelData, updatedBy) {
         });
         Attributes.set('note', channelData.note);
     }
-    
+
     if (channelData.topic) {
         document.title = channelData.topic;
         showMessage({
@@ -405,10 +405,10 @@ function channelTheme(channelData, updatedBy) {
         });
         Attributes.set('topic', channelData.topic);
     }
-    
+
     if (channelData.background) {
         if (Attributes.get('toggle-background')) {
-            document.getElementsByClassName('messages')[0].style.background = channelData.background;   
+            document.getElementsByClassName('messages')[0].style.background = channelData.background;
         }
         Attributes.set('background', channelData.background);
     }
@@ -421,7 +421,7 @@ function channelTheme(channelData, updatedBy) {
             document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], 4);
         }
     }
-    
+
     if (channelData.lock !== undefined && updatedBy) {
         var message;
         if (channelData.lock) {
@@ -445,7 +445,7 @@ function createPanel(title, html, func) {
         password,
         confirmPassword,
         submitButton;
-    
+
     if (panel.length === 0) {
         overlay = document.createElement('div');
         overlay.className = 'overlay';
@@ -458,23 +458,23 @@ function createPanel(title, html, func) {
         header.textContent = title;
         submitButton = document.createElement('button');
         submitButton.textContent = 'submit';
-        
+
         panel.appendChild(cancel);
         panel.appendChild(header);
-        
+
         html.forEach(function (ele) {
             panel.appendChild(ele);
         })
-        
+
         panel.appendChild(document.createElement('br'));
         panel.appendChild(submitButton);
-        
+
         cancel.addEventListener('click', function () {
             document.body.removeChild(overlay);
         });
-        
+
         submitButton.addEventListener('click', func);
-        
+
         overlay.appendChild(panel);
         document.body.appendChild(overlay);
     }
@@ -484,7 +484,7 @@ function createPmPanel(id) {
     var validUser = ONLINE.users[id],
         panel = document.getElementById('PmPanel-' + id),
         informer;
-    
+
     function makePanel() {
         var panelContainer = document.createElement('div'),
             header,
@@ -496,7 +496,7 @@ function createPmPanel(id) {
             inputBar,
             input,
             i;
-        
+
         panelContainer.id = 'PmPanel-' + id;
         panelContainer.className = 'pmPanel';
         header = document.createElement('header');
@@ -515,25 +515,25 @@ function createPmPanel(id) {
         inputBar.className = 'input-bar';
         input = document.createElement('input');
         input.placeholder = 'Type anything then press enter';
-        
+
         cancel.addEventListener('click', function () {
             document.body.removeChild(panelContainer);
         });
-        
+
         input.addEventListener('keydown', function (e) {
             if (e.which === 13 && this.value) {
                 clientSubmit.message.sendPrivate(this.value, id);
                 this.value = '';
             }
         });
-        
+
         if (ONLINE.users[id].pm) {
             for (i = 0; i < ONLINE.users[id].pm.length; i++) {
                 showMessage(ONLINE.users[id].pm[i], messages);
             }
             ONLINE.users[id].pm = [];
         }
-        
+
         controls.appendChild(minimize);
         controls.appendChild(cancel);
         header.appendChild(nickName);
@@ -542,10 +542,10 @@ function createPmPanel(id) {
         panelContainer.appendChild(messages);
         inputBar.appendChild(input);
         panelContainer.appendChild(inputBar);
-        
+
         return panelContainer;
     }
-    
+
     if (validUser && !panel) {
         informer = validUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm');
         if (informer.length !== 0) {
@@ -562,10 +562,10 @@ function autoComplete(word) {
         span,
         keys = Object.keys(ONLINE.users),
         i;
-    
+
     autocomp.className = 'autocomplete';
     autocomp.style.cssText = 'width:100%;position:relative;margin-bottom:5px;';
-    
+
     for (i = 0; i < keys.length; i++) {
         if (ONLINE.users[keys[i]].nick.match(word)) {
             span = document.createElement('span');
@@ -573,19 +573,19 @@ function autoComplete(word) {
             autocomp.appendChild(span);
         }
     }
-    
+
     document.getElementById('input-bar').prepend(autocomp);
-    
+
 }
 
 (function () {
     var history = [],
         historyIndex = 0;
-    
+
     $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
         var keyCode = e.which,
             inputValue = this.value;
-        
+
         switch (keyCode) {
         case 13:
             if (!e.shiftKey) {
@@ -611,7 +611,7 @@ function autoComplete(word) {
         default:
             historyIndex = 0;
         }
-        
+
         if (historyIndex !== 0) {
             this.value = history[history.length - historyIndex];
         }
@@ -622,7 +622,7 @@ function autoComplete(word) {
 
         var newHeight = Math.min(Math.floor(this.scrollHeight / 18) * 18, screen.height / 3),
             messageDiv = document.getElementsByClassName('messages')[0];
-        
+
         this.style.height = newHeight + 'px';
         messageDiv.style.top = -(newHeight - 18) + 'px';
     });
@@ -648,7 +648,7 @@ socket.on('captcha', function (captcha) {
 socket.on('channeldata', function (channel) {
     var i,
         channelData;
-    
+
     if (channel.users) {
         document.getElementsByClassName('userList')[0].innerHTML = '';
         ONLINE.users = {};
@@ -665,24 +665,24 @@ socket.on('banlist', function (banlist) {
         insideHolder = document.createElement('div'),
         cancel,
         table;
-    
+
     border.className = 'banlist';
-    
+
     border.appendChild(insideHolder);
-    
+
     cancel = document.createElement('span');
     cancel.style.cssText = 'position:absolute;top:0px;right:4px;cursor:pointer;';
     cancel.textContent = 'x';
-    
+
     cancel.onclick = function(){
         document.body.removeChild(border);
     }
-    
+
     border.appendChild(cancel);
-    
-    table = document.createElement('table');   
+
+    table = document.createElement('table');
     table.innerHTML = '<tr><th>Nick</th><th>Banned by</th><th>Reason</th></tr>';
-    
+
     banlist.map(function(user){
         var tr = document.createElement('tr');
         var keys = Object.keys(user);
@@ -694,17 +694,17 @@ socket.on('banlist', function (banlist) {
         }
         table.appendChild(tr);
     });
-    
+
     insideHolder.appendChild(table);
     $$$.draggable(border);
-    
+
     document.body.appendChild(border);
 });
 
 socket.on('update', function (allAtt) {
     var keys = Object.keys(allAtt),
         i;
-    
+
     for (i = 0; i < keys.length; i++) {
         Attributes.set(keys[i], allAtt[keys[i]], true);
     }
@@ -713,11 +713,11 @@ socket.on('update', function (allAtt) {
 socket.on('locked', function () {
     var nickInput = document.createElement('input'),
         passwordInput = document.createElement('input');
-    
+
     nickInput.placeholder = 'Username';
     passwordInput.placeholder = 'PassWord';
     passwordInput.type = 'password';
-    
+
     createPanel('Login', [nickInput, passwordInput], function () {
         socket.emit('requestJoin', {
             nick : nickInput.value,

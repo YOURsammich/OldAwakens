@@ -159,9 +159,9 @@ var parser = {
         str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', this.matches);
         str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoil">$1</span>', this.matches);
         str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<span class="spin">$1</span>', this.matches);
-        str = this.multiple(str, /\/\&([^\|]+)\|?/g, '<span class="marquee">$1</span>', this.matches);
+        str = this.multiple(str, /\/\&amp;([^\|]+)\|?/g, '<span class="marquee">$1</span>', this.matches);
         str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="rainbow">$1</span>', this.matches);
-        str = this.multiple(str, /\/\$([^\|]+)\|?/g, '<span class="shake">$1</span>', this.matches);
+        str = this.multiple(str, /\/\&#36;([^\|]+)\|?/g, '<span class="shake">$1</span>', this.matches);
         str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>', this.matches);
 
         if (wordReplace) {

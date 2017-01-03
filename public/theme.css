@@ -64,17 +64,19 @@ a {
 .nick {
     color: rgb(100, 100, 192);
     text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
+    padding-left: 0.3em;
 }
 
 .message {
     text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
-    padding-left: 3.9em;
-    text-indent: -3.9em;
+    /*padding-left: 3.9em;*/
+    /*text-indent: -3.9em;*/
     word-wrap: break-word;
     color: white;
 }
 
 .messageContent {
+    padding-left: 0.3em;
     width: 70%;
 }
 
@@ -124,7 +126,7 @@ a {
 }
 
 .message div {
-    display: inline;
+    display: inline-block;
 }
 
 #input-bar {
@@ -496,7 +498,7 @@ a {
     transform: translate(0%);
   }
   50% {
-    transform: translate(100vw);
+    transform: translate(90vw);
   }
   100% {
     transform: translate(0%);
