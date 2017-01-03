@@ -476,7 +476,7 @@ a {
   display: inline-block;
   animation-name: rainbow;
   animation-duration: 2s;
-  animation-iteration-count: 5;
+  animation-iteration-count: 15;
 }
 
 .shake {
@@ -491,6 +491,22 @@ a {
   animation-name: marquee;
   animation-duration: 10s;
   animation-iteration-count: 6;
+}
+
+.italic {
+    display: inline-block;
+    transform: skewX(-15deg);
+}
+
+.spoil {
+    color: #000;
+    background-color: #000;
+    text-shadow: initial;
+}
+
+.spoil:hover {
+    color: #FFF;
+    background-color: #000;
 }
 
 @keyframes marquee {
