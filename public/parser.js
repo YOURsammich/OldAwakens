@@ -231,15 +231,14 @@ var parser = {
         return str;
     },
     parseImage : function(bin, type){
-            var b64 = window.btoa(bin);
-            var str = '<a target="_blank" href="data:'+type+";base64," + b64 + '">';
-            if (Attributes.get('toggle-images')) {
-                str += '<img src="data:'+type+";base64," + b64 + '">';
-            } else {
-                str += '[Image]';
-            }
-            str += '</a>';
-            return str;
+        var b64 = window.btoa(bin);
+        var str = '<a target="_blank" href="data:'+type+";base64," + b64 + '">';
+        if (Attributes.get('toggle-images')) {
+            str += '<img src="data:'+type+";base64," + b64 + '">';
+        } else {
+            str += '[Image]';
         }
+        str += '</a>';
+        return str;
     }
 };
