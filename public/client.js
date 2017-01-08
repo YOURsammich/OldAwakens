@@ -251,11 +251,7 @@ var messageBuilder = {
 function showMessage(messageData, panel, img) {
     var blockUsers = Attributes.get('blocked') || [];
     if (blockUsers.indexOf(messageData.nick) === -1) {
-        if(img) {
-            var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
-        }else{
-            var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
-        }
+        var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
         
         if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
             Attributes.set('lastpm', messageData.nick);
