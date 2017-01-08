@@ -231,8 +231,10 @@ var parser = {
         return str;
     },
     parseImage : function(bin, type){
-        var b64 = window.btoa(bin);
-        var str = '<a target="_blank" href="data:'+type+";base64," + b64 + '"><img src="data:'+type+";base64," + b64 + '"></a>';
-        return str;
+        if (Attributes.get('toggle-images')) {
+            var b64 = window.btoa(bin);
+            var str = '<a target="_blank" href="data:'+type+";base64," + b64 + '"><img src="data:'+type+";base64," + b64 + '"></a>';
+            return str;
+        }
     }
 };
