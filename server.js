@@ -618,7 +618,7 @@ function createChannel(io, channelName) {
         });
         
         socket.on('message-image', function (message, flair) {
-            var acceptedFiletypes = ["image/png", "image/jpg", "image/gif", "image/webp"];
+            var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"];
             throttle.on(user.remote_addr + '-message').then(function (notSpam) {
                 if (notSpam) {
                     if (findIndex(channel.online, 'id', user.id) != -1) {

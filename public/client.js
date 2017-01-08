@@ -642,7 +642,7 @@ function autoComplete(word) {
         messageDiv.style.top = -(newHeight - 18) + 'px';
     });
     $$$.query('.main-container').addEventListener('drop', function (e) {
-        var acceptedFiletypes = ["image/png", "image/jpg", "image/gif", "image/webp"];
+        var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"];
         e.preventDefault();
         e.stopPropagation();
         var file = e.dataTransfer.files[0];
