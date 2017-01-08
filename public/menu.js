@@ -193,9 +193,6 @@ var menuControl = {
                     document.body.removeChild(menu);
                 }
                 menu = makeMenu();
-                menu.addEventListener('mouseleave', function () {
-                    document.body.removeChild(menu);
-                });
                 document.body.appendChild(menu);
             }
         }
@@ -270,10 +267,14 @@ var menuControl = {
     
     $$$.query('.toggle-menu').addEventListener('click', function () {
         var menuContainer = document.getElementById('menu-container'),
-            messages = document.getElementsByClassName('messages')[0],
-            currentScroll = messages.scrollTop
+            messages = document.getElementById('messages'),
+            currentScroll = messages.scrollTop,
+            contextMenu = document.getElementById('context-menu');
 
         if (closing) {
+            if (contextMenu) {
+                document.body.removeChild(contextMenu); 
+            }
             menuContainer.style.width = '0px';
             messages.style.width = '100%';
             closing = false;
