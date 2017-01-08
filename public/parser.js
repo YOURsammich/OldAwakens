@@ -1,3 +1,5 @@
+//10:00am
+
 var parser = {
     linkreg : /(http|https|ftp)\x3A\x2F\x2F(?:[\da-z](?:[\x2D\da-z]*[\da-z])?\.)+[\da-z](?:[\x2D\da-z]*[\da-z])?[a-z#-9;!=?@_]*/gi,
     coloreg : 'yellowgreen|yellow|whitesmoke|white|wheat|violet|turquoise|tomato|thistle|teal|tan|steelblue|springgreen|snow|slategray|slateblue|skyblue|silver|sienna|seashell|seagreen|sandybrown|salmon|saddlebrown|royalblue|rosybrown|red|rebeccapurple|purple|powderblue|plum|pink|peru|peachpuff|papayawhip|palevioletred|paleturquoise|palegreen|palegoldenrod|orchid|orangered|orange|olivedrab|olive|oldlace|navy|navajowhite|moccasin|mistyrose|mintcream|midnightblue|mediumvioletred|mediumturquoise|mediumspringgreen|mediumslateblue|mediumseagreen|mediumpurple|mediumorchid|mediumblue|mediumaquamarine|maroon|magenta|linen|limegreen|lime|lightyellow|lightsteelblue|lightslategray|lightskyblue|lightseagreen|lightsalmon|lightpink|lightgreen|lightgray|lightgoldenrodyellow|lightcyan|lightcoral|lightblue|lemonchiffon|lawngreen|lavenderblush|lavender|khaki|ivory|indigo|indianred|hotpink|honeydew|greenyellow|green|gray|goldenrod|gold|ghostwhite|gainsboro|fuchsia|forestgreen|floralwhite|firebrick|dodgerblue|dimgray|deepskyblue|deeppink|darkviolet|darkturquoise|darkslategray|darkslateblue|darkseagreen|darksalmon|darkred|darkorchid|darkorange|darkolivegreen|darkmagenta|darkkhaki|darkgreen|darkgray|darkgoldenrod|darkcyan|darkblue|cyan|crimson|cornsilk|cornflowerblue|coral|chocolate|chartreuse|cadetblue|transparent|burlywood|brown|blueviolet|blue|blanchedalmond|black|bisque|beige|azure|aquamarine|aqua|antiquewhite|aliceblue',
@@ -153,15 +155,15 @@ var parser = {
         //styles
         str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', this.matches);
         str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', this.matches);
-        str = this.multiple(str, /\/\%([^\|]+)\|?/g, '<span class="italic">$1</span>', this.matches);
+        str = this.multiple(str, /\/\%([^\|]+)\|?/g, '<span class="style italic">$1</span>', this.matches);
         str = this.multiple(str, /\/\_([^\|]+)\|?/g, '<u>$1</u>', this.matches);
         str = this.multiple(str, /\/\-([^\|]+)\|?/g, '<strike>$1</strike>', this.matches);
         str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', this.matches);
         str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoil">$1</span>', this.matches);
-        str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<span class="spin">$1</span>', this.matches);
-        str = this.multiple(str, /\/\&amp;([^\|]+)\|?/g, '<span class="marquee">$1</span>', 1);
-        str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="rainbow">$1</span>', this.matches);
-        str = this.multiple(str, /\/\&#36;([^\|]+)\|?/g, '<span class="shake">$1</span>', this.matches);
+        str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<div class="style spin">$1</div>', this.matches);
+        str = this.multiple(str, /\/\&amp;([^\|]+)\|?/g, '<span class="style marquee">$1</span>', 1);
+        str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="style rainbow">$1</span>', this.matches);
+        str = this.multiple(str, /\/\&#36;([^\|]+)\|?/g, '<span class="style shake">$1</span>', this.matches);
         str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>', this.matches);
 
         if (wordReplace) {
@@ -221,7 +223,9 @@ var parser = {
         if (normalize) {
             str = str.replace(this.repnmliz, '<textarea style="overflow:hidden;">' + normalize.replace(/<br>/g, '&#13;') + '</textarea>');
         }
-
+        
+        str = str.replace(/(<br>)(.+)/g, '<div style="display:block;padding-left:3.5em;">$2</div>');
+        //.replace(/(<br>)(.+)/, '<div>$2</div>')
         //convert spaces
         str = str.replace(/\s{2}/gi, '&nbsp;');
         return str;

@@ -109,8 +109,8 @@ var messageBuilder = {
         }
 
         container.appendChild(timeDIV);
+        
         if (nick) {
-
             if (hat && hat !== 'none') {
                 hatSpan = document.createElement('div');
                 hatSpan.className = 'hat';
@@ -132,7 +132,7 @@ var messageBuilder = {
 
             container.appendChild(nickDIV);
         }
-
+        
         messageDIV.className = 'messageContent';
 
         if (messageType === 'info') {
@@ -162,6 +162,7 @@ var messageBuilder = {
                 message = message.slice(0, index) + message.slice(index + 1);
             }
             parser.getAllFonts(message);
+            
             messageDIV.innerHTML = ' ' + parser.parse(message, messageType === 'chat' && Attributes.get('toggle-filters'));
         }
 
@@ -189,14 +190,20 @@ var messageBuilder = {
             }
         }
 
-        return messageType === 'chat' && nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert)
+        return messageType === 'chat' && nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert);
     },
     appendMessageTo : function (message, el) {
         if (el === undefined) {
-            el = document.getElementsByClassName('messages')[0];
+            el = document.getElementById('messages');
         }
+        
+        /*li = document.createElement('li');
+        li.appendChild(message);*/
 
         el.appendChild(message);
+        
+        
+        
         this.scrollToBottom(el);
     },
     scrollToBottom : function (el) {
@@ -412,7 +419,7 @@ function channelTheme(channelData, updatedBy) {
 
     if (channelData.background) {
         if (Attributes.get('toggle-background')) {
-            document.getElementsByClassName('messages')[0].style.background = channelData.background;
+            document.getElementById('messages').style.background = channelData.background;
         }
         Attributes.set('background', channelData.background);
     }
@@ -583,7 +590,6 @@ function autoComplete(word) {
 }
 
 (function () {
-    window.blurred = false;
     var history = [],
         historyIndex = 0;
 
@@ -626,7 +632,7 @@ function autoComplete(word) {
         this.style.height = '0px';
 
         var newHeight = Math.min(Math.floor(this.scrollHeight / 18) * 18, screen.height / 3),
-            messageDiv = document.getElementsByClassName('messages')[0];
+            messageDiv = document.getElementById('messages');
 
         this.style.height = newHeight + 'px';
         messageDiv.style.top = -(newHeight - 18) + 'px';

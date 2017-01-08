@@ -28,7 +28,7 @@ a {
     height: 100%;
 }
 
-.messages {
+#messages {
     transition: width 1s;
     height: calc(100vh - 38px);
     width: 100%;
@@ -37,7 +37,7 @@ a {
     overflow-y: scroll;
 }
 
-.messages img {
+#messages img {
 	max-height: 256px;
 	max-width: 256px;
 }
@@ -64,19 +64,15 @@ a {
 .nick {
     color: rgb(100, 100, 192);
     text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
-    padding-left: 0.3em;
 }
 
 .message {
     text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
-    /*padding-left: 3.9em;*/
-    /*text-indent: -3.9em;*/
     word-wrap: break-word;
     color: white;
 }
 
 .messageContent {
-    padding-left: 0.3em;
     width: 70%;
 }
 
@@ -126,7 +122,7 @@ a {
 }
 
 .message div {
-    display: inline-block;
+    display: inline;
 }
 
 #input-bar {
@@ -465,36 +461,35 @@ a {
 
 /* chat styles */
 
+.style {
+    display: inline-block !important;
+}
+
 .spin {
-  display: inline-block;
   animation-name: spin;
   animation-duration: 2s;
   animation-iteration-count: 1;
 }
 
 .rainbow {
-  display: inline-block;
-  animation-name: rainbow;
-  animation-duration: 2s;
-  animation-iteration-count: 15;
+    animation-name: rainbow;
+    animation-duration: 2s;
+    animation-iteration-count: 15;
 }
 
 .shake {
-  display: inline-block;
   animation-name: shake;
   animation-duration: 0.5s;
   animation-iteration-count: 20;
 }
 
 .marquee {
-  display: inline-block;
   animation-name: marquee;
   animation-duration: 10s;
   animation-iteration-count: 6;
 }
 
 .italic {
-    display: inline-block;
     transform: skewX(-15deg);
 }
 
