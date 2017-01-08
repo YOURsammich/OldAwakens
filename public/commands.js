@@ -187,7 +187,7 @@ var COMMANDS = {
     },
     unmute : {
         handler : function () {
-            Attributes.remove('mute', '');
+            Attributes.set('mute', 'false', true);
         }
     },
     clear : {

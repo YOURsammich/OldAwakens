@@ -336,7 +336,7 @@ function createChannel(io, channelName) {
         unwhitelist : {
             role : 1,
             params : ['nick'],
-            handler : function (user) {
+            handler : function (user, params) {
                 dao.getChannelAtt(channelName, 'whitelist').then(function (whitelist) {
                     if (whitelist === undefined) {
                         whitelist = [];
@@ -500,13 +500,13 @@ function createChannel(io, channelName) {
                             usersHats = {
                                 available : ['none'],
                                 current : ''
-                            }
+                            };
                         }
                     } else {
                         usersHats = {
                             available : ['none'],
                             current : ''
-                        }
+                        };
                     }
                     
                     if (hatIndex !== -1) {
@@ -603,6 +603,37 @@ function createChannel(io, channelName) {
                                     hat : user.hat,
                                     count : ++channel.messageCount
                                 });      
+                            }
+                        }   
+                    }
+                } else {
+                    showMessage(user.socket,'You are spamming, stop or you will be temporarily banned.', 'error');
+                    throttle.warn(user.remote_addr + '-message');
+                }
+            }).fail(function () {
+                dao.ban(channelName,user.remote_addr,'Throttle', 'Message spamming');
+                showMessage(user.socket, 'You have been banned for spamming.','error');
+                socket.disconnect();
+            });
+        });
+        
+        socket.on('message-image', function (message, flair) {
+            var acceptedFiletypes = ["image/png", "image/jpg", "image/gif", "image/webp"];
+            throttle.on(user.remote_addr + '-message').then(function (notSpam) {
+                if (notSpam) {
+                    if (findIndex(channel.online, 'id', user.id) != -1) {
+                        if (message && typeof message.type === 'string' && acceptedFiletypes.indexOf(message.type) > -1 &&typeof message.img === 'string' && (typeof flair === 'string' || !flair)) {
+                            if (message.img.length < 7000001) {
+                                if (flair && flair.length < 500 || !flair) {
+                                    roomEmit('message', {
+                                        message : message,
+                                        messageType : 'chat-image',
+                                        nick : user.nick,
+                                        flair : flair,
+                                        hat : user.hat,
+                                        count : ++channel.messageCount
+                                    });      
+                                }
                             }
                         }   
                     }
@@ -743,7 +774,7 @@ function createChannel(io, channelName) {
                 errorMessage;
             
             if (typeof settings === 'object') {
-                for (i = 0; i < keys.length; i++) {
+                for (var i = 0; i < keys.length; i++) {
                     if (validSettings[keys[i]]) {
                         if (typeof settings[keys[i]] === validSettings[keys[i]].type) {
                             if (user.role > validSettings[keys[i]].role) {
@@ -971,7 +1002,7 @@ function intoapp(app, http) {
 (function () {
     var app = express();
     var http = require('http').Server(app);
-    http.listen(80, function () {
+    http.listen(process.env.PORT || 80, function () {
        console.log('listening on *:80');
        intoapp(app, http);
     });

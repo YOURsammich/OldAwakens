@@ -139,6 +139,8 @@ var messageBuilder = {
             messageDIV.innerHTML = parser.escape(message);
         } else if (messageType === 'captcha') {
             messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
+        } else if (messageType === 'chat-image') {
+            messageDIV.innerHTML = parser.parseImage(message.img, message.type);
         } else {
 
             if (this.alertMessage(message, messageType, nick)) {
@@ -246,16 +248,18 @@ var messageBuilder = {
     }
 }
 
-function showMessage(messageData, panel) {
-    
-    var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat),
-        blockUsers = Attributes.get('blocked') || [];
-
-    if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
-        Attributes.set('lastpm', messageData.nick);
-    }
-
+function showMessage(messageData, panel, img) {
+    var blockUsers = Attributes.get('blocked') || [];
     if (blockUsers.indexOf(messageData.nick) === -1) {
+        if(img) {
+            var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
+        }else{
+            var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
+        }
+        
+        if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
+            Attributes.set('lastpm', messageData.nick);
+        }
         messageBuilder.appendMessageTo(messageHTML, panel);
     }
 }
@@ -637,6 +641,35 @@ function autoComplete(word) {
         this.style.height = newHeight + 'px';
         messageDiv.style.top = -(newHeight - 18) + 'px';
     });
+    $$$.query('.main-container').addEventListener('drop', function (e) {
+        var acceptedFiletypes = ["image/png", "image/jpg", "image/gif", "image/webp"];
+        e.preventDefault();
+        e.stopPropagation();
+        var file = e.dataTransfer.files[0];
+        if (file.size < 7000001) {
+            var type = file.type;
+            if (acceptedFiletypes.indexOf(type) > -1) {
+                var reader = new FileReader();
+                reader.onloadend = function () {
+                    socket.emit("message-image", {
+                        "type": type,
+                        "img": reader.result 
+                    }, Attributes.get("flair"));
+                }
+                reader.readAsBinaryString(file);
+            } else {
+                showMessage({
+                    "message": "Not an image.",
+                    "messageType": "error"
+                });
+            }
+        } else {
+            showMessage({
+                "message": "Image too large.",
+                "messageType": "error"
+            });
+        }
+    });
     window.onblur = function() {
         window.blurred = true;
     };
@@ -647,6 +680,8 @@ function autoComplete(word) {
 })();
 
 socket.on('message', showMessage);
+
+socket.on('chat-image', showMessage, true);
 
 socket.on('pmMessage', handlePrivateMessage);
 
@@ -765,4 +800,4 @@ socket.on('connect', function () {
     }
 });
 
-menuControl.initMissedMessages(socket);
+menuControl.initMissedMessages(socket)

@@ -229,5 +229,10 @@ var parser = {
         //convert spaces
         str = str.replace(/\s{2}/gi, '&nbsp;');
         return str;
+    },
+    parseImage : function(bin, type){
+        var b64 = window.btoa(bin);
+        var str = '<a target="_blank" href="data:'+type+";base64," + b64 + '"><img src="data:'+type+";base64," + b64 + '"></a>';
+        return str;
     }
 };
