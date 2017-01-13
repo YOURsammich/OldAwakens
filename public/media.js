@@ -62,6 +62,9 @@ function embed(type, input) {
     case 'embed':
         url = '<iframe width="100%" height="100%" src="' + input + '" frameborder="0" allowfullscreen></iframe>';
         break;
+    case 'swf':
+        url = '<object width="100%" height="100%" data="' + input + '" type="application/x-shockwave-flash">\n<param name="movie" value="' + input + '" />\n</object>'
+        break;
     }
 
     buildVideoOverlay(url);
