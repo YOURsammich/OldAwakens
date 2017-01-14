@@ -673,6 +673,9 @@ function autoComplete(word) {
         window.blurred = false;
         document.getElementById("icon").href = "images/awakenslogo.png";
     };
+    emojione.imageType = 'svg';
+    emojione.sprites = true;
+    emojione.imagePathSVGSprites = 'images/emojione.sprites.svg';
 })();
 
 socket.on('message', showMessage);

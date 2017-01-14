@@ -148,6 +148,9 @@ var parser = {
         //match links
         var linkesc = str.match(this.linkreg);
         str = str.replace(this.linkreg, this.replink);
+        
+        //replace emoji shortcode
+        str = emojione.shortnameToImage(str);
 
         //green text
         str = this.multiple(str, /(^|^[&#36;A-z\s|]+\s|^&#35;[A-z0-9]+\s|^[&#36;A-z\s|]+&#35;[A-z]+\s|<br>)\s?&gt;(.*?)(<br>|$)/g, '$1<span style="color:#789922;">>$2</span><br>');
@@ -180,7 +183,6 @@ var parser = {
 
         //replace fonts
         str = this.multiple(str, this.fontRegex, '<span style="font-family:\'$3\'">$4</span>');
-
         //replace user escaping
         for (var i in escs)
             str = str.replace(this.repslsh, escs[i][1]);
