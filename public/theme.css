@@ -225,6 +225,30 @@ a {
     margin-top: 5px;
 }
 
+.nickText::before {
+    content: '';
+    display: inline-block;
+    border-radius: 50%;
+    background-color: #3498db;
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    margin-right: 4px;
+    transition: 0.5s;
+}
+
+.nickText::after {
+    content: '';
+    display: inline-block;
+    border-radius: 50%;
+    background-color: #e67e22;
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    margin-left: 4px;
+    transition: 0.5s;
+}
+
 .userList .nickContain .informer {
     color: lightgrey;
     font-size: 12px;
@@ -715,4 +739,12 @@ a {
     border-bottom:1px black solid;
     max-width:200px;
     word-wrap:break-word;
+}
+
+.typing::before {
+    opacity: 1;
+}
+
+.unreadPM::after {
+    opacity: 1;
 }

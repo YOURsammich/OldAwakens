@@ -626,6 +626,8 @@ function autoComplete(word) {
         if (historyIndex !== 0) {
             this.value = history[history.length - historyIndex];
         }
+        
+        socket.emit('typing');
     });
 
     $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
@@ -687,6 +689,8 @@ socket.on('pmMessage', handlePrivateMessage);
 socket.on('joined', menuControl.addUser);
 
 socket.on('nick', menuControl.changeNick);
+
+socket.on('typing', menuControl.typing);
 
 socket.on('afk', menuControl.afk);
 

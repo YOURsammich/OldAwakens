@@ -617,6 +617,10 @@ function createChannel(io, channelName) {
             });
         });
         
+        socket.on("typing", function() {
+            roomEmit("typing", user.id);
+        });
+        
         socket.on('message-image', function (message, flair) {
             var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"];
             throttle.on(user.remote_addr + '-message').then(function (notSpam) {

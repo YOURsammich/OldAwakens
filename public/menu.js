@@ -23,7 +23,8 @@ var menuControl = {
         
         ONLINE.users[id] = {
             nick : nick,
-            li : nickContain
+            li : nickContain,
+            typing : false
         };
         
         if (document.getElementsByClassName('LoginPanel').length !== 0 && nick === Attributes.get('nick')) {
@@ -216,6 +217,16 @@ var menuControl = {
         window.addEventListener('blur', function () {
             blurred = true;
         });
+    },
+    typing : function (id) {
+        var user = ONLINE.users[id];
+        if (user) {
+            if (user.typing !== false) clearTimeout(user.typing);
+            user.li.children[0].classList.add('typing');
+            setTimeout(function(user){
+                user.li.children[0].classList.remove('typing');
+            }, 2500, user);
+        }
     }
 };
 
