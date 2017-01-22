@@ -648,7 +648,7 @@ function autoComplete(word) {
         
         e.preventDefault();
         e.stopPropagation();
-        var file = e.dataTransfer.files[0];
+        
         if (file.size < 7000001) {
             type = file.type;
             if (acceptedFiletypes.indexOf(type) != -1) {
