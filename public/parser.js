@@ -7,7 +7,7 @@ var parser = {
     repslsh : 'ÃƒÂ¸ÃƒÂº!#@&5nÃƒÂ¥ÃƒÂ¶EESCHEInoheÃƒÂ©ÃƒÂ¤',
     replink : 'ÃƒÂ©ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂºENONHEInoheÃƒÂ¥ÃƒÂ¶',
     repnmliz : 'ÃƒÂ©ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂ¶EESCHEInoheÃƒÂ©ÃƒÂ¤',
-    matches : 6,
+    matches : 10,
     multiple : function (str, mtch, rep, limit) {
         var ct = 0;
         limit = limit || 3000;
@@ -150,7 +150,7 @@ var parser = {
         str = str.replace(this.linkreg, this.replink);
         
         //replace emoji shortcode
-        str = emojione.shortnameToImage(str);
+        str = emojione.toImage(str);
 
         //green text
         str = this.multiple(str, /(^|^[&#36;A-z\s|]+\s|^&#35;[A-z0-9]+\s|^[&#36;A-z\s|]+&#35;[A-z]+\s|<br>)\s?&gt;(.*?)(<br>|$)/g, '$1<span style="color:#789922;">>$2</span><br>');

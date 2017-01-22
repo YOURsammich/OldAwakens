@@ -568,26 +568,60 @@ function createPmPanel(id) {
     }
 }
 
-function autoComplete(word) {
-    var autocomp = document.createElement('div'),
-        span,
-        keys = Object.keys(ONLINE.users),
-        i;
+var AutoComplete = {
+    isBarOpen: false,
+    selected: 0,
+    word: null,
 
-    autocomp.className = 'autocomplete';
-    autocomp.style.cssText = 'width:100%;position:relative;margin-bottom:5px;';
-
-    for (i = 0; i < keys.length; i++) {
-        if (ONLINE.users[keys[i]].nick.match(word)) {
-            span = document.createElement('span');
-            span.textContent = ONLINE.users[keys[i]].nick;
-            autocomp.appendChild(span);
+    tabPressed: function tabPressed() {
+        if (this.isBarOpen) {
+            this.bar.childNodes[this.selected].style.color = "";
+            if(++this.selected > this.bar.childNodes.length - 1) this.selected = 0;
+            this.bar.childNodes[this.selected].style.color = "#DDD";
+        } else {
+            var word = this.word = document.getElementById('ac').value.replace(/[\.,-\/#!$%\^&\*;:{}=\_`~()]/g, ' ').trim().split(' ').reverse()[0],
+                valids = Object.keys(ONLINE.users).filter(function (element) {
+                return ONLINE.users[element].nick.indexOf(word) === 0;
+            });
+            if (valids.length === 0) return;
+            if (valids.length === 1) {
+                var input = document.getElementById('ac');
+                input.value = (input.value.split(' ').reverse().join(' ')).replace(this.word, ONLINE.users[valids[0]].nick).split(' ').reverse().join(' ');
+                return;
+            }
+            var keys = Object.keys(ONLINE.users),
+                bar  = document.createElement('div');
+            bar.style.cssText = 'width:100%;position:relative;margin-bottom:5px;';
+            this.bar = bar;
+            this.selected = 0;
+            for (var i = 0; i < keys.length; i++) {
+                if (ONLINE.users[keys[i]].nick.indexOf(this.word) === 0) {
+                    let span = document.createElement('span');
+                    span.textContent = ONLINE.users[keys[i]].nick + " ";
+                    this.bar.appendChild(span);
+                }
+            }
+            this.bar.childNodes[0].style.color = "#DDD";
+            document.getElementById('input-bar').prepend(this.bar);
+            this.isBarOpen = true;
+        }
+    },
+    otherKeys: function() {
+        if (this.isBarOpen) {
+            this.bar.parentNode.removeChild(this.bar);
+            this.isBarOpen = false;
+        }
+    },
+    enterPressed: function enterPressed() {
+        if (this.isBarOpen) {
+            var input = document.getElementById('ac');
+            input.value = (input.value.split(' ').reverse().join(' ')).replace(this.word, this.bar.childNodes[this.selected].textContent.replace(/ /, '')).split(' ').reverse().join(' ');
+            this.bar.parentNode.removeChild(this.bar);
+            this.isBarOpen = false;
+            return true;
         }
     }
-
-    document.getElementById('input-bar').prepend(autocomp);
-
-}
+};
 
 (function () {
     var history = [],
@@ -596,10 +630,10 @@ function autoComplete(word) {
     $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
         var keyCode = e.which,
             inputValue = this.value;
-
+        if (AutoComplete.isBarOpen) e.preventDefault();
         switch (keyCode) {
         case 13:
-            if (!e.shiftKey) {
+            if (!AutoComplete.enterPressed() && !e.shiftKey) {
                 e.preventDefault();
                 if (inputValue) {
                     historyIndex = 0;
@@ -607,6 +641,12 @@ function autoComplete(word) {
                     history.push(inputValue);
                     clientSubmit.handleInput(inputValue);
                 }
+            }
+            break;
+        case 32:
+            if (AutoComplete.isBarOpen) {
+                AutoComplete.enterPressed();
+                this.value = this.value + " ";
             }
             break;
         case 38:
@@ -619,7 +659,12 @@ function autoComplete(word) {
                 historyIndex--;
             }
             break;
+        case 9:
+            e.preventDefault();
+            AutoComplete.tabPressed();
+            break;
         default:
+            AutoComplete.otherKeys();
             historyIndex = 0;
         }
 
@@ -645,32 +690,33 @@ function autoComplete(word) {
             file = e.dataTransfer.files[0],
             type,
             reader;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        if (file.size < 7000001) {
-            type = file.type;
-            if (acceptedFiletypes.indexOf(type) != -1) {
-                reader = new FileReader();
-                reader.onloadend = function () {
-                    socket.emit("message-image", {
-                        type : type,
-                        img : reader.result 
-                    }, Attributes.get("flair"));
+            
+        if (file) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (file.size < 7000001) {
+                type = file.type;
+                if (acceptedFiletypes.indexOf(type) > -1) {
+                    reader = new FileReader();
+                    reader.onloadend = function () {
+                        socket.emit("message-image", {
+                            "type" : type,
+                            "img" : reader.result 
+                        }, Attributes.get("flair"));
+                    }
+                    reader.readAsBinaryString(file);
+                } else {
+                    showMessage({
+                        "message" : "Not an image.",
+                        "messageType" : "error"
+                    });
                 }
-                reader.readAsBinaryString(file);
             } else {
                 showMessage({
-                    message : "Not an image.",
-                    messageType : "error"
+                    "message" : "Image too large.",
+                    "messageType" : "error"
                 });
             }
-        } else {
-            showMessage({
-                message : "Image too large.",
-                messageType : "error"
-            });
         }
     });
     
