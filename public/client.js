@@ -754,8 +754,7 @@ socket.on('captcha', function (captcha) {
 });
 
 socket.on('channeldata', function (channel) {
-    var i,
-        channelData;
+    var i;
 
     if (channel.users) {
         document.getElementsByClassName('userList')[0].innerHTML = '';
