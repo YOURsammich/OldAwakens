@@ -245,7 +245,7 @@ function createChannel(io, channelName) {
                 if (index !== -1) {
                     if (user.role <= channel.online[index].role) {
                             roomEmit('message', {
-                            message : user.nick + ' kicked ' + params.nick,
+                            message : user.nick + ' kicked ' + params.nick + (params.reason ? ': ' + params.reason : ''),
                             messageType : 'general'
                         });
                         showMessage(channel.online[index].socket, message, 'error');
@@ -273,7 +273,7 @@ function createChannel(io, channelName) {
                 
                 dao.ban(channelName, params.nick, user.nick, params.reason).then(function () {
                     roomEmit('message', {
-                        message : user.nick + ' banned ' + params.nick,
+                        message : user.nick + ' banned ' + params.nick + (params.reason ? ': ' + params.reason : ''),
                         messageType : 'general'
                     });
                     showMessage(user.socket, params.nick + ' is now banned', 'info');
@@ -491,7 +491,7 @@ function createChannel(io, channelName) {
                     
                 dao.find(parmas.nick).then(function (dbuser) {
                     allHats = dao.getHats();
-                    hatIndex = allHats.lowercase.indexOf(parmas.hat);
+                    hatIndex = allHats.lowercase.indexOf(parmas.hat.toLowerCase());
                     userIndex = findIndex(channel.online, 'nick', dbuser.nick);
                     
                     if (dbuser.hat) {
@@ -512,12 +512,17 @@ function createChannel(io, channelName) {
                     
                     if (hatIndex !== -1) {
                         hatName = allHats.lowercase[hatIndex];
-                        usersHats.available.push(hatName);
-                        dao.setUserinfo(dbuser.nick, 'hat', usersHats).then(function () {
-                            if (userIndex !== -1) {
-                                showMessage(channel.online[userIndex].socket, 'You now have access to hat: ' + hatName, 'info');
-                            }
-                        });
+                        if (usersHats.available.indexOf(hatName) === -1) {
+                            usersHats.available.push(hatName);
+                            dao.setUserinfo(dbuser.nick, 'hat', usersHats).then(function () {
+                                if (userIndex !== -1) {
+                                    showMessage(channel.online[userIndex].socket, 'You now have access to hat: ' + hatName, 'info');
+                                }
+                                showMessage(user.socket, user.nick + ' now has access to ' + hatName, 'info');
+                            });
+                        } else {
+                            showMessage(user.socket, user.nick + ' already has access to ' + hatName, 'info');
+                        }
                     } else {
                         showMessage(user.socket, 'That hat doesn\'t exist', 'error');
                     }
@@ -535,13 +540,13 @@ function createChannel(io, channelName) {
                     allHats;
                     
                 dao.find(user.nick).then(function (dbuser) {
-                    allHats = dao.getHats();
                     if (dbuser.hat) {
+                        allHats = dao.getHats();
                         usersHats = JSON.parse(dbuser.hat);
-                        hatIndex = allHats.lowercase.indexOf(params.hat);
+                        hatIndex = allHats.lowercase.indexOf(params.hat.toLowerCase());
 
                         if (hatIndex !== -1) {
-                            userHatIndex = usersHats.available.indexOf(params.hat);
+                            userHatIndex = usersHats.available.indexOf(allHats.lowercase[hatIndex]);
                             if (userHatIndex !== -1) {
                                 usersHats.current = allHats.name[hatIndex];
                                 dao.setUserinfo(dbuser.nick, 'hat', usersHats).then(function () {
