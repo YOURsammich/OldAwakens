@@ -563,7 +563,7 @@ function createPmPanel(id) {
             validUser.li.getElementsByClassName('informer')[0].removeChild(informer[0]);
         }
         panel = makePanel();
-        $$$.draggable(panel);
+        $$$.draggable(panel, 'messageContent');
         document.body.appendChild(panel);
     }
 }
@@ -639,35 +639,41 @@ function autoComplete(word) {
         this.style.height = newHeight + 'px';
         messageDiv.style.top = -(newHeight - 18) + 'px';
     });
+    
     $$$.query('.main-container').addEventListener('drop', function (e) {
-        var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"];
+        var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
+            file = e.dataTransfer.files[0],
+            type,
+            reader;
+        
         e.preventDefault();
         e.stopPropagation();
         var file = e.dataTransfer.files[0];
         if (file.size < 7000001) {
-            var type = file.type;
-            if (acceptedFiletypes.indexOf(type) > -1) {
-                var reader = new FileReader();
+            type = file.type;
+            if (acceptedFiletypes.indexOf(type) != -1) {
+                reader = new FileReader();
                 reader.onloadend = function () {
                     socket.emit("message-image", {
-                        "type": type,
-                        "img": reader.result 
+                        type : type,
+                        img : reader.result 
                     }, Attributes.get("flair"));
                 }
                 reader.readAsBinaryString(file);
             } else {
                 showMessage({
-                    "message": "Not an image.",
-                    "messageType": "error"
+                    message : "Not an image.",
+                    messageType : "error"
                 });
             }
         } else {
             showMessage({
-                "message": "Image too large.",
-                "messageType": "error"
+                message : "Image too large.",
+                messageType : "error"
             });
         }
     });
+    
     window.onblur = function() {
         window.blurred = true;
     };

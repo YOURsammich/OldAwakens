@@ -146,6 +146,11 @@ var COMMANDS = {
                 if (password.value === confirmPassword.value) {
                     if (password.value.length > 4) {
                         socket.emit('register', userName.value, password.value);
+                    } else {
+                        showMessage({
+                            message : 'Please choose a password that is at least 5 characters long',
+                            messageType : 'info'
+                        });
                     }
                 }
             });

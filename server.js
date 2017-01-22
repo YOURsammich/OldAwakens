@@ -260,7 +260,8 @@ function createChannel(io, channelName) {
         },
         ban : {
             role : 1,
-            params : ['nick', 'reason'],
+            params : ['nick'],
+            optionalParams : ['reason'],
             handler : function (user, params) {
                 var index = findIndex(channel.online, 'nick', params.nick),
                     message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
@@ -626,7 +627,7 @@ function createChannel(io, channelName) {
             throttle.on(user.remote_addr + '-message').then(function (notSpam) {
                 if (notSpam) {
                     if (findIndex(channel.online, 'id', user.id) != -1) {
-                        if (message && typeof message.type === 'string' && acceptedFiletypes.indexOf(message.type) > -1 &&typeof message.img === 'string' && (typeof flair === 'string' || !flair)) {
+                        if (message && typeof message.type === 'string' && acceptedFiletypes.indexOf(message.type) != -1 &&typeof message.img === 'string' && (typeof flair === 'string' || !flair)) {
                             if (message.img.length < 7000001) {
                                 if (flair && flair.length < 500 || !flair) {
                                     roomEmit('message', {
@@ -688,7 +689,7 @@ function createChannel(io, channelName) {
             if (command.role === undefined || command.role >= user.role) {
                 if (command.params) {
                     for (i = 0; i < command.params.length; i++) {
-                        if (typeof params[command.params[i]] !== 'string') {
+                        if (typeof params[command.params[i]] !== 'string' && (command.optionalParams && typeof params[command.optionalParams[i]] !== 'string')) {
                             valid = false;
                         }
                     }

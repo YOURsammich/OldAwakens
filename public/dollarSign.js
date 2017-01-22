@@ -2,7 +2,7 @@ window.$$$ = {
     query : function (identifier) {
         return document.querySelector(identifier);
     },
-    draggable : function (el) {
+    draggable : function (el, stopOn) {
         var container = document.getElementById('messages'),
             clickX = 0,
             clickY = 0;
@@ -36,7 +36,7 @@ window.$$$ = {
         
         el.addEventListener('mousedown', function (e) {
             var target = e.target || e.srcElement;
-            if (!target.classList.contains('resizable-handle')) {
+            if (!target.classList.contains('resizable-handle') && target.className !== stopOn) {
                 clickX = e.clientX - parseInt(el.style.left, 10);
                 clickY = e.clientY - parseInt(el.style.top, 10);
                 el.addEventListener('mousemove', drag);
