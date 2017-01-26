@@ -154,10 +154,7 @@ var parser = {
 
         //green text
         str = this.multiple(str, /(^|^[&#36;A-z\s|]+\s|^&#35;[A-z0-9]+\s|^[&#36;A-z\s|]+&#35;[A-z]+\s|<br>)\s?&gt;(.*?)(<br>|$)/g, '$1<span style="color:#789922;">>$2</span><br>');
-        
-        //Spoiler image check
-        var spoiler = /\/\&#35;([^\|]+)\|?/g.test(str)
-    
+
         //styles
         str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', this.matches);
         str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', this.matches);
@@ -165,7 +162,7 @@ var parser = {
         str = this.multiple(str, /\/\_([^\|]+)\|?/g, '<u>$1</u>', this.matches);
         str = this.multiple(str, /\/\-([^\|]+)\|?/g, '<strike>$1</strike>', this.matches);
         str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', this.matches);
-        str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoil">$1</span>', this.matches);
+        str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoilerImg spoil">$1</span>', this.matches);
         str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<div class="style spin">$1</div>', this.matches);
         str = this.multiple(str, /\/\&amp;([^\|]+)\|?/g, '<span class="style marquee">$1</span>', 1);
         str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="style rainbow">$1</span>', this.matches);
@@ -223,11 +220,7 @@ var parser = {
 
         var img = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:agif|apng|gif|jpg|jpeg|png|bmp|svg))<\/a>/gi.exec(str);
         if (img && Attributes.get('toggle-images')) {
-            if (spoiler) {
-                str = this.multiple(str, img[0], img[1] + '<img class="spoilerImg" src="' + img[2] + '" onload="messageBuilder.scrollToBottom(\'messages\');"/></a>', 3);
-            } else {
-                str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="messageBuilder.scrollToBottom(\'messages\');"/></a>', 3);
-            }
+            str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="messageBuilder.scrollToBottom(\'messages\');"/></a>', 3);
         }
 
         //replace normalied text

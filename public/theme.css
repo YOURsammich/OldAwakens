@@ -749,12 +749,12 @@ a {
     opacity: 1;
 }
 
-.spoilerImg {
+.spoilerImg img {
     -webkit-filter: brightness(-200%); /* Safari */
     filter: brightness(-200%);
 }
 
-.spoilerImg:hover {
+.spoilerImg img:hover {
     -webkit-filter: brightness(100%); /* Safari */
     filter: brightness(100%);
 }
