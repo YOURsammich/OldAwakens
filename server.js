@@ -481,6 +481,7 @@ function createChannel(io, channelName) {
             }
         },
         give_hat : {
+            role : 0,
             params : ['nick', 'hat'],
             handler : function (user, parmas) {
                 var allHats,
