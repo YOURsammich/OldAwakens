@@ -748,3 +748,13 @@ a {
 .unreadPM::after {
     opacity: 1;
 }
+
+.spoilerImg {
+    -webkit-filter: brightness(-200%); /* Safari */
+    filter: brightness(-200%);
+}
+
+.spoilerImg:hover {
+    -webkit-filter: brightness(100%); /* Safari */
+    filter: brightness(100%);
+}
