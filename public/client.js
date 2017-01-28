@@ -870,7 +870,7 @@ socket.on("cursor", function(cursor){
 
 socket.on("removeCursor", function(id) {
     if (CURSORS && !Attributes.get("toggle-cursors")) {
-        CURSORS[i].element.parentElement.removeChild(CURSORS[i].element);
+        CURSORS[id].element.parentElement.removeChild(CURSORS[id].element);
         delete CURSORS[id];
     }
 });
