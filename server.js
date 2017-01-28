@@ -596,6 +596,26 @@ function createChannel(io, channelName) {
             user.remote_addr = socket.request.headers['cf-connecting-ip'];
         }
         
+        socket.on("cursor", function(cursor){
+            if (findIndex(channel.online, 'id', user.id) != -1) {
+                cursor.y = cursor.y || 0;
+                cursor.x = cursor.x || 0;
+                
+                roomEmit("cursor", {
+                    "id": user.id,
+                    "nick": user.nick,
+                    "x": cursor.x,
+                    "y": cursor.y
+                });
+            }
+        });
+        
+        socket.on("removeCursor", function(){
+            if (findIndex(channel.online, 'id', user.id) != -1) {
+                roomEmit("removeCursor", user.id);
+            }
+        });
+        
         socket.on('message', function (message, flair) {
             throttle.on(user.remote_addr + '-message').then(function (notSpam) {
                 if (notSpam) {

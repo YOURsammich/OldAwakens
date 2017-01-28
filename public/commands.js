@@ -207,11 +207,19 @@ var COMMANDS = {
     toggle : {
         params : ['attr'],
         handler : function (params) {
-            var validAtts = ['background', 'images', '12h', 'filters'],
+            var validAtts = ['background', 'images', '12h', 'filters', 'cursors'],
                 attValue = Attributes.get('toggle-' + params.attr);
             
             if (validAtts.indexOf(params.attr) !== -1) {
                 Attributes.set('toggle-' + params.attr, !attValue, true);
+                
+                if (params.attr == "cursors" && !attValue) {
+                    socket.emit("removeCursor");
+                    var eles = document.querySelectorAll(".cursor");
+                    for (var i = 0; i < eles.length; i++) {
+                        eles[i].parentElement.removeChild(eles[i]);
+                    }
+                }
                 
                 if (params.attr === 'background') {
                     if (!attValue) {

@@ -70,6 +70,8 @@ a {
     text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
     word-wrap: break-word;
     color: white;
+    z-index: 1;
+    position: relative;
 }
 
 .messageContent {
@@ -757,4 +759,28 @@ a {
 .spoilerImg img:hover {
     -webkit-filter: brightness(100%); /* Safari */
     filter: brightness(100%);
+}
+
+/* Cursor Stuff */
+
+.cursor { 
+    position: absolute;
+    transition: 0.1s;
+    z-index: 0;
+}
+
+.cursor::after {
+    display: block;
+    text-shadow:
+     1px 0px 0 #000,
+    -1px 0px 0 #000,
+     0px 1px 0 #000,
+     0px -1px 0 #000,
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px 1px 0 #000,
+     1px 1px 0 #000;
+    color: #FFF;
+    opacity: 0.5;
+    content: attr(id);
 }

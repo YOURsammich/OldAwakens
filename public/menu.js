@@ -60,6 +60,14 @@ var menuControl = {
         
         menuControl.updateCount();
         
+        if (CURSORS) {
+            var This = CURSORS[id];
+            if (This) {
+                CURSORS[id].element.parentElement.removeChild(CURSORS[id].element);
+                delete CURSORS[id];
+            }
+        }
+        
         showMessage({
             message : user.nick + ' has left',
             messageType : 'general'
@@ -76,7 +84,12 @@ var menuControl = {
         
         nickContain.textContent = newNick;
         User.nick = newNick;
-        
+        if (CURSORS) {
+            var This = CURSORS[id];
+            if (This) {
+                This.element.id = newNick;
+            }
+        }
     },
     inform : function (id, type, message, func) {
         var user = ONLINE.users[id],

@@ -44,8 +44,10 @@ var Attributes = {
             attribute = this.altAtt[attribute];
         }
 
-        if (this.storedAttributes[attribute] === undefined && attribute.substr(0, 6) === 'toggle') {
+        if (this.storedAttributes[attribute] === undefined && attribute.substr(0, 6) === 'toggle' && attribute !== "toggle-cursors") {
             value = true;
+        } else if (this.storedAttributes[attribute] === undefined && attribute == "toggle-cursors") {
+            value = false;
         } else {
             value = this.storedAttributes[attribute];
         }
@@ -851,6 +853,25 @@ socket.on('connect', function () {
     } else {
         socket.emit('requestJoin', Attributes.storedAttributes);
         menuControl.updateValues();
+    }
+});
+
+socket.on("cursor", function(cursor){
+    if (cursor.nick != Attributes.get("nick")) {
+        if (CURSORS && !Attributes.get("toggle-cursors")) {
+            if (CURSORS.hasOwnProperty(cursor.id)) {
+                moveCursor(cursor.id, cursor.x, cursor.y);
+            } else {
+                newCursor(cursor.id, cursor.nick, cursor.x, cursor.y);
+            }
+        }
+    }
+});
+
+socket.on("removeCursor", function(id) {
+    if (CURSORS && !Attributes.get("toggle-cursors")) {
+        CURSORS[i].element.parentElement.removeChild(CURSORS[i].element);
+        delete CURSORS[id];
     }
 });
 
