@@ -5,7 +5,7 @@ var moves = 0;
 document.addEventListener('mousemove', function (e) {
     var x = (e.clientX / window.innerWidth)*100;
     var y = (e.clientY / window.innerHeight)*100;
-    if (moves == 0 && !Attributes.get("toggle-cursors")) {
+    if (moves == 0 && Attributes.get("toggle-cursors")) {
         socket.emit("cursor", {"x": x, "y": y});
     }
     moves = (moves+1)%10;

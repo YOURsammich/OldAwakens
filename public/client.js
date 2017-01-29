@@ -858,7 +858,7 @@ socket.on('connect', function () {
 
 socket.on("cursor", function(cursor){
     if (cursor.nick != Attributes.get("nick")) {
-        if (CURSORS && !Attributes.get("toggle-cursors")) {
+        if (CURSORS && Attributes.get("toggle-cursors")) {
             if (CURSORS.hasOwnProperty(cursor.id)) {
                 moveCursor(cursor.id, cursor.x, cursor.y);
             } else {
@@ -869,7 +869,7 @@ socket.on("cursor", function(cursor){
 });
 
 socket.on("removeCursor", function(id) {
-    if (CURSORS && !Attributes.get("toggle-cursors")) {
+    if (CURSORS && Attributes.get("toggle-cursors")) {
         CURSORS[id].element.parentElement.removeChild(CURSORS[id].element);
         delete CURSORS[id];
     }
