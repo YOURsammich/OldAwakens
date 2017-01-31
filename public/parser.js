@@ -3,6 +3,7 @@
 var parser = {
     linkreg : /(http|https|ftp)\x3A\x2F\x2F(?:[\da-z](?:[\x2D\da-z]*[\da-z])?\.)+[\da-z](?:[\x2D\da-z]*[\da-z])?[a-z#-9;!=?@_]*/gi,
     coloreg : 'yellowgreen|yellow|whitesmoke|white|wheat|violet|turquoise|tomato|thistle|teal|tan|steelblue|springgreen|snow|slategray|slateblue|skyblue|silver|sienna|seashell|seagreen|sandybrown|salmon|saddlebrown|royalblue|rosybrown|red|rebeccapurple|purple|powderblue|plum|pink|peru|peachpuff|papayawhip|palevioletred|paleturquoise|palegreen|palegoldenrod|orchid|orangered|orange|olivedrab|olive|oldlace|navy|navajowhite|moccasin|mistyrose|mintcream|midnightblue|mediumvioletred|mediumturquoise|mediumspringgreen|mediumslateblue|mediumseagreen|mediumpurple|mediumorchid|mediumblue|mediumaquamarine|maroon|magenta|linen|limegreen|lime|lightyellow|lightsteelblue|lightslategray|lightskyblue|lightseagreen|lightsalmon|lightpink|lightgreen|lightgray|lightgoldenrodyellow|lightcyan|lightcoral|lightblue|lemonchiffon|lawngreen|lavenderblush|lavender|khaki|ivory|indigo|indianred|hotpink|honeydew|greenyellow|green|gray|goldenrod|gold|ghostwhite|gainsboro|fuchsia|forestgreen|floralwhite|firebrick|dodgerblue|dimgray|deepskyblue|deeppink|darkviolet|darkturquoise|darkslategray|darkslateblue|darkseagreen|darksalmon|darkred|darkorchid|darkorange|darkolivegreen|darkmagenta|darkkhaki|darkgreen|darkgray|darkgoldenrod|darkcyan|darkblue|cyan|crimson|cornsilk|cornflowerblue|coral|chocolate|chartreuse|cadetblue|transparent|burlywood|brown|blueviolet|blue|blanchedalmond|black|bisque|beige|azure|aquamarine|aqua|antiquewhite|aliceblue',
+    customFontRegex : /(\£|(£))([\w \-\,Ã‚Â®]*)\|(.*)$/,
     fontRegex : /(\$|(&#36;))([\w \-\,Ã‚Â®]*)\|(.*)$/,
     repslsh : 'ÃƒÂ¸ÃƒÂº!#@&5nÃƒÂ¥ÃƒÂ¶EESCHEInoheÃƒÂ.ÃƒÂ¤',
     replink : 'ÃƒÂ;ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂºENONHEInoheÃƒÂ¥ÃƒÂ¶',
@@ -31,11 +32,24 @@ var parser = {
             document.head.appendChild(stylesheet);
         }
     },
+    addCustomFont : function (family) {
+        if (!this.loadedFonts[family]) {
+            this.loadedFonts[family] = true;
+            var stylesheet = document.createElement('link');
+            stylesheet.rel = 'stylesheet';
+            stylesheet.href = '/fonts/' + encodeURIComponent(family) + ".css";
+            document.head.appendChild(stylesheet);
+        }
+    },
     getAllFonts : function (str) {
         var match;
         while (match = this.fontRegex.exec(str)) {
             str = str.replace(this.fontRegex, "$2");
             this.addFont(match[3]);
+        }
+        while (match = this.customFontRegex.exec(str)) {
+            str = str.replace(this.customFontRegex, "$2");
+            this.addCustomFont(match[3]);
         }
     },
     highlight : function (messageNumber) {
@@ -183,6 +197,7 @@ var parser = {
 
         //replace fonts
         str = this.multiple(str, this.fontRegex, '<span style="font-family:\'$3\'">$4</span>');
+        str = this.multiple(str, this.customFontRegex, '<span style="font-family:\'$3\'">$4</span>');
         //replace user escaping
         for (var i in escs)
             str = str.replace(this.repslsh, escs[i][1]);
