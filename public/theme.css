@@ -532,6 +532,10 @@ a {
     background-color: #000;
 }
 
+.nlink {
+    text-decoration: none;
+}
+
 @keyframes marquee {
   0% {
     transform: translate(0%);

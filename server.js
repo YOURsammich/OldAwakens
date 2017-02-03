@@ -1033,8 +1033,9 @@ function intoapp(app, http) {
 (function () {
     var app = express();
     var http = require('http').Server(app);
-    http.listen(process.env.PORT || 80, function () {
-       console.log('listening on *:80');
+    var port = (process.env.PORT || 80);
+    http.listen(port, function () {
+       console.log('listening on *:'+port);
        intoapp(app, http);
     });
 })();
