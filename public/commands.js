@@ -372,6 +372,11 @@ var COMMANDS = {
             }
         }
     },
+    emojis : {
+        handler : function () {
+            embed('embed', 'https://emojicopy.com/');
+        }
+    },
     //server side commands
     nick : {
         params : ['nick']
