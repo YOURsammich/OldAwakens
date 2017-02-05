@@ -1,12 +1,14 @@
 //10:00am
 
 var parser = {
-    linkreg : /(http|https|ftp)\x3A\x2F\x2F(?:[\da-z](?:[\x2D\da-z]*[\da-z])?\.)+[\da-z](?:[\x2D\da-z]*[\da-z])?[a-z#-9;!=?@_]*/gi,
+    linkreg : /(http|https|ftp)\x3A\x2F\x2F(?:[\da-z](?:[\x2D\da-z]*[\da-z])?\.)+[\da-z](?:[\x2D\da-z]*[\da-z])?[a-z0-9\_\-\%\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\`\.]*/gi,
+    clinkreg : /([a-z]+:\/\/(([0-9a-z\-\.]+\.[a-z]+\/[a-z0-9\_\-\~\:\/\?\#\[\]\@\!\$\&\'\%\(\)\*\+\,\;\=\`\.]+)|([0-9a-z\-\.]+\.[a-z]+\/)|([0-9a-z\-\.]+\.[a-z]+)))\[\{([\W\w]+)\}\]/gi,
     coloreg : 'yellowgreen|yellow|whitesmoke|white|wheat|violet|turquoise|tomato|thistle|teal|tan|steelblue|springgreen|snow|slategray|slateblue|skyblue|silver|sienna|seashell|seagreen|sandybrown|salmon|saddlebrown|royalblue|rosybrown|red|rebeccapurple|purple|powderblue|plum|pink|peru|peachpuff|papayawhip|palevioletred|paleturquoise|palegreen|palegoldenrod|orchid|orangered|orange|olivedrab|olive|oldlace|navy|navajowhite|moccasin|mistyrose|mintcream|midnightblue|mediumvioletred|mediumturquoise|mediumspringgreen|mediumslateblue|mediumseagreen|mediumpurple|mediumorchid|mediumblue|mediumaquamarine|maroon|magenta|linen|limegreen|lime|lightyellow|lightsteelblue|lightslategray|lightskyblue|lightseagreen|lightsalmon|lightpink|lightgreen|lightgray|lightgoldenrodyellow|lightcyan|lightcoral|lightblue|lemonchiffon|lawngreen|lavenderblush|lavender|khaki|ivory|indigo|indianred|hotpink|honeydew|greenyellow|green|gray|goldenrod|gold|ghostwhite|gainsboro|fuchsia|forestgreen|floralwhite|firebrick|dodgerblue|dimgray|deepskyblue|deeppink|darkviolet|darkturquoise|darkslategray|darkslateblue|darkseagreen|darksalmon|darkred|darkorchid|darkorange|darkolivegreen|darkmagenta|darkkhaki|darkgreen|darkgray|darkgoldenrod|darkcyan|darkblue|cyan|crimson|cornsilk|cornflowerblue|coral|chocolate|chartreuse|cadetblue|transparent|burlywood|brown|blueviolet|blue|blanchedalmond|black|bisque|beige|azure|aquamarine|aqua|antiquewhite|aliceblue',
     customFontRegex : /(\£|(£))([\w \-\,Ã‚Â®]*)\|(.*)$/,
     fontRegex : /(\$|(&#36;))([\w \-\,Ã‚Â®]*)\|(.*)$/,
     repslsh : 'ÃƒÂ¸ÃƒÂº!#@&5nÃƒÂ¥ÃƒÂ¶EESCHEInoheÃƒÂ.ÃƒÂ¤',
     replink : 'ÃƒÂ;ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂºENONHEInoheÃƒÂ¥ÃƒÂ¶',
+    repclink : 'ÃƒÂ;ÃƒÂ¤!#@&5cÃƒÂ¸ÃƒÂºENONHEInoheÃƒÂ¥ÃƒÂ¶',
     repnmliz : 'ÃƒÂ;ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂ¶EESCHEInoheÃƒÂ_ÃƒÂ¤',
     matches : 10,
     multiple : function (str, mtch, rep, limit) {
@@ -134,6 +136,32 @@ var parser = {
 
         return str;
     },
+    stylize : function(str) {
+        // Replace styles
+        str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', this.matches);
+        str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', this.matches);
+        str = this.multiple(str, /\/\%([^\|]+)\|?/g, '<span class="style italic">$1</span>', this.matches);
+        str = this.multiple(str, /\/\_([^\|]+)\|?/g, '<u>$1</u>', this.matches);
+        str = this.multiple(str, /\/\-([^\|]+)\|?/g, '<strike>$1</strike>', this.matches);
+        str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', this.matches);
+        str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoilerImg spoil">$1</span>', this.matches);
+        str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<div class="style spin">$1</div>', this.matches);
+        str = this.multiple(str, /\/\&amp;([^\|]+)\|?/g, '<span class="style marquee">$1</span>', 1);
+        str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="style rainbow">$1</span>', this.matches);
+        str = this.multiple(str, /\/\&#36;([^\|]+)\|?/g, '<span class="style shake">$1</span>', this.matches);
+        str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>', this.matches);
+        return str;
+    },
+    color : function(str) {
+        // Replace colors
+        str = this.multiple(str, /&#35;&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="text-shadow: 0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1;">$2</span>');
+        str = this.multiple(str, /&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="background-color: #$1;">$2</span>');
+        str = this.multiple(str, /&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="color: #$1;">$2</span>');
+        str = this.multiple(str, RegExp('&#35;&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="text-shadow: 0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1;">$2</span>');
+        str = this.multiple(str, RegExp('&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="background-color: $1;">$2</span>');
+        str = this.multiple(str, RegExp('&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="color: $1;">$2</span>');
+        return str;
+    },
     parse : function (str, wordReplace) {
         // Convert chars to html codes
         str = str.replace(/\n/g, '\\n');
@@ -155,9 +183,13 @@ var parser = {
         var normalize = /\/\`[^]/.test(str) ? str.match(/\/\`([^]+)$/)[1] : null;
         str = str.replace(/\/\`[^]+$/, this.repnmliz);
 
-        //match qoutes
+        //match quotes
         str = str.replace(/&gt;&gt;/g,'>&gt;');
         var check = str.match(/>&gt;\d+/g);
+
+        //match clinks
+        var clinks = str.match(this.clinkreg);
+        str = str.replace(this.clinkreg, this.repclink)
 
         //match links
         var linkesc = str.match(this.linkreg);
@@ -170,30 +202,13 @@ var parser = {
         str = this.multiple(str, /(^|^[&#36;A-z\s|]+\s|^&#35;[A-z0-9]+\s|^[&#36;A-z\s|]+&#35;[A-z]+\s|<br>)\s?&gt;(.*?)(<br>|$)/g, '$1<span style="color:#789922;">>$2</span><br>');
 
         //styles
-        str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', this.matches);
-        str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', this.matches);
-        str = this.multiple(str, /\/\%([^\|]+)\|?/g, '<span class="style italic">$1</span>', this.matches);
-        str = this.multiple(str, /\/\_([^\|]+)\|?/g, '<u>$1</u>', this.matches);
-        str = this.multiple(str, /\/\-([^\|]+)\|?/g, '<strike>$1</strike>', this.matches);
-        str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', this.matches);
-        str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoilerImg spoil">$1</span>', this.matches);
-        str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<div class="style spin">$1</div>', this.matches);
-        str = this.multiple(str, /\/\&amp;([^\|]+)\|?/g, '<span class="style marquee">$1</span>', 1);
-        str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="style rainbow">$1</span>', this.matches);
-        str = this.multiple(str, /\/\&#36;([^\|]+)\|?/g, '<span class="style shake">$1</span>', this.matches);
-        str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>', this.matches);
+        str = this.stylize(str);
 
         if (wordReplace) {
             str = this.wordReplace(str);
         }
-
-        // Replace colors
-        str = this.multiple(str, /&#35;&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="text-shadow: 0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1,0px 0px 20px #$1;">$2</span>');
-        str = this.multiple(str, /&#35;&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="background-color: #$1;">$2</span>');
-        str = this.multiple(str, /&#35;([\da-f]{6}|[\da-f]{3})(.+)$/i, '<span style="color: #$1;">$2</span>');
-        str = this.multiple(str, RegExp('&#35;&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="text-shadow: 0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1,0px 0px 20px $1;">$2</span>');
-        str = this.multiple(str, RegExp('&#35;&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="background-color: $1;">$2</span>');
-        str = this.multiple(str, RegExp('&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="color: $1;">$2</span>');
+        
+        str = this.color(str);
 
         //replace fonts
         str = this.multiple(str, this.fontRegex, '<span style="font-family:\'$3\'">$4</span>');
@@ -201,6 +216,17 @@ var parser = {
         //replace user escaping
         for (var i in escs)
             str = str.replace(this.repslsh, escs[i][1]);
+
+        //replace clinks
+        for (var i in clinks){
+            var link = clinks[i].replace(this.clinkreg, function(match, p1, p2, p3, p4, p5, p6){
+                var name = p6;
+                name = parser.stylize(name);
+                name = parser.color(name);
+                return '<a target="_blank" class="nlink" href="'+p1+'">'+name+'</a>';
+            });
+            str = str.replace(this.repclink, link);
+        }
 
         //replace links
         for (var i in linkesc){

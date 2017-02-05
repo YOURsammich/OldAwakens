@@ -1,7 +1,7 @@
 {
-  "name": "visual-chat",
-  "version": "0.0.1",
-  "description": "A simple node.js chat server with some user management and games.",
+  "name": "awakens",
+  "version": "0.0.4",
+  "description": "A simple node.js chat server with some user management.",
   "dependencies": {
     "ascii-captcha": "0.0.3",
     "bcrypt-nodejs": "^0.0.3",
@@ -12,5 +12,6 @@
     "request": "^2.39.0",
     "socket.io": "*",
     "underscore": "^1.6.0"
-  }
+  },
+  "license": "GPL-3.0"
 }
