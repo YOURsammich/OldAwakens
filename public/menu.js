@@ -60,12 +60,8 @@ var menuControl = {
         
         menuControl.updateCount();
         
-        if (CURSORS) {
-            var This = CURSORS[id];
-            if (This) {
-                CURSORS[id].element.parentElement.removeChild(CURSORS[id].element);
-                delete CURSORS[id];
-            }
+        if (user.cursor) {
+            user.cursor.parentNode.removeChild(user.cursor);
         }
         
         showMessage({
@@ -84,11 +80,8 @@ var menuControl = {
         
         nickContain.textContent = newNick;
         User.nick = newNick;
-        if (CURSORS) {
-            var This = CURSORS[id];
-            if (This) {
-                This.element.id = newNick;
-            }
+        if (User.cursor) {
+            User.cursor.innerHTML = '<br>' + newNick;
         }
     },
     inform : function (id, type, message, func) {

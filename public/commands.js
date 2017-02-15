@@ -213,11 +213,12 @@ var COMMANDS = {
             if (validAtts.indexOf(params.attr) !== -1) {
                 Attributes.set('toggle-' + params.attr, !attValue, true);
                 
-                if (params.attr == "cursors" && !attValue) {
-                    socket.emit("removeCursor");
-                    var eles = document.querySelectorAll(".cursor");
-                    for (var i = 0; i < eles.length; i++) {
-                        eles[i].parentElement.removeChild(eles[i]);
+                if (params.attr == 'cursors') {
+                    if (attValue) {
+                        document.getElementById('cursor-container').style.display = 'none';
+                        socket.emit('removeCursor');
+                    } else {
+                        document.getElementById('cursor-container').style.display = 'block';
                     }
                 }
                 
