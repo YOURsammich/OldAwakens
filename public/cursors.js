@@ -30,7 +30,7 @@ function changeCursor(id, newCursor) {
     document.addEventListener('mousemove', function (e) {
         var x = e.clientX / window.innerWidth
         var y = e.clientY / window.innerHeight
-        if (moves == 0) {
+        if (moves == 0 && Attributes.get('cursors')) {
             socket.emit('updateCursor', {
                 x : x,
                 y : y
