@@ -26,10 +26,6 @@ var menuControl = {
             li : nickContain
         };
         
-        if (document.getElementsByClassName('LoginPanel').length !== 0 && nick === Attributes.get('nick')) {
-            document.body.removeChild(document.getElementsByClassName('LoginPanel')[0].parentNode);
-        }
-        
         menuControl.updateCount();
         
         if (afk) {
@@ -41,6 +37,10 @@ var menuControl = {
                 message : nick + ' has joined',
                 messageType : 'general'
             });
+        }
+        
+        if (document.getElementsByClassName('LoginPanel').length !== 0 && nick === Attributes.get('nick')) {
+            document.body.removeChild(document.getElementsByClassName('LoginPanel')[0].parentNode);
         }
     },
     removeUser : function (id) {
@@ -80,7 +80,7 @@ var menuControl = {
         nickContain.textContent = newNick;
         User.nick = newNick;
         if (User.cursor) {
-            User.cursor.innerHTML = '<br>' + newNick;
+            User.cursor.setAttribute('data-nick', newNick);
         }
     },
     inform : function (id, type, message, func) {
