@@ -47,7 +47,7 @@ socket.on('updateCursor', function (cursorData) {
 });
 
 socket.on('removeCursor', function(id) {
-    if (Attributes.get('toggle-cursors' && ONLINE.users[id].cursor)) {
+    if (ONLINE.users[id].cursor) {
         ONLINE.users[id].cursor.parentNode.removeChild(ONLINE.users[id].cursor);
     }
 });

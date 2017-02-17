@@ -641,8 +641,8 @@ function createChannel(io, channelName) {
             });
         });
         
-        socket.on("typing", function() {
-            roomEmit("typing", user.id);
+        socket.on('typing', function(typing) {
+            roomEmit('typing', user.id, typing);
         });
         
         socket.on('message-image', function (message, flair) {

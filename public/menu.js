@@ -11,7 +11,7 @@ var menuControl = {
         
         nickContain.addEventListener('click', function (e) {
             var target = e.target;
-            if (target.className === 'nickText') {
+            if (target.classList.contains('nickText')) {
                 menuControl.contextMenu.placeMenu(e.clientX, e.clientY, id);
             }
         });
@@ -23,8 +23,7 @@ var menuControl = {
         
         ONLINE.users[id] = {
             nick : nick,
-            li : nickContain,
-            typing : false
+            li : nickContain
         };
         
         if (document.getElementsByClassName('LoginPanel').length !== 0 && nick === Attributes.get('nick')) {
@@ -224,14 +223,14 @@ var menuControl = {
             blurred = true;
         });
     },
-    typing : function (id) {
+    typing : function (id, typing) {
         var user = ONLINE.users[id];
         if (user) {
-            if (user.typing !== false) clearTimeout(user.typing);
-            user.li.children[0].classList.add('typing');
-            setTimeout(function(user){
+            if (typing) {
+                user.li.children[0].classList.add('typing');
+            } else {
                 user.li.children[0].classList.remove('typing');
-            }, 2500, user);
+            }
         }
     }
 };

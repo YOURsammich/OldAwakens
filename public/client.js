@@ -3,6 +3,7 @@ var socket = io.connect(window.location.pathname);
 //idle/afk users should change positions on the userlist board after so long of inactivity
 
 var ONLINE = {
+    
     users : {},
     getId : function (nick) {
         var keys = Object.keys(this.users),
@@ -627,11 +628,13 @@ var AutoComplete = {
 
 (function () {
     var history = [],
-        historyIndex = 0;
+        historyIndex = 0,
+        typing = false;
 
     $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
         var keyCode = e.which,
             inputValue = this.value;
+        
         if (AutoComplete.isBarOpen) e.preventDefault();
         switch (keyCode) {
         case 13:
@@ -674,7 +677,11 @@ var AutoComplete = {
             this.value = history[history.length - historyIndex];
         }
         
-        socket.emit('typing');
+        if (!typing) {
+            socket.emit('typing', true);
+        }
+        
+        typing = true;
     });
 
     $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
@@ -685,6 +692,11 @@ var AutoComplete = {
 
         this.style.height = newHeight + 'px';
         messageDiv.style.top = -(newHeight - 18) + 'px';
+        
+        if (this.value.length === 0) {
+            typing = false;
+            socket.emit('typing', false);
+        }
     });
     
     $$$.query('.main-container').addEventListener('drop', function (e) {
