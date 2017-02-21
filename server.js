@@ -200,10 +200,10 @@ function createChannel(io, channelName) {
                         if (userData) {
                             message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
                         } else {
-                            message = 'Nick: ' + dbuser.nick + '\nRole: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\nIP: ' + (user.role <= 1 ? dbuser.remote_addr : 'Private');  
+                            message = 'Nick: ' + dbuser.nick + '\nRole: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\nIP: ' + (user.role === 0 ? dbuser.remote_addr : 'Private');
                         }
                         message += '\nRegistered: Yes';
-                        showMessage(user.socket, message, 'info');   
+                        showMessage(user.socket, message, 'info');
                     }).fail(function () {
                         if (userData) {
                             message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
@@ -211,7 +211,7 @@ function createChannel(io, channelName) {
                             message = params.nick + ' doesn\'t exist'
                         }
                         message += '\nRegistered: No';
-                        showMessage(user.socket, message, 'info');   
+                        showMessage(user.socket, message, 'info');
                     });
                 });
                 
@@ -835,7 +835,7 @@ function createChannel(io, channelName) {
         function joinChannel(requestedData, channelRoles, channelData, overRide) {
             var i,
                 onlineUsers = [],
-                roleNames = ['God', 'Admin', 'Mod', 'Basic'],
+                roleNames = ['God', 'Channel Owner', 'Admin', 'Mod', 'Basic'],
                 userRole;
             
             function join(channelData, nick, role, hat) {
