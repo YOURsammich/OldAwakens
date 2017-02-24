@@ -198,19 +198,19 @@ function createChannel(io, channelName) {
 
                     dao.find(params.nick).then(function (dbuser) {
                         if (userData) {
-                            message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
+                            message = 'Nick: ' + userData.nick + '\n              Role: ' + userData.role + '\n              IP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
                         } else {
-                            message = 'Nick: ' + dbuser.nick + '\nRole: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\nIP: ' + (user.role <= 1 ? dbuser.remote_addr : 'Private');  
+                            message = 'Nick: ' + dbuser.nick + '\n              Role: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\n              IP: ' + (user.role <= 1 ? dbuser.remote_addr : 'Private');  
                         }
-                        message += '\nRegistered: Yes';
+                        message += '\n              Registered: Yes';
                         showMessage(user.socket, message, 'info');   
                     }).fail(function () {
                         if (userData) {
-                            message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
+                            message = 'Nick: ' + userData.nick + '\n              Role: ' + userData.role + '\n              IP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
                         } else {
                             message = params.nick + ' doesn\'t exist'
                         }
-                        message += '\nRegistered: No';
+                        message += '\n              Registered: No';
                         showMessage(user.socket, message, 'info');   
                     });
                 });
@@ -568,6 +568,45 @@ function createChannel(io, channelName) {
                 });
             }
         },
+        cursor : {
+            params : ['cursor'],
+            handler : function (user, params) {
+                var usersCursors,
+                    userCursorIndex,
+                    cursorIndex,
+                    allCursors;
+                    
+                dao.find(user.nick).then(function (dbuser) {
+                    var allCursors = dao.getCursors();
+                    var cursorIndex = allCursors.lowercase.indexOf(params.cursor.toLowerCase());
+                    if (cursorIndex !== -1) {
+                        var userCursor = {
+                            "name": allCursors.name[cursorIndex]
+                        }
+                        dao.setUserinfo(dbuser.nick, 'cursor', userCursor).then(function () {
+                            user.cursor = allCursors.name[cursorIndex];
+                            roomEmit("changeCursor", user.id, user.cursor);
+                            showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
+                        });
+                    } else {
+                        showMessage(user.socket, 'That cursor doesn\'t exist.', 'error');
+                    }
+                }).fail(function () {
+                    var allCursors = dao.getCursors();
+                    var cursorIndex = allCursors.lowercase.indexOf(params.cursor.toLowerCase());
+                    if (cursorIndex !== -1) {
+                        var userCursor = {
+                            "name": allCursors.name[cursorIndex]
+                        }
+                        user.cursor = allCursors.name[cursorIndex];
+                        roomEmit("changeCursor", user.id, user.cursor);
+                        showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
+                    } else {
+                        showMessage(user.socket, 'That cursor doesn\'t exist.', 'error');
+                    }
+                });
+            }
+        },
         afk : {
             params : ['message'],
             handler : function (user, params) {
@@ -601,7 +640,8 @@ function createChannel(io, channelName) {
                 if (!isNaN(parseInt(cursorData.y)) && !isNaN(parseInt(cursorData.x))) {
                     roomEmit('updateCursor', {
                         id : user.id,
-                        position : cursorData
+                        position : cursorData,
+                        type : user.cursor
                     });
                 }
             }
@@ -838,7 +878,7 @@ function createChannel(io, channelName) {
                 roleNames = ['God', 'Admin', 'Mod', 'Basic'],
                 userRole;
             
-            function join(channelData, nick, role, hat) {
+            function join(channelData, nick, role, hat, cursor) {
                 
                 if (typeof nick === 'string' && nick.length > 0 && nick.length < 50 && /^[\x21-\x7E]*$/i.test(nick)) {
                     user.nick = nick;
@@ -847,6 +887,10 @@ function createChannel(io, channelName) {
                     
                     if (hat) {
                         user.hat = JSON.parse(hat).current;
+                    }
+                    
+                    if (cursor) {
+                        user.cursor = JSON.parse(cursor).name;
                     }
                     
                     if (role !== undefined) {
@@ -898,7 +942,7 @@ function createChannel(io, channelName) {
                             } else {
                                 userRole = channelRoles[requestedData.nick];
                             }
-                            join(channelData, dbuser.nick, userRole, dbuser.hat);
+                            join(channelData, dbuser.nick, userRole, dbuser.hat, dbuser.cursor);
                         } else {
                             join(channelData);
                         }
