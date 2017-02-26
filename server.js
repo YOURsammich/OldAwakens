@@ -580,6 +580,45 @@ function createChannel(io, channelName) {
                 });
             }
         },
+        cursor : {
+            params : ['cursor'],
+            handler : function (user, params) {
+                var usersCursors,
+                    userCursorIndex,
+                    cursorIndex,
+                    allCursors;
+                    
+                dao.find(user.nick).then(function (dbuser) {
+                    var allCursors = dao.getCursors();
+                    var cursorIndex = allCursors.lowercase.indexOf(params.cursor.toLowerCase());
+                    if (cursorIndex !== -1) {
+                        var userCursor = {
+                            "name": allCursors.name[cursorIndex]
+                        }
+                        dao.setUserinfo(dbuser.nick, 'cursor', userCursor).then(function () {
+                            user.cursor = allCursors.name[cursorIndex];
+                            roomEmit("changeCursor", user.id, user.cursor);
+                            showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
+                        });
+                    } else {
+                        showMessage(user.socket, 'That cursor doesn\'t exist.', 'error');
+                    }
+                }).fail(function () {
+                    var allCursors = dao.getCursors();
+                    var cursorIndex = allCursors.lowercase.indexOf(params.cursor.toLowerCase());
+                    if (cursorIndex !== -1) {
+                        var userCursor = {
+                            "name": allCursors.name[cursorIndex]
+                        }
+                        user.cursor = allCursors.name[cursorIndex];
+                        roomEmit("changeCursor", user.id, user.cursor);
+                        showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
+                    } else {
+                        showMessage(user.socket, 'That cursor doesn\'t exist.', 'error');
+                    }
+                });
+            }
+        },
         afk : {
             params : ['message'],
             handler : function (user, params) {
@@ -744,10 +783,14 @@ function createChannel(io, channelName) {
         socket.on('command', function (commandName, params) {
             throttle.on(user.remote_addr + '-command').then(function (notSpam) {
                 if (notSpam) {
-                    if (typeof commandName === 'string' && COMMANDS[commandName]) {
-                        if (!params || typeof params === 'object') {
-                            handleCommand(COMMANDS[commandName], params);
+                    if (findIndex(channel.online, 'id', user.id) != -1) {
+                        if (typeof commandName === 'string' && COMMANDS[commandName]) {
+                            if (!params || typeof params === 'object') {
+                                handleCommand(COMMANDS[commandName], params);
+                            }
                         }
+                    } else {
+                        showMessage(user.socket, 'You must be online to do that.','error');
                     }
                 } else {
                     showMessage(user.socket, 'You are spamming, stop or you will be temporarily banned.','error');

@@ -429,6 +429,9 @@ var COMMANDS = {
     hat : {
         params : ['hat']
     },
+    cursor : {
+        params : ['cursor']
+    },
     afk : {
         params : ['message']
     }

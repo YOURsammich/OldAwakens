@@ -289,5 +289,18 @@ module.exports = {
             name : name,
             lowercase : lowercase
         }
+    },
+    getCursors : function(){
+        var list = fs.readdirSync('public/cursors');
+        var name = [];
+        var lowercase = [];
+        list.forEach(function(i){
+            name.push(i);
+            lowercase.push(i.toLowerCase().substr(0,i.length-4));
+        });
+        return {
+            name : name,
+            lowercase : lowercase
+        }
     }
 }

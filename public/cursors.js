@@ -18,7 +18,7 @@ function moveCursor(id, position, cursorType) {
 }
 
 function changeCursor(id, newCursor) {
-    var user = ONLINE[id];
+    var user = ONLINE.users[id];
     
     if (user && user.cursor) {
         user.cursor.getElementsByTagName('img')[0].src = '/cursors/' + newCursor;
@@ -42,7 +42,13 @@ function changeCursor(id, newCursor) {
 
 socket.on('updateCursor', function (cursorData) {
     if (Attributes.get('toggle-cursors') && ONLINE.users[cursorData.id].nick !== Attributes.get('nick')) {
-        moveCursor(cursorData.id, cursorData.position, cursorData.cursorType);
+        moveCursor(cursorData.id, cursorData.position, cursorData.type);
+    }
+});
+
+socket.on('changeCursor', function (id, type) {
+    if (Attributes.get('toggle-cursors') && ONLINE.users[id].nick !== Attributes.get('nick')) {
+        changeCursor(id, type);
     }
 });
 

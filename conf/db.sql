@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `masks` (
 CREATE TABLE IF NOT EXISTS `users` (
   `nick` varchar(500) NOT NULL,
   `hat` varchar(10000) NOT NULL,
+  `cursor` varchar(10000) NOT NULL,
   `flair` varchar(1000) NOT NULL,
   `password` varchar(500) NOT NULL,
   `remote_addr` varchar(500) NOT NULL,
