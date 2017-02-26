@@ -200,30 +200,18 @@ function createChannel(io, channelName) {
                         if (userData) {
                             message = 'Nick: ' + userData.nick + '\n              Role: ' + userData.role + '\n              IP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
                         } else {
-<<<<<<< HEAD
                             message = 'Nick: ' + dbuser.nick + '\n              Role: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\n              IP: ' + (user.role <= 1 ? dbuser.remote_addr : 'Private');  
                         }
                         message += '\n              Registered: Yes';
                         showMessage(user.socket, message, 'info');   
-=======
-                            message = 'Nick: ' + dbuser.nick + '\nRole: ' + (channelRoles[dbuser.nick] || dbuser.role) + '\nIP: ' + (user.role === 0 ? dbuser.remote_addr : 'Private');
-                        }
-                        message += '\nRegistered: Yes';
-                        showMessage(user.socket, message, 'info');
->>>>>>> 063a37464f320bf73662c3e53181425cf46a85ec
                     }).fail(function () {
                         if (userData) {
                             message = 'Nick: ' + userData.nick + '\n              Role: ' + userData.role + '\n              IP: ' + (user.role <= 1 ? userData.remote_addr : 'Private');
                         } else {
                             message = params.nick + ' doesn\'t exist'
                         }
-<<<<<<< HEAD
                         message += '\n              Registered: No';
                         showMessage(user.socket, message, 'info');   
-=======
-                        message += '\nRegistered: No';
-                        showMessage(user.socket, message, 'info');
->>>>>>> 063a37464f320bf73662c3e53181425cf46a85ec
                     });
                 });
                 
