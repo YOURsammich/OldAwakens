@@ -748,8 +748,14 @@ var AutoComplete = {
     emojione.sprites = true;
     emojione.imagePathSVGSprites = 'images/emojione.sprites.svg';
     
-    $$$.query(':read-write').style['font-family'] = Attributes.get('font') || 'Droid Sans';
-    $$$.query(':read-write').style['color'] = Attributes.get('color');
+    // Temporary fix
+    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+        $$$.query(':-moz-read-write').style['font-family'] = Attributes.get('font') || 'Droid Sans';
+        $$$.query(':-moz-read-write').style['color'] = Attributes.get('color');
+    } else {
+        $$$.query(':read-write').style['font-family'] = Attributes.get('font') || 'Droid Sans';
+        $$$.query(':read-write').style['color'] = Attributes.get('color');
+    }
     parser.addFont(Attributes.get('font'))
 })();
 
