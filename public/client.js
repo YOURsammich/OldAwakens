@@ -748,7 +748,7 @@ var AutoComplete = {
     emojione.sprites = true;
     emojione.imagePathSVGSprites = 'images/emojione.sprites.svg';
     
-    $$$.query(':read-write').style['font-family'] = Attributes.get('font');
+    $$$.query(':read-write').style['font-family'] = Attributes.get('font') || 'Droid Sans';
     $$$.query(':read-write').style['color'] = Attributes.get('color');
     parser.addFont(Attributes.get('font'))
 })();
