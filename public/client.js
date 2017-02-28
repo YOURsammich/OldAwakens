@@ -37,6 +37,9 @@ var Attributes = {
             });
         }
         localStorage.setItem('chat-' + attribute, newValue);
+        if (attribute == 'font') {
+            $$$.query(':read-write').style['font-family'] = this.get('font');
+        }
     },
     get : function (attribute) {
         var value = '';
@@ -744,6 +747,10 @@ var AutoComplete = {
     emojione.imageType = 'svg';
     emojione.sprites = true;
     emojione.imagePathSVGSprites = 'images/emojione.sprites.svg';
+    
+    $$$.query(':read-write').style['font-family'] = Attributes.get('font');
+    $$$.query(':read-write').style['color'] = Attributes.get('color');
+    parser.addFont(Attributes.get('font'))
 })();
 
 socket.on('message', showMessage);

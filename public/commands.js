@@ -52,8 +52,10 @@ var COMMANDS = {
         handler : function (params) {
             if (params.color === 'none') {
                 Attributes.remove('color');
+                $$$.query(':read-write').style['color'] = 'white';
             } else {
                 Attributes.set('color', params.color.replace(/#/g,''));
+                $$$.query(':read-write').style['color'] = params.color;
             }
             menuControl.updateValues();
         }
@@ -93,7 +95,7 @@ var COMMANDS = {
     flair : {
         params : ['flair'],
         handler : function (params) {
-            if (params.color === 'none') {
+            if (params.flair === 'none') {
                 Attributes.remove('flair');
             } else {
                 Attributes.set('flair', params.flair);
@@ -103,10 +105,12 @@ var COMMANDS = {
     font : {
         params : ['font'],
         handler : function (params) {
-            if (params.color === 'none') {
+            if (params.font === 'none') {
                 Attributes.remove('font');
+                $$$.query(':read-write').style['font-family'] = 'Droid Sans';
             } else {
                 Attributes.set('font', params.font);
+                $$$.query(':read-write').style['font-family'] = params.font;
             }
         }
     },

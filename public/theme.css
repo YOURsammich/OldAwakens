@@ -808,3 +808,7 @@ a {
     opacity: 0.5;
     content: attr(data-nick);
 }
+
+:read-write {
+    font-family: 'Droid Sans';
+}

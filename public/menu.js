@@ -232,7 +232,7 @@ var menuControl = {
                 user.li.children[0].classList.remove('typing');
             }
         }
-    }
+    },
 };
 
 (function () {
