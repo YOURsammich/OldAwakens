@@ -35,7 +35,6 @@ a {
     background-color: black;
     position: relative;
     overflow-y: scroll;
-    overflow: hidden;
 }
 
 #messages img {
