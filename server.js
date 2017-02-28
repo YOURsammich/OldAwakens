@@ -792,25 +792,29 @@ function createChannel(io, channelName) {
         });
         
         socket.on('register', function (nick, password) {
-            if (typeof nick === 'string' && typeof password === 'string') {
-                if (nick.length < 50 && /^[\x21-\x7E]*$/i.test(nick)) {
-                    dao.findip(user.remote_addr).then(function (accounts) {
-                        if (accounts.length < 5) {
-                            dao.register(nick, password, user.remote_addr).then(function () {
-                                showMessage(user.socket, nick + ' is now regiserted');
-                                updateUserData(user, {
-                                    nick : nick
+            if (findIndex(channel.online, 'id', user.id) != -1) {
+                if (typeof nick === 'string' && typeof password === 'string') {
+                    if (nick.length < 50 && /^[\x21-\x7E]*$/i.test(nick)) {
+                        dao.findip(user.remote_addr).then(function (accounts) {
+                            if (accounts.length < 5) {
+                                dao.register(nick, password, user.remote_addr).then(function () {
+                                    showMessage(user.socket, nick + ' is now regiserted');
+                                    updateUserData(user, {
+                                        nick : nick
+                                    });
+                                }).fail(function () {
+                                    showMessage(user.socket, 'This nick is already registered');
                                 });
-                            }).fail(function () {
-                                showMessage(user.socket, 'This nick is already registered');
-                            });
-                         } else {
-                             showMessage(user.socket, 'Serveral accounts already registered with this IP');
-                         }
-                    });
-                } else {
-                    showMessage(user.socket, 'Invalid nick');
+                             } else {
+                                 showMessage(user.socket, 'Serveral accounts already registered with this IP');
+                             }
+                        });
+                    } else {
+                        showMessage(user.socket, 'Invalid nick');
+                    }
                 }
+            } else {
+                showMessage(user.socket, 'You cannot do this right now.', 'error');
             }
         });
         
