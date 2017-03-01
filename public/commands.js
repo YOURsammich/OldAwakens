@@ -52,10 +52,10 @@ var COMMANDS = {
         handler : function (params) {
             if (params.color === 'none') {
                 Attributes.remove('color');
-                $$$.query(':read-write').style['color'] = 'white';
+                parser.changeInput('color', 'white');
             } else {
                 Attributes.set('color', params.color.replace(/#/g,''));
-                $$$.query(':read-write').style['color'] = params.color;
+                parser.changeInput('color', params.color);
             }
             menuControl.updateValues();
         }
@@ -107,10 +107,10 @@ var COMMANDS = {
         handler : function (params) {
             if (params.font === 'none') {
                 Attributes.remove('font');
-                $$$.query(':read-write').style['font-family'] = 'Droid Sans';
+                parser.changeInput('font', 'Droid Sans');
             } else {
                 Attributes.set('font', params.font);
-                $$$.query(':read-write').style['font-family'] = params.font;
+                parser.changeInput('font', params.font);
             }
         }
     },
@@ -443,3 +443,9 @@ var COMMANDS = {
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
 COMMANDS.bg = COMMANDS.background;
+
+(function(){
+    parser.addFont(Attributes.get('font'));
+    parser.changeInput('font', Attributes.get('font'));
+    parser.changeInput('color', Attributes.get('color'));
+})();

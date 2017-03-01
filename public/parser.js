@@ -285,5 +285,22 @@ var parser = {
         }
         str += '</a>';
         return str;
+    },
+    changeInput : function(type, value) {
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+            if (type == 'font') {
+                $$$.query(':-moz-read-write').style['font-family'] = value;
+            } else {
+                $$$.query(':-moz-read-write').style['color'] = value;
+            }
+        } else {
+            if (type == 'font'){
+                $$$.query(':read-write').style['font-family'] = value;
+            } else {
+                $$$.query(':read-write').style['color'] = value;
+            }
+            
+            
+        }
     }
 };

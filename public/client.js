@@ -37,9 +37,6 @@ var Attributes = {
             });
         }
         localStorage.setItem('chat-' + attribute, newValue);
-        if (attribute == 'font') {
-            $$$.query(':read-write').style['font-family'] = this.get('font');
-        }
     },
     get : function (attribute) {
         var value = '';
@@ -747,16 +744,6 @@ var AutoComplete = {
     emojione.imageType = 'svg';
     emojione.sprites = true;
     emojione.imagePathSVGSprites = 'images/emojione.sprites.svg';
-    
-    // Temporary fix
-    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-        $$$.query(':-moz-read-write').style['font-family'] = Attributes.get('font') || 'Droid Sans';
-        $$$.query(':-moz-read-write').style['color'] = Attributes.get('color');
-    } else {
-        $$$.query(':read-write').style['font-family'] = Attributes.get('font') || 'Droid Sans';
-        $$$.query(':read-write').style['color'] = Attributes.get('color');
-    }
-    parser.addFont(Attributes.get('font'))
 })();
 
 socket.on('message', showMessage);
