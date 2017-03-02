@@ -36,7 +36,7 @@ function changeCursor(id, newCursor) {
                 y : y
             });
         }
-        moves = (moves+1)%10;
+        moves = (moves+1)%5;
     });
 })();
 
