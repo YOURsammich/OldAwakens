@@ -764,7 +764,7 @@ socket.on('left', menuControl.removeUser);
 
 socket.on('captcha', function (captcha) {
     var messageHTML = messageBuilder.createMessage(captcha, 'captcha');
-    appendMessageTo(messageHTML);
+    messageBuilder.appendMessageTo(messageHTML);
 });
 
 socket.on('channeldata', function (channel) {
