@@ -128,7 +128,7 @@ a {
 
 #input-bar {
     position: absolute;
-    z-index: 1;
+    /* z-index: 1; this hides quotes behind the input bar */
     bottom: 0px;
     background-color: rgb(58, 58, 58);
     padding-top: 5px;
