@@ -390,7 +390,7 @@ function createChannel(io, channelName) {
                         if (accounts && accounts.length) {
                             showMessage(user.socket, 'IP ' + ip + ' matched accounts: ' + accounts.join(', '), 'info');
                         } else {
-                            showMessage(user.socket, 'No accounts matched this ip.', 'error');
+                            showMessage(user.socket, 'No accounts matched this ip:' + ip, 'error');
                         }
                     });
                 }
