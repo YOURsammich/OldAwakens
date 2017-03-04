@@ -382,7 +382,7 @@ var clientSubmit = {
                 decorativeModifiers += style;
             }
 
-            return decorativeModifiers + ' ' + text;
+            return decorativeModifiers + text;
         },
         send : function (message) {
             socket.emit('message', this.decorateText(message), Attributes.get('flair'));

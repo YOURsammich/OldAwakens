@@ -271,8 +271,6 @@ var parser = {
         
         str = str.replace(/(<br>)(.+)/g, '<div style="display:block;padding-left:3.5em;">$2</div>');
         //.replace(/(<br>)(.+)/, '<div>$2</div>')
-        //convert spaces
-        str = str.replace(/\s{2}/gi, '&nbsp;');
         return str;
     },
     parseImage : function(bin, type){
