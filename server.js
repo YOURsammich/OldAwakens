@@ -619,6 +619,22 @@ function createChannel(io, channelName) {
                     roomEmit('afk', user.id, user.afk);
                 }
             }
+        },
+        cursors : {
+            role: 0,
+            handler : function (user) {
+                var allCursors = dao.getCursors().lowercase;
+                var b = allCursors.pop();
+               showMessage(user.socket, `Cursors available: ${allCursors.join(", ")} and ${b}.`);
+            }
+        },
+        hats : {
+            role: 0,
+            handler : function (user) {
+                var allHats = dao.getHats().lowercase;
+                var b = allHats.pop();
+               showMessage(user.socket, `Hats available: ${allHats.join(", ")} and ${b}.`);
+            }
         }
     };
     

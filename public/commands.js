@@ -410,7 +410,9 @@ var COMMANDS = {
     },
     afk : {
         params : ['message']
-    }
+    },
+    cursors : {},
+    hats : {}
 };
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
