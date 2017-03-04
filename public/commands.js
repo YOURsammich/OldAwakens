@@ -1,13 +1,35 @@
 var COMMANDS = {
+    help : {
+        handler : function () {
+            embed('embed', '/help/')
+        }  
+    },
+    commands :  {
+            handler : function () {
+            var keys = Object.keys(COMMANDS);
+            var ava = [];
+            keys.forEach(function(key){
+                if(Attributes.get('role') <= COMMANDS[key].role || COMMANDS[key].role === undefined){
+                    ava.push(key);
+                }
+            });
+            showMessage({
+                message : 'Available Commands: /' + ava.join(', /'),
+                messageType : 'info'
+            });
+        }
+    },
     color : {
         params : ['color'],
         handler : function (params) {
             if (params.color === 'none') {
                 Attributes.remove('color');
+                parser.changeInput('color', 'white');
             } else {
                 Attributes.set('color', params.color.replace(/#/g,''));
-                menuControl.updateValues();
+                parser.changeInput('color', params.color);
             }
+            menuControl.updateValues();
         }
     },
     bgcolor : {
@@ -17,8 +39,8 @@ var COMMANDS = {
                 Attributes.remove('bgcolor');
             } else {
                 Attributes.set('bgcolor', params.color.replace(/#/g,''));
-                menuControl.updateValues();
             }
+            menuControl.updateValues();
         }
     },
     glow : {
@@ -28,8 +50,8 @@ var COMMANDS = {
                 Attributes.remove('glow');
             } else {
                 Attributes.set('glow', params.color.replace(/#/g,''));
-                menuControl.updateValues();
             }
+            menuControl.updateValues();
         }
     },
     style : {
@@ -39,14 +61,13 @@ var COMMANDS = {
                 Attributes.remove('style');
             } else {
                 Attributes.set('style', params.style, true);
-                menuControl.updateValues();
             }
         }
     },
     flair : {
         params : ['flair'],
         handler : function (params) {
-            if (params.color === 'none') {
+            if (params.flair === 'none') {
                 Attributes.remove('flair');
             } else {
                 Attributes.set('flair', params.flair);
@@ -56,10 +77,12 @@ var COMMANDS = {
     font : {
         params : ['font'],
         handler : function (params) {
-            if (params.color === 'none') {
+            if (params.font === 'none') {
                 Attributes.remove('font');
+                parser.changeInput('font', 'Droid Sans');
             } else {
                 Attributes.set('font', params.font);
+                parser.changeInput('font', params.font);
             }
         }
     },
@@ -82,13 +105,32 @@ var COMMANDS = {
     },
     whoami : {
         handler : function () {
-            sendCommand('whois', {
-                nick : Attributes.get('nick') 
-            });
+            clientSubmit.handleInput('/whois ' + Attributes.get('nick'));
         }
     },
     register : {
-        handler : createRegisterPanel  
+        handler : function () {
+        var userName = document.createElement('input'),
+            password = document.createElement('input'),
+            confirmPassword = document.createElement('input');
+            
+            userName.value = Attributes.get('nick');
+            password.placeholder = 'Password';
+            confirmPassword.placeholder = 'Confirm password';
+            
+            createPanel('register', [userName, password, confirmPassword], function () {
+                if (password.value === confirmPassword.value) {
+                    if (password.value.length > 4) {
+                        socket.emit('register', userName.value, password.value);
+                    } else {
+                        showMessage({
+                            message : 'Please choose a password that is at least 5 characters long',
+                            messageType : 'info'
+                        });
+                    }
+                }
+            });
+        }  
     },
     code : {
         params : ['code'],
@@ -104,7 +146,7 @@ var COMMANDS = {
         params : ['message'],
         handler : function (params) {
             showMessage({
-                message : decorateText(params.message),
+                message : clientSubmit.message.decorateText(params.message),
                 nick : Attributes.get('nick'),
                 flair : Attributes.get('flair')
             });
@@ -115,7 +157,7 @@ var COMMANDS = {
         handler: function (params) {
             var lastPm = Attributes.get('lastpm');
             if (lastPm) {
-                handleInput('/pm ' + lastPm + '|' + params.message);
+                clientSubmit.handleInput('/pm ' + lastPm + '|' + params.message);
             }
         }
     },
@@ -126,7 +168,7 @@ var COMMANDS = {
     },
     unmute : {
         handler : function () {
-            Attributes.remove('mute', '');
+            Attributes.set('mute', 'false', true);
         }
     },
     clear : {
@@ -137,6 +179,38 @@ var COMMANDS = {
                 parent.removeChild(messages[0]);
             }
         }  
+    },
+    toggle : {
+        params : ['attr'],
+        handler : function (params) {
+            var validAtts = ['background', 'images', '12h', 'filters', 'cursors'],
+                attValue = Attributes.get('toggle-' + params.attr);
+            
+            if (validAtts.indexOf(params.attr) !== -1) {
+                Attributes.set('toggle-' + params.attr, !attValue, true);
+                
+                if (params.attr == 'cursors') {
+                    if (attValue) {
+                        document.getElementById('cursor-container').style.display = 'none';
+                        socket.emit('removeCursor');
+                    } else {
+                        document.getElementById('cursor-container').style.display = 'block';
+                    }
+                }
+                
+                if (params.attr === 'background') {
+                    if (!attValue) {
+                        document.getElementById('messages').style.background = Attributes.get('background');
+                    } else {
+                        document.getElementById('messages').style.background = 'black';
+                    }   
+                }
+            } else {
+                showMessage({
+                    message : 'Not a toggleable attribute'
+                });
+            }
+        }
     },
     captchaon : {
         handler : function () {
@@ -198,12 +272,91 @@ var COMMANDS = {
             });
         }
     },
+    block : {
+        params : ['nick'],
+        handler : function (params) {
+            var blockedUsers = Attributes.get('blocked');
+            if (!blockedUsers) {
+                blockedUsers = [];
+            } else {
+                blockedUsers = blockedUsers.split(',');
+            }
+            
+            blockedUsers.push(params.nick);
+            Attributes.set('blocked', blockedUsers.join(','));
+            showMessage({
+                message : params.nick + ' is now blocked',
+                messageType : 'info'
+            });
+        }
+    },
+    unblock : {
+        params : ['nick'],
+        handler : function (params) {
+            var blockedUsers = Attributes.get('blocked'),
+                index;
+            
+            if (!blockedUsers) {
+                blockedUsers = [];
+            } else {
+                blockedUsers = blockedUsers.split(',');
+            }
+            
+            index = blockedUsers.indexOf(params.nick);
+            if (index !== -1) {
+                blockedUsers.splice(index, 1);
+                Attributes.set('blocked', blockedUsers.join(','));
+                showMessage({
+                    message : params.nick + ' is now unblocked',
+                    messageType : 'info'
+                });
+            } else {
+                showMessage({
+                    message : params.nick + ' isn\'t now unblocked',
+                    messageType : 'info'
+                });
+            }
+        }
+    },
+    login : {
+        params : ['nick', 'password'],
+        paramsOptional : true,
+        handler : function (params) {
+            var nickInput,
+                passwordInput;
+            
+            if (params.nick && params.password) {
+                socket.emit('command', 'login', {
+                    nick : params.nick,
+                    password : params.password
+                });
+            } else {
+                nickInput = document.createElement('input');
+                passwordInput = document.createElement('input');
+                nickInput.placeholder = 'Username';
+                nickInput.value = params.nick || ''
+                passwordInput.placeholder = 'Password';
+                passwordInput.value = params.password || '';
+                passwordInput.type = 'password';
+
+                createPanel('Login', [nickInput, passwordInput], function () {
+                    socket.emit('command', 'login', {
+                        nick : nickInput.value,
+                        password : passwordInput.value
+                    });
+                    document.body.removeChild(document.getElementsByClassName('LoginPanel')[0].parentNode);
+                });
+            }
+        }
+    },
+    emojis : {
+        handler : function () {
+            embed('embed', 'https://emojicopy.com/');
+        }
+    },
     //server side commands
     nick : {
         params : ['nick']
-    },
-    login : {
-        params : ['nick', 'password']
     },
     me : {
         params : ['message']
@@ -244,7 +397,29 @@ var COMMANDS = {
     },
     pm : {
         params : ['nick|message']
-    }
+    },
+    banlist : {},
+    give_hat : {
+        params : ['nick', 'hat']
+    },
+    hat : {
+        params : ['hat']
+    },
+    cursor : {
+        params : ['cursor']
+    },
+    afk : {
+        params : ['message']
+    },
+    cursors : {},
+    hats : {}
 };
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
+COMMANDS.bg = COMMANDS.background;
+
+(function(){
+    parser.addFont(Attributes.get('font'));
+    parser.changeInput('font', Attributes.get('font'));
+    parser.changeInput('color', Attributes.get('color'));
+})();

@@ -8,7 +8,7 @@ function buildVideoOverlay(url) {
         header,
         cancel,
         container;
-    
+
     if (videoOverlay.length === 0) {
         videoOverlay = document.createElement('div');
         videoOverlay.className = 'video-overlay';
@@ -51,7 +51,7 @@ function embed(type, input) {
         url = '<audio style="width:100%;height:100%" src="' + input + '" controls></video>';
         break;
     case 'liveleak':
-        url = '<iframe width="100%" height="100%" src="http://www.liveleak.com/ll_embed?f=' + input + '" frameborder="0" allowfullscreen></iframe>';
+        url = '<iframe width="100%" height="100%" src="//www.liveleak.com/ll_embed?f=' + input + '" frameborder="0" allowfullscreen></iframe>';
         break;
     case 'vimeo':
         url = '<iframe src="//player.vimeo.com/video/' + input + '" width="100%" height="100%" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
@@ -62,8 +62,11 @@ function embed(type, input) {
     case 'embed':
         url = '<iframe width="100%" height="100%" src="' + input + '" frameborder="0" allowfullscreen></iframe>';
         break;
+    case 'swf':
+        url = '<object width="100%" height="100%" data="' + input + '" type="application/x-shockwave-flash">\n<param name="movie" value="' + input + '" />\n</object>'
+        break;
     }
-    
+
     buildVideoOverlay(url);
 }
 
@@ -71,9 +74,9 @@ function soundCloud(url) {
     function reqListener() {
         buildVideoOverlay(JSON.parse(this.responseText).html);
     }
-     
+
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", reqListener);
-    oReq.open("GET", "http://soundcloud.com/oembed?format=json&url=" + url + "&iframe=true");
+    oReq.open("GET", "//soundcloud.com/oembed?format=json&url=" + url + "&iframe=true");
     oReq.send();
 }

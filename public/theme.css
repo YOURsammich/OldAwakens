@@ -15,21 +15,22 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-    background-color:transparent;
+    background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
     border-radius: 5px;
-    background:#5F5F5F;
+    background: #5F5F5F;
 }
 
-.main-container {
+#main-container {
     width: 100%;
     height: 100%;
 }
 
 #messages {
-    height: calc(100% - 40px);
+    transition: width 1s;
+    height: calc(100vh - 38px);
     width: 100%;
     background-color: black;
     position: relative;
@@ -39,6 +40,18 @@ a {
 #messages img {
 	max-height: 256px;
 	max-width: 256px;
+}
+
+.hat {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    display: inline-block !important;
+    background-size: 30px 20px;
+    margin-right: -50px;
+    margin-top: -50px;
+    top: 4px;
+    left: -27px;
 }
 
 .time {
@@ -55,9 +68,8 @@ a {
 
 .message {
     text-shadow: rgb(0, 0, 0) -1px -1px 0px, rgb(0, 0, 0) 1px -1px 0px, rgb(0, 0, 0) -1px 1px 0px, rgb(0, 0, 0) 1px 1px 0px;
-    padding-left: 3.9em;
-    text-indent: -3.9em;
     word-wrap: break-word;
+    white-space: pre;
     color: white;
 }
 
@@ -116,15 +128,19 @@ a {
 
 #input-bar {
     position: absolute;
+    z-index: 1;
     bottom: 0px;
     background-color: rgb(58, 58, 58);
-    padding: 5px;
-    width: calc(100% - 10px);
+    padding-top: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-bottom: 1px;
+    width: calc(100% - 8px);
 }
 
 #input-bar textarea {
-    width: calc(100% - 45px);
-    height: 30px;
+    width: calc(100% - 55px);
+    height: 18px;
     resize: none;
     padding-top: 4px;
     padding-bottom: 4px;
@@ -138,13 +154,12 @@ a {
     box-shadow: rgba(255, 255, 255, 0.1) 0 1px 0, rgba(0, 0, 0, 0.8) 0 1px 7px 0px inset;
 }
 
-.menu-container {
+#menu-container {
     position: absolute;
-    z-index: 5;
     top: 0px;
     right: -4px;
     text-align: center;
-    height: calc(100% - 40px);
+    height: calc(100% - 38px);
     width: 0px;
     background-color: rgb(17, 17, 17);
     color: white;
@@ -178,11 +193,11 @@ a {
 
 .textDecoration .bar .label {
     width: 100%;
-    height: 100%;
+    height: 22px;
     background-color: white;
     color: black;
     position: relative;
-    top: -20px;
+    top: -22px;
     overflow: hidden;
     transition: height .3s, top .3s;
     font-family: "Droid Sans", sans-serif;
@@ -190,9 +205,14 @@ a {
 
 .textDecoration .bar input {
     width: 100%;
-    height: 100%;
+    height: 20px;
     outline: none;
     border: none;
+}
+
+.transparent {
+    background-color: #fcfcfc;
+    background-image: url("https://www.transparenttextures.com/patterns/az-subtle.png");
 }
 
 .userList {
@@ -204,6 +224,30 @@ a {
     list-style-type: none;
     cursor: pointer;
     margin-top: 5px;
+}
+
+.nickText::before {
+    content: '';
+    display: inline-block;
+    border-radius: 50%;
+    background-color: #3498db;
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    margin-right: 4px;
+    transition: 0.5s;
+}
+
+.nickText::after {
+    content: '';
+    display: inline-block;
+    border-radius: 50%;
+    background-color: #e67e22;
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    margin-left: 4px;
+    transition: 0.5s;
 }
 
 .userList .nickContain .informer {
@@ -251,7 +295,7 @@ a {
     width: 29px;
     right: 0px;
     height: 30px;
-    top: 3px;
+    bottom: 3px;
     box-shadow: rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgb(0, 0, 0) 0px -1px 0px 0px inset, rgba(0, 0, 0, 0.901961) 0px 3px 10px;
     line-height: 206%;
     text-align: center;
@@ -261,7 +305,7 @@ a {
 }
 
 .toggle-menu:active{
-    bottom:-3px;
+    bottom: 2px;
     box-shadow: inset 0px 1px 0px 0px rgba(255,255,255,.2),
 	        inset 0px -1px 0px 0px rgba(0,0,0,1),
 	        0px 3px 3px rgba(0,0,0,.2);
@@ -299,7 +343,7 @@ a {
     }
 }
 
-.registerPanel {
+.panel {
     animation-name: slideOpen;
     animation-duration: 1s;
     animation-fill-mode: forwards;
@@ -321,14 +365,14 @@ a {
     }
 }
 
-.registerPanel header {
+.panel header {
     font-size: 30px;
     color: white;
     font-family: Montserrat;
     margin: 15px;
 }
 
-.registerPanel input {
+.panel input {
     width: 60%;
     height: 30px;
     box-sizing: border-box;
@@ -341,7 +385,7 @@ a {
     outline: none;
 }
 
-.registerPanel #cancel {
+.panel #cancel {
     position: relative;
     float: right;
     cursor: pointer;
@@ -349,40 +393,6 @@ a {
     right: 20px;
     top: 13px;
     color: white;
-}
-
-/*login panel*/
-
-.loginPanel {
-    width: 300px;
-    height: 300px;
-    position: absolute;
-    top: 30%;
-    left: calc(50% - 150px);
-    text-align: center;
-    box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset, rgba(255, 255, 255, 0.2) 0px -1px 0px 0px;
-    border: solid 4px #222;
-    background-color: #545454;
-}
-
-.loginPanel input {
-    width: 60%;
-    height: 25px;
-    box-sizing: border-box;
-    margin-bottom: 10px;
-    font-size: 14px;
-    font-family: Montserrat;
-    border-radius: 5px;
-    border: solid 1px #ccc;
-    padding: 0px 20px;
-    outline: none;
-}
-
-.loginPanel header {
-    font-size: 30px;
-    color: white;
-    font-family: Montserrat;
-    margin: 15px;
 }
 
 /* pm panel */
@@ -476,12 +486,132 @@ a {
 
 /* chat styles */
 
-.shake{
-    animation-name: shake-hard;
+.style {
+    display: inline-block !important;
+}
+
+.spin {
+  animation-name: spin;
+  animation-duration: 2s;
+  animation-iteration-count: 1;
+}
+
+.rainbow {
+    animation-name: rainbow;
     animation-duration: 2s;
-    animation-iteration-count: 6;
-    margin-left: 63px;
-    display: inline-block;
+    animation-iteration-count: 15;
+}
+
+.shake {
+  animation-name: shake;
+  animation-duration: 0.5s;
+  animation-iteration-count: 20;
+}
+
+.marquee {
+  animation-name: marquee;
+  animation-duration: 10s;
+  animation-iteration-count: 6;
+}
+
+.italic {
+    transform: skewX(-15deg);
+}
+
+.spoil {
+    color: #000;
+    background-color: #000;
+    text-shadow: initial;
+}
+
+.spoil:hover {
+    color: #FFF;
+    background-color: #000;
+}
+
+.nlink {
+    text-decoration: none;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translate(0%);
+  }
+  50% {
+    transform: translate(90vw);
+  }
+  100% {
+    transform: translate(0%);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(-9px) rotate(7deg) translateY(-10px);
+  }
+  10% {
+    transform: translateX(-11px) rotate(19deg) translateY(5px);
+  }
+  20% {
+    transform: translateX(12px) rotate(23deg) translateY(-12px);
+  }
+  30% {
+    transform: translateX(13px) rotate(-20deg) translateY(14px);
+  }
+  40% {
+    transform: translateX(-11px) rotate(31deg) translateY(-1px);
+  }
+  50% {
+    transform: translateX(7px) rotate(8deg) translateY(17px);
+  }
+  60% {
+    transform: translateX(10px) rotate(-1deg) translateY(-11px);
+  }
+  70% {
+    transform: translateX(-17px) rotate(33deg) translateY(5px);
+  }
+  80% {
+    transform: translateX(-6px) rotate(9deg) translateY(-5px);
+  }
+  90% {
+    transform: translateX(12px) rotate(-27deg) translateY(30px);
+  }
+  100% {
+    transform: translateX(0px) rotate(0deg) translateY(0px);
+  }
+}
+
+@keyframes rainbow {
+  0% {
+    color: rgb(255, 0, 0);
+  }
+  16.6% {
+    color: rgb(255, 255, 0);
+  }
+  33.2% {
+    color: rgb(0, 255, 0);
+  }
+  49.8% {
+    color: rgb(0, 255, 255);
+  }
+  66.4% {
+    color: rgb(0, 0, 255);
+  }
+  84.3% {
+    color: rgb(255, 0, 255);
+  }
+  100% {
+    color: rgb(255, 0, 0);
+  }
 }
 
 @keyframes shake-hard {
@@ -584,5 +714,101 @@ a {
   98% {
     transform: translate(10px, 4px) rotate(-0.5deg); }
   0%, 100% {
-    transform: translate(0, 0) rotate(0); } 
+    transform: translate(0, 0) rotate(0); }
+}
+
+.banlist{
+    position:absolute;
+    background-color:#34495e;
+    padding:15px;
+}
+
+.banlist div{
+    overflow-y:scroll;
+    max-height:400px;
+    padding:10px;
+    text-align:center;
+}
+
+.banlist table{
+    border:solid 1px black;
+    border-collapse: collapse;
+}
+
+.banlist table th{
+    border:1px black solid;
+}
+
+.banlist table td{
+    border-right:1px black solid;
+    border-bottom:1px black solid;
+    max-width:200px;
+    word-wrap:break-word;
+}
+
+.typing::before {
+    opacity: 1;
+}
+
+.unreadPM::after {
+    opacity: 1;
+}
+
+.spoilerImg img {
+    -webkit-filter: brightness(-200%); /* Safari */
+    filter: brightness(-200%);
+}
+
+.spoilerImg img:hover {
+    -webkit-filter: brightness(100%); /* Safari */
+    filter: brightness(100%);
+}
+
+/* Cursor Stuff */
+
+#cursor-container {
+    pointer-events: none;
+}
+
+.cursor { 
+    position: absolute;
+    transition: 0.1s;
+    text-shadow:
+     1px 0px 0 #000,
+    -1px 0px 0 #000,
+     0px 1px 0 #000,
+     0px -1px 0 #000,
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px 1px 0 #000,
+     1px 1px 0 #000;
+    color: #FFF;
+    opacity: 0.6;
+    max-height: 32px;
+    max-width: 32px;
+}
+
+.cursor > img {
+    max-height: 32px;
+    max-width: 32px;
+}
+
+.cursor[data-nick]::after {
+    display: block;
+    text-shadow:
+     1px 0px 0 #000,
+    -1px 0px 0 #000,
+     0px 1px 0 #000,
+     0px -1px 0 #000,
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px 1px 0 #000,
+     1px 1px 0 #000;
+    color: #FFF;
+    opacity: 0.5;
+    content: attr(data-nick);
+}
+
+:read-write {
+    font-family: 'Droid Sans';
 }
