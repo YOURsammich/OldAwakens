@@ -6,7 +6,5 @@ npm-debug.log*
 # Dependency directories
 node_modules
 
-#hats, cursors, and fonts
-public/cursors
-public/fonts
-public/hats
+#config file
+conf/settings.json
