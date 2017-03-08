@@ -144,6 +144,9 @@ var messageBuilder = {
             messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
         } else if (messageType === 'chat-image') {
             messageDIV.innerHTML = parser.parseImage(message.img, message.type);
+            if (count) {
+                container.classList += ' msg-' + count;
+            }
         } else {
 
             if (this.alertMessage(message, messageType, nick)) {
