@@ -195,7 +195,7 @@ module.exports = {
         var defer = $.Deferred();
         var sql = "UPDATE `awakens`.`users` SET ?? = ? WHERE `nick` = ?";
         
-        if (typeof value) {
+        if (typeof value !== 'string') {
             value = JSON.stringify(value);
         }
         
