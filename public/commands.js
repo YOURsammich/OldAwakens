@@ -373,6 +373,9 @@ var COMMANDS = {
     ban : {
         params : ['nick|reason']
     },
+    banip : {
+        params : ['nick|reason']  
+    },
     unban : {
         params : ['nick']  
     },
