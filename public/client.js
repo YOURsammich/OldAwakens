@@ -36,7 +36,12 @@ var Attributes = {
                 messageType : 'info'
             });
         }
-        localStorage.setItem('chat-' + attribute, newValue);
+        
+        if (typeof newValue === 'object') {
+            localStorage.setItem('chat-' + attribute, JSON.stringify(newValue));
+        } else {
+            localStorage.setItem('chat-' + attribute, newValue);
+        }
     },
     get : function (attribute) {
         var value = '';
@@ -245,7 +250,7 @@ var messageBuilder = {
         }
 
         var scrollDelta = el.scrollHeight - el.clientHeight;
-        if (scrollDelta - el.scrollTop < 300) {
+        if (scrollDelta - el.scrollTop < 600) {
             scrollTo(el, scrollDelta, 200);
         }
     }
@@ -402,19 +407,19 @@ var clientSubmit = {
     }
 }
 
-function channelTheme(channelData, updatedBy) {
+function channelTheme(channelData) {
     if (channelData.note) {
         showMessage({
-            message : channelData.note,
+            message : channelData.note.value,
             messageType : 'note'
         });
         Attributes.set('note', channelData.note);
     }
 
     if (channelData.topic) {
-        document.title = channelData.topic;
+        document.title = channelData.topic.value;
         showMessage({
-            message : 'Topic: ' + channelData.topic,
+            message : 'Topic: ' + channelData.topic.value,
             messageType : 'general'
         });
         Attributes.set('topic', channelData.topic);
@@ -422,31 +427,33 @@ function channelTheme(channelData, updatedBy) {
 
     if (channelData.background) {
         if (Attributes.get('toggle-background')) {
-            document.getElementById('messages').style.background = channelData.background;
+            document.getElementById('messages').style.background = channelData.background.value;
         }
         Attributes.set('background', channelData.background);
     }
 
-    if (channelData.themecolors) {
-        document.getElementById('input-bar').style.backgroundColor = channelData.themecolors[0];
-        document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors[1];
+    if (channelData.themecolors && channelData.themecolors.value) {
+        document.getElementById('input-bar').style.backgroundColor = channelData.themecolors.value[0];
+        document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors.value[1];
         if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
             document.styleSheets[0].deleteRule(4);
-            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], 4);
+            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
         }
     }
-
-    if (channelData.lock !== undefined && updatedBy) {
+    
+    if (channelData.lock !== undefined && Attributes.get('lock').value !== channelData.lock.value && channelData.lock.updatedBy) {
         var message;
-        if (channelData.lock) {
+        if (channelData.lock.value) {
             message = ' locked this channel';
         } else {
             message = ' unlocked this channel';
         }
         showMessage({
-            message : updatedBy + message,
+            message : channelData.lock.updatedBy + message,
             messageType : 'general'
         });
+        
+        Attributes.set('lock', channelData.lock);
     }
 }
 
@@ -691,6 +698,8 @@ var AutoComplete = {
             messageDiv = document.getElementById('messages');
 
         this.style.height = newHeight + 'px';
+        this.parentNode.style.top = -(newHeight - 18) + 'px';
+        
         messageDiv.style.top = -(newHeight - 18) + 'px';
         
         if (this.value.length === 0) {
@@ -777,8 +786,10 @@ socket.on('channeldata', function (channel) {
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
         }
     }
-
-    channelTheme(channel.data, channel.updatedBy);
+    
+    if (channel.data) {
+        channelTheme(channel.data);
+    }
 });
 
 socket.on('banlist', function (banlist) {

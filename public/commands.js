@@ -89,10 +89,41 @@ var COMMANDS = {
     get : {
         params : ['attribute'],
         handler : function (params) {
-            var value = Attributes.get(params.attribute);
-            if (value) {
+            var attData = Attributes.get(params.attribute),
+                formatTime = new Date();
+            
+            formatTime.setTime(attData.date);
+            
+            function timeSince(date) {
+                var seconds = Math.floor((new Date() - date) / 1000);
+
+                var interval = Math.floor(seconds / 31536000);
+
+                if (interval > 1) {
+                    return interval + " years";
+                }
+                interval = Math.floor(seconds / 2592000);
+                if (interval > 1) {
+                    return interval + " months";
+                }
+                interval = Math.floor(seconds / 86400);
+                if (interval > 1) {
+                    return interval + " days";
+                }
+                interval = Math.floor(seconds / 3600);
+                if (interval > 1) {
+                    return interval + " hours";
+                }
+                interval = Math.floor(seconds / 60);
+                if (interval > 1) {
+                    return interval + " minutes";
+                }
+                return Math.floor(seconds) + " seconds";
+            };
+            
+            if (attData.value) {
                 showMessage({
-                    message : params.attribute + ' is is currently set to: ' + value,
+                    message : params.attribute + ' was set to "' + attData.value + '" by "' + attData.updatedBy + '" ' + timeSince(formatTime.getTime()) + ' ago',
                     messageType : 'info'
                 });
             } else {

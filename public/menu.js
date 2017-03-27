@@ -209,14 +209,14 @@ var menuControl = {
         
         socket.on('message', function () {
             if (blurred && ++unread) {
-                document.title = '(' + unread + ') ' + Attributes.get('topic');
+                document.title = '(' + unread + ') ' + Attributes.get('topic').value;
             }
         });
 
         window.addEventListener('focus', function () {
             unread = 0;
             blurred = false;
-            document.title = Attributes.get('topic');
+            document.title = Attributes.get('topic').value;
         });
         
         window.addEventListener('blur', function () {
