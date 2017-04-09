@@ -261,6 +261,7 @@ function showMessage(messageData, panel, img) {
         userID = ONLINE.getId(messageData.nick);
     
     if (messageData.nick && userID) {
+        //menuControl.startIdle(userID);
     }
     
     if (blockUsers.indexOf(messageData.nick) === -1) {
