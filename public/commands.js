@@ -71,6 +71,9 @@ var COMMANDS = {
                 Attributes.remove('flair');
             } else {
                 Attributes.set('flair', params.flair);
+                socket.emit('command', 'flair', {//save flair on server
+                    flair : params.flair
+                });
             }
         }
     },
@@ -379,6 +382,11 @@ var COMMANDS = {
                 });
             }
         }
+    },
+    logout : {
+        handler : function () {
+            clientSubmit.handleInput('/nick ' + 'Ron' + Math.random());
+        }  
     },
     emojis : {
         handler : function () {

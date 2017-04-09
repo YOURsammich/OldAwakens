@@ -163,10 +163,6 @@ var messageBuilder = {
                 audioPlayer.chat.play();
             }
 
-            if (count) {
-                container.classList += ' msg-' + count;
-            }
-
             while (message.split(/\n/).length > 15) {
                 var index = message.lastIndexOf('\n');
                 message = message.slice(0, index) + message.slice(index + 1);
@@ -174,6 +170,10 @@ var messageBuilder = {
             parser.getAllFonts(message);
             
             messageDIV.innerHTML = ' ' + parser.parse(message, messageType === 'chat' && Attributes.get('toggle-filters'));
+        }
+        
+        if (count) {
+            container.classList += ' msg-' + count;
         }
 
         container.appendChild(messageDIV);
@@ -257,7 +257,12 @@ var messageBuilder = {
 }
 
 function showMessage(messageData, panel, img) {
-    var blockUsers = Attributes.get('blocked') || [];
+    var blockUsers = Attributes.get('blocked') || [],
+        userID = ONLINE.getId(messageData.nick);
+    
+    if (messageData.nick && userID) {
+    }
+    
     if (blockUsers.indexOf(messageData.nick) === -1) {
         var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
         
@@ -440,8 +445,8 @@ function channelTheme(channelData) {
             document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
         }
     }
-    
-    if (channelData.lock !== undefined && Attributes.get('lock').value !== channelData.lock.value && channelData.lock.updatedBy) {
+
+    if (typeof Attributes.get('lock') == 'object' && Attributes.get('lock').value != channelData.lock.value) {
         var message;
         if (channelData.lock.value) {
             message = ' locked this channel';
@@ -708,7 +713,7 @@ var AutoComplete = {
         }
     });
     
-    $$$.query('.main-container').addEventListener('drop', function (e) {
+    $$$.query('#main-container').addEventListener('drop', function (e) {
         var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
             file = e.dataTransfer.files[0],
             type,

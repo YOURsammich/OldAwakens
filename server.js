@@ -625,6 +625,12 @@ function createChannel(io, channelName) {
                     }
                 });
             }
+        },
+        flair : {
+            params : 'flair',
+            handler : function (user, params) {
+                dao.setUserinfo(user.nick, 'flair', params.flair);
+            }
         }
     };
     
@@ -672,6 +678,37 @@ function createChannel(io, channelName) {
                                     hat : user.hat,
                                     count : ++channel.messageCount
                                 });      
+                            }
+                        }   
+                    }
+                } else {
+                    showMessage(user.socket,'You are spamming, stop or you will be temporarily banned.', 'error');
+                    throttle.warn(user.remote_addr + '-message');
+                }
+            }).fail(function () {
+                dao.ban(channelName,user.remote_addr,'Throttle', 'Message spamming');
+                showMessage(user.socket, 'You have been banned for spamming.','error');
+                socket.disconnect();
+            });
+        });
+        
+        socket.on('message-image', function (message, flair) {
+            var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"];
+            throttle.on(user.remote_addr + '-message').then(function (notSpam) {
+                if (notSpam) {
+                    if (findIndex(channel.online, 'id', user.id) != -1) {
+                        if (message && typeof message.type === 'string' && acceptedFiletypes.indexOf(message.type) != -1 &&typeof message.img === 'string' && (typeof flair === 'string' || !flair)) {
+                            if (message.img.length < 7000001) {
+                                if (flair && flair.length < 500 || !flair) {
+                                    roomEmit('message', {
+                                        message : message,
+                                        messageType : 'chat-image',
+                                        nick : user.nick,
+                                        flair : flair,
+                                        hat : user.hat,
+                                        count : ++channel.messageCount
+                                    });      
+                                }
                             }
                         }   
                     }
@@ -889,7 +926,7 @@ function createChannel(io, channelName) {
                 roomEmit('joined', user.id, user.nick);
                 console.log('USER JOIN', nick, user.role, user.remote_addr);
             }
-
+            
             if (userData.nick && userData.nick.length > 0 && userData.nick.length < 50 && /^[\x21-\x7E]*$/i.test(userData.nick)) {
                 var index = findIndex(channel.online, 'nick', userData.nick);
                 
@@ -919,12 +956,11 @@ function createChannel(io, channelName) {
         
         function checkChannelStatus (joinData, dbuser) {
             dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
-                
                 if (dbuser && dbuser.role !== 0 && channelData[dbuser.nick]) {//assign channel role
                     dbuser.role = channelData[dbuser.nick];
                 }
                 
-                if (channelData.lock) {
+                if (channelData.lock.value) {
                     if (dbuser && dbuser.nick) {
                         joinChannel(joinData, dbuser, channelData);
                     } else {
