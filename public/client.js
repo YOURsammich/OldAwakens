@@ -260,10 +260,6 @@ function showMessage(messageData, panel, img) {
     var blockUsers = Attributes.get('blocked') || [],
         userID = ONLINE.getId(messageData.nick);
     
-    if (messageData.nick && userID) {
-        //menuControl.startIdle(userID);
-    }
-    
     if (blockUsers.indexOf(messageData.nick) === -1) {
         var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
         

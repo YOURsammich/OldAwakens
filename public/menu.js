@@ -199,6 +199,7 @@ var menuControl = {
                     document.body.removeChild(menu);
                 }
                 menu = makeMenu();
+                
                 document.body.appendChild(menu);
             }
         }
@@ -232,7 +233,7 @@ var menuControl = {
                 user.li.children[0].classList.remove('typing');
             }
         }
-    },
+    }
 };
 
 (function () {
@@ -311,4 +312,12 @@ var menuControl = {
         }
     });
     
+    document.body.addEventListener('mouseup', function (e) {
+        var menu = document.getElementById('context-menu'),
+            target = e.target.offsetParent;
+        
+        if (menu && menu !== target) {
+            document.body.removeChild(menu);
+        }
+    });
 })();
