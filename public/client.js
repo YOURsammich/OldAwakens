@@ -145,8 +145,6 @@ var messageBuilder = {
 
         if (messageType === 'info') {
             messageDIV.innerHTML = parser.escape(message);
-        } else if (messageType === 'captcha') {
-            messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
         } else if (messageType === 'chat-image') {
             messageDIV.innerHTML = parser.parseImage(message.img, message.type);
         } else {
@@ -272,24 +270,23 @@ function showMessage(messageData, panel, img) {
 
 function handlePrivateMessage(messageData) {
     var panel = document.getElementById('PmPanel-' + messageData.landOn),
-        pmUser = ONLINE.users[messageData.landOn],
-        informer;
+        pmUser = ONLINE.users[messageData.landOn];
 
     if (panel && panel.getElementsByClassName('messages')[0]) {
         showMessage(messageData, panel.getElementsByClassName('messages')[0]);
     } else if (pmUser) {
-        informer = pmUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm');
-
-        if (informer.length === 0) {
-            menuControl.inform(messageData.landOn, 'pm', 'unread PM(s)', function () {
-                createPmPanel(messageData.landOn);
-            });
-        }
-
         if (!pmUser.pm) {
             pmUser.pm = [];
         }
         pmUser.pm.push(messageData);
+        
+        menuControl.contextMenu.placeMenu(messageData.landOn, {
+            ['unread PM(s) - ' +  pmUser.pm.length] : {
+                callback : function (nick) {
+                    createPmPanel(ONLINE.getId(nick));
+                }  
+            }
+        }, true);
     }
 }
 
@@ -442,8 +439,8 @@ function channelTheme(channelData) {
             document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
         }
     }
-
-    if (typeof Attributes.get('lock') == 'object' && Attributes.get('lock').value != channelData.lock.value) {
+    
+    if (channelData.lock && (typeof Attributes.get('lock') != 'object' || Attributes.get('lock').value != channelData.lock.value)) {
         var message;
         if (channelData.lock.value) {
             message = ' locked this channel';
@@ -456,6 +453,21 @@ function channelTheme(channelData) {
         });
         
         Attributes.set('lock', channelData.lock);
+    }
+    
+    if (channelData.proxy && typeof Attributes.get('proxy') != 'object' || Attributes.get('proxy').value != channelData.proxy.value) {
+        var message;
+        if (channelData.proxy.value) {
+            message = ' blocked proxies';
+        } else {
+            message = ' unblocked proxies';
+        }
+        showMessage({
+            message : channelData.proxy.updatedBy + message,
+            messageType : 'general'
+        });
+        
+        Attributes.set('proxy', channelData.proxy);
     }
 }
 
@@ -505,8 +517,7 @@ function createPanel(title, html, func) {
 
 function createPmPanel(id) {
     var validUser = ONLINE.users[id],
-        panel = document.getElementById('PmPanel-' + id),
-        informer;
+        panel = document.getElementById('PmPanel-' + id);
 
     function makePanel() {
         var panelContainer = document.createElement('div'),
@@ -570,10 +581,6 @@ function createPmPanel(id) {
     }
 
     if (validUser && !panel) {
-        informer = validUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm');
-        if (informer.length !== 0) {
-            validUser.li.getElementsByClassName('informer')[0].removeChild(informer[0]);
-        }
         panel = makePanel();
         $$$.draggable(panel, 'messageContent');
         document.body.appendChild(panel);
