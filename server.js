@@ -805,6 +805,23 @@ function createChannel(io, channelName) {
             roomEmit('typing', user.id, typing);
         });
         
+        socket.on('activeChannels', function () {
+            var channelInfo = [],
+                channelKeys = Object.keys(channels),
+                i;
+            
+            for (i = 0; i < channelKeys.length; i++) {
+                if (channels[channelKeys[i]].online.length) {
+                    channelInfo.push({
+                        name : channelKeys[i],
+                        online : channels[channelKeys[i]].online.length
+                    });   
+                }
+            }
+            
+            user.socket.emit('activeChannels', channelInfo);
+        });
+        
         socket.on('privateMessage', function (message, flair, userID) {
             var index,
                 sendUser;
@@ -1113,8 +1130,8 @@ function createChannel(io, channelName) {
         });
         
     });
-        
-    return true;
+    
+    return channel;
 }
 
 function intoapp(app, http) {

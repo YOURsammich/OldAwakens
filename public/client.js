@@ -455,7 +455,7 @@ function channelTheme(channelData) {
         Attributes.set('lock', channelData.lock);
     }
     
-    if (channelData.proxy && typeof Attributes.get('proxy') != 'object' || Attributes.get('proxy').value != channelData.proxy.value) {
+    if (channelData.proxy && (typeof Attributes.get('proxy') != 'object' || Attributes.get('proxy').value != channelData.proxy.value)) {
         var message;
         if (channelData.proxy.value) {
             message = ' blocked proxies';
@@ -887,5 +887,23 @@ socket.on('connect', function () {
         menuControl.updateValues();
     }
 });
+
+socket.on('activeChannels', function (channels) {
+    
+    channels.sort(function (a, b) {
+        return  b.online - a.online;
+    });
+    
+    var channelPanel = document.getElementsByClassName('channelPanel')[0],
+        div,
+        i;
+    
+    for (i = 0; i < channels.length; i++) {
+        div = document.createElement('div');
+        div.textContent = channels[i].name;
+        channelPanel.appendChild(div);   
+    }
+});
+socket.emit('activeChannels');
 
 menuControl.initMissedMessages(socket)
