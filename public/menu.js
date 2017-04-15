@@ -4,6 +4,7 @@ var menuControl = {
             nickText = document.createElement('div'),
             extraInfo = document.createElement('div');
         
+        nickContain.id = id;
         nickContain.className = 'nickContain';
         extraInfo.className = 'informer';
         nickText.className = 'nickText';
@@ -12,7 +13,7 @@ var menuControl = {
         nickContain.addEventListener('click', function (e) {
             var target = e.target;
             if (target.classList.contains('nickText')) {
-                menuControl.contextMenu.placeMenu(e.clientX, e.clientY, id);
+                menuControl.contextMenu.placeMenu(id);
             }
         });
         
@@ -83,29 +84,11 @@ var menuControl = {
             User.cursor.setAttribute('data-nick', newNick);
         }
     },
-    inform : function (id, type, message, func) {
-        var user = ONLINE.users[id],
-            newEle = user.li.getElementsByClassName(type);
-        if (newEle.length === 0) {
-            newEle = document.createElement('div');
-            newEle.textContent = message;
-            newEle.className = type;
-            
-            if (func) {
-                newEle.addEventListener('click', func);
-            }
-            
-            user.li.getElementsByClassName('informer')[0].appendChild(newEle);
-        } else {
-            newEle[0].textContent = message;
-        }
-    },
     afk : function (id, message) {
         var user = ONLINE.users[id];
         if (user) {
-            menuControl.inform(id, 'afk', message);
+            user.li.getElementsByClassName('informer')[0].textContent = message;
         }
-        console.log(id, message);
     },
     updateCount : function () {
         var length = Object.keys(ONLINE.users).length;
@@ -132,7 +115,7 @@ var menuControl = {
         
     },
     contextMenu : {
-        options : {
+        defaultOptions : {
             PM : {
                 callback : function (nick) {
                     createPmPanel(ONLINE.getId(nick));
@@ -143,35 +126,42 @@ var menuControl = {
                     clientSubmit.handleInput('/whois ' + nick);
                 }
             },
-            find : {
-                callback : function (nick) {
-                    clientSubmit.handleInput('/find ' + nick);
-                }
-            },
             divider : '---',
             kick : {
                 callback : function (nick) {
                     clientSubmit.handleInput('/kick ' + nick);
                 }
-            }
+            },
+            ban : {
+                callback : function (nick) {
+                    clientSubmit.handleInput('/ban ' + nick);
+                }  
+            },
+            banip : {
+                callback : function (nick) {
+                    clientSubmit.handleInput('/banip ' + nick);
+                }  
+            },
+            find : {
+                callback : function (nick) {
+                    clientSubmit.handleInput('/find ' + nick);
+                }
+            }  
         },
-        placeMenu : function (X, Y, id) {
-            var menu = document.getElementById('context-menu'),
-                options = this.options,
-                validUser = ONLINE.users[id];
+        placeMenu : function (id, options, stayOpen) {
+            var options = options || this.defaultOptions,
+                validUser = ONLINE.users[id],
+                menu,
+                userLi;
             
             function makeMenu () {
-                var menuContainer = document.createElement('div'),
-                    header;
+                var menuContainer = document.createElement('div');
                 
-                menuContainer.id = 'context-menu';
-                menuContainer.style.left = X + 'px';
-                menuContainer.style.top = (Y - menuContainer.offsetHeight) + 'px';
+                if (!stayOpen) {
+                    menuContainer.id = 'tempMenu';
+                }
                 
-                header = document.createElement('header');
-                header.textContent = validUser.nick;
-                
-                menuContainer.appendChild(header);
+                menuContainer.className = 'menuOptions';
                 
                 var keys = Object.keys(options);
                 for(var i = 0; i < keys.length; i++){
@@ -180,7 +170,7 @@ var menuControl = {
                     if (att !== 'divider') {
                         li.textContent = att;
                         li.onclick = function(e){
-                            document.body.removeChild(menuContainer);
+                            userLi.removeChild(menuContainer);
                             options[this.textContent].callback(validUser.nick);
                         }
                     } else {
@@ -195,11 +185,15 @@ var menuControl = {
             }
             
             if (validUser) {
-                if (menu) {
-                    document.body.removeChild(menu);
+                userLi = ONLINE.users[id].li;
+                menu = userLi.getElementsByClassName('menuOptions');
+                
+                if (menu.length) {
+                    userLi.removeChild(menu[0]);
                 }
                 menu = makeMenu();
-                document.body.appendChild(menu);
+                
+                userLi.appendChild(menu);
             }
         }
     },
@@ -209,14 +203,14 @@ var menuControl = {
         
         socket.on('message', function () {
             if (blurred && ++unread) {
-                document.title = '(' + unread + ') ' + Attributes.get('topic');
+                document.title = '(' + unread + ') ' + Attributes.get('topic').value;
             }
         });
 
         window.addEventListener('focus', function () {
             unread = 0;
             blurred = false;
-            document.title = Attributes.get('topic');
+            document.title = Attributes.get('topic').value;
         });
         
         window.addEventListener('blur', function () {
@@ -232,7 +226,7 @@ var menuControl = {
                 user.li.children[0].classList.remove('typing');
             }
         }
-    },
+    }
 };
 
 (function () {
@@ -269,7 +263,7 @@ var menuControl = {
             panel,
             i;
         
-        if (target.nodeName === 'BUTTON') {
+        if (target.nodeName === 'LI') {
             for (i = 0; i < tabs.length; i++) {
                 panel = document.getElementsByClassName(tabs[i].id)[0];
                 if (target.id === panel.className) {
@@ -285,7 +279,7 @@ var menuControl = {
         var menuContainer = document.getElementById('menu-container'),
             messages = document.getElementById('messages'),
             currentScroll = messages.scrollTop,
-            contextMenu = document.getElementById('context-menu');
+            contextMenu = document.getElementById('menuOptions');
 
         if (closing) {
             if (contextMenu) {
@@ -311,4 +305,12 @@ var menuControl = {
         }
     });
     
+    document.body.addEventListener('mouseup', function (e) {
+        var menu = document.getElementById('tempMenu'),
+            target = e.target.parentNode;
+        
+        if (menu && menu !== target) {
+            menu.parentNode.removeChild(menu);
+        }
+    });
 })();

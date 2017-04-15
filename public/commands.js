@@ -71,6 +71,9 @@ var COMMANDS = {
                 Attributes.remove('flair');
             } else {
                 Attributes.set('flair', params.flair);
+                socket.emit('command', 'flair', {//save flair on server
+                    flair : params.flair
+                });
             }
         }
     },
@@ -89,12 +92,52 @@ var COMMANDS = {
     get : {
         params : ['attribute'],
         handler : function (params) {
-            var value = Attributes.get(params.attribute);
-            if (value) {
-                showMessage({
-                    message : params.attribute + ' is is currently set to: ' + value,
-                    messageType : 'info'
-                });
+            var attData = Attributes.get(params.attribute),
+                formatTime;
+            
+            function timeSince(date) {
+                var seconds = Math.floor((new Date() - date) / 1000);
+
+                var interval = Math.floor(seconds / 31536000);
+
+                if (interval > 1) {
+                    return interval + " years";
+                }
+                interval = Math.floor(seconds / 2592000);
+                if (interval > 1) {
+                    return interval + " months";
+                }
+                interval = Math.floor(seconds / 86400);
+                if (interval > 1) {
+                    return interval + " days";
+                }
+                interval = Math.floor(seconds / 3600);
+                if (interval > 1) {
+                    return interval + " hours";
+                }
+                interval = Math.floor(seconds / 60);
+                if (interval > 1) {
+                    return interval + " minutes";
+                }
+                return Math.floor(seconds) + " seconds";
+            };
+            
+            if (attData) {
+                
+                if (attData.value) {
+                    formatTime = new Date();
+                    formatTime.setTime(attData.date);
+                    showMessage({
+                        message : params.attribute + ' was set to "' + attData.value + '" by "' + attData.updatedBy + '" ' + timeSince(formatTime.getTime()) + ' ago',
+                        messageType : 'info'
+                    });
+                } else {
+                    showMessage({
+                        message : params.attribute + ': ' + attData,
+                        messageType : 'info'
+                    });
+                }
+                
             } else {
                 showMessage({
                     message : params.attribute + ' isn\'t set',
@@ -121,7 +164,10 @@ var COMMANDS = {
             createPanel('register', [userName, password, confirmPassword], function () {
                 if (password.value === confirmPassword.value) {
                     if (password.value.length > 4) {
-                        socket.emit('register', userName.value, password.value);
+                        socket.emit('command', 'register', {
+                            nick : userName.value,
+                            password : password.value
+                        });
                     } else {
                         showMessage({
                             message : 'Please choose a password that is at least 5 characters long',
@@ -272,6 +318,20 @@ var COMMANDS = {
             });
         }
     },
+    blockproxy : {
+        handler : function () {
+            socket.emit('channelStatus', {
+                proxy : true
+            });
+        }
+    },
+    unblockproxy : {
+        handler : function () {
+            socket.emit('channelStatus', {
+                proxy : false
+            });
+        }
+    },
     block : {
         params : ['nick'],
         handler : function (params) {
@@ -349,10 +409,26 @@ var COMMANDS = {
             }
         }
     },
+    logout : {
+        handler : function () {
+            clientSubmit.handleInput('/nick ' + 'Ron' + Math.random());
+        }  
+    },
     emojis : {
         handler : function () {
             embed('embed', 'https://emojicopy.com/');
         }
+    },
+    myhats : {
+        handler : function () {
+            clientSubmit.handleInput('/hatlist ' + Attributes.get('nick'));
+        }
+    },
+    vpm : {
+        params : ['nick'],
+        handler: function (params) {
+            createPmPanel(ONLINE.getId(params.nick));
+        }  
     },
     //server side commands
     nick : {
@@ -405,8 +481,14 @@ var COMMANDS = {
     give_hat : {
         params : ['nick', 'hat']
     },
+    remove_hat : {
+        params : ['nick', 'hat']  
+    },
     hat : {
         params : ['hat']
+    },
+    hatlist : {
+        params : ['nick']  
     },
     cursor : {
         params : ['cursor']

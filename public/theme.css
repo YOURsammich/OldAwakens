@@ -24,17 +24,20 @@ a {
 }
 
 #main-container {
+    position: absolute;
     width: 100%;
     height: 100%;
 }
 
 #messages {
     transition: width 1s;
-    height: calc(100vh - 38px);
-    width: 100%;
+    height: calc(100% - 38px);
+    width: calc(100% - 50px);
     background-color: black;
-    position: relative;
     overflow-y: scroll;
+    overflow-x: hidden;
+    position: relative;
+    padding-right: 50px;
 }
 
 #messages img {
@@ -71,10 +74,6 @@ a {
     word-wrap: break-word;
     white-space: pre-wrap;
     color: white;
-}
-
-.messageContent {
-    width: 70%;
 }
 
 .action .messageContent:before,
@@ -127,8 +126,8 @@ a {
 }
 
 #input-bar {
-    position: absolute;
-    /* z-index: 1; this hides quotes behind the input bar */
+    position: relative;
+    z-index: 1;
     bottom: 0px;
     background-color: rgb(58, 58, 58);
     padding-top: 5px;
@@ -163,24 +162,24 @@ a {
     width: 0px;
     background-color: rgb(17, 17, 17);
     color: white;
-    display: block;
+    display: none;
     box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset, rgba(255, 255, 255, 0.2) 0px -1px 0px 0px;
     transition: width 1s;
     border-left: 4px solid #333;
     overflow: hidden;
 }
 
-.userPanel {
-    margin-top: 20px;
-    width: 300px;
-    display: none;
-}
-
-.userPanel h3 {
+#menu-container h3 {
     width: 80%;
     margin-left: 10%;
     border-bottom: 1px solid #333;
     font-weight: normal;
+}
+
+.userPanel {
+    margin-top: 20px;
+    width: 300px;
+    display: none;
 }
 
 .textDecoration .bar {
@@ -213,6 +212,10 @@ a {
 .transparent {
     background-color: #fcfcfc;
     background-image: url("https://www.transparenttextures.com/patterns/az-subtle.png");
+}
+
+.channelPanel {
+    display: none;
 }
 
 .userList {
@@ -258,27 +261,31 @@ a {
 
 #menu-tabs {
     width: 100%;
+    padding: 0px;
     padding-top: 15px;
     padding-bottom: 15px;
     background-color: rgb(34, 34, 34);
     box-shadow: rgba(0, 0, 0, 0.8) 5px 0px 7px 0px;
     white-space: nowrap;
+    margin: 0px;
 }
 
-#menu-tabs button {
+#menu-tabs li {
+    box-sizing: border-box;
+    display: inline-block;
+    font: 13.3333px Arial;
     background-color: rgb(51, 51, 51);
     color: white;
     cursor: pointer;
     padding: 10px;
     outline: none;
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgb(17, 17, 17);
+    border: 1px solid rgb(17, 17, 17);
     width: 130px;
 }
 
 #menu-tabs .listIcon {
     position: relative;
+    vertical-align: middle;
     width: 40px;
     height: 40px;
     border-radius: 100%;
@@ -348,7 +355,6 @@ a {
     animation-duration: 1s;
     animation-fill-mode: forwards;
     overflow: hidden;
-    width: 500px;
     margin: 0 auto;
     background-color: #545454;
     color: black;
@@ -446,32 +452,22 @@ a {
     outline: none;
 }
 
-/* context-menu */
+/* userOptions */
 
-#context-menu {
-    position: absolute;
-    z-index: 100;
-    width: 100px;
-    background-color: #EEE;
+.menuOptions {
+    background-color: rgb(51, 51, 51);
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 11px;
 }
 
-#context-menu header {
-    background-color: #DDD;
-    padding: 2px;
-    font-weight: bold;
-    word-wrap: break-word;
-}
-
-#context-menu li {
+.menuOptions li {
     height: 15px;
     cursor: pointer;
     list-style: none;
-    padding: 2px 2px 2px 24px;
+    padding: 2px 2px 2px 2px;
 }
 
-#context-menu li:hover {
+.menuOptions li:hover {
     background-color: #39F;
 }
 

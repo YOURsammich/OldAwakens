@@ -36,7 +36,12 @@ var Attributes = {
                 messageType : 'info'
             });
         }
-        localStorage.setItem('chat-' + attribute, newValue);
+        
+        if (typeof newValue === 'object') {
+            localStorage.setItem('chat-' + attribute, JSON.stringify(newValue));
+        } else {
+            localStorage.setItem('chat-' + attribute, newValue);
+        }
     },
     get : function (attribute) {
         var value = '';
@@ -140,8 +145,6 @@ var messageBuilder = {
 
         if (messageType === 'info') {
             messageDIV.innerHTML = parser.escape(message);
-        } else if (messageType === 'captcha') {
-            messageDIV.innerHTML = '<pre>' + parser.escape(message) + '</pre>';
         } else if (messageType === 'chat-image') {
             messageDIV.innerHTML = parser.parseImage(message.img, message.type);
             if (count) {
@@ -161,10 +164,6 @@ var messageBuilder = {
                 audioPlayer.chat.play();
             }
 
-            if (count) {
-                container.classList += ' msg-' + count;
-            }
-
             while (message.split(/\n/).length > 15) {
                 var index = message.lastIndexOf('\n');
                 message = message.slice(0, index) + message.slice(index + 1);
@@ -172,6 +171,10 @@ var messageBuilder = {
             parser.getAllFonts(message);
             
             messageDIV.innerHTML = ' ' + parser.parse(message, messageType === 'chat' && Attributes.get('toggle-filters'));
+        }
+        
+        if (count) {
+            container.classList += ' msg-' + count;
         }
 
         container.appendChild(messageDIV);
@@ -248,14 +251,16 @@ var messageBuilder = {
         }
 
         var scrollDelta = el.scrollHeight - el.clientHeight;
-        if (scrollDelta - el.scrollTop < 300) {
+        if (scrollDelta - el.scrollTop < 600) {
             scrollTo(el, scrollDelta, 200);
         }
     }
 }
 
 function showMessage(messageData, panel, img) {
-    var blockUsers = Attributes.get('blocked') || [];
+    var blockUsers = Attributes.get('blocked') || [],
+        userID = ONLINE.getId(messageData.nick);
+    
     if (blockUsers.indexOf(messageData.nick) === -1) {
         var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
         
@@ -268,24 +273,23 @@ function showMessage(messageData, panel, img) {
 
 function handlePrivateMessage(messageData) {
     var panel = document.getElementById('PmPanel-' + messageData.landOn),
-        pmUser = ONLINE.users[messageData.landOn],
-        informer;
+        pmUser = ONLINE.users[messageData.landOn];
 
     if (panel && panel.getElementsByClassName('messages')[0]) {
         showMessage(messageData, panel.getElementsByClassName('messages')[0]);
     } else if (pmUser) {
-        informer = pmUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm');
-
-        if (informer.length === 0) {
-            menuControl.inform(messageData.landOn, 'pm', 'unread PM(s)', function () {
-                createPmPanel(messageData.landOn);
-            });
-        }
-
         if (!pmUser.pm) {
             pmUser.pm = [];
         }
         pmUser.pm.push(messageData);
+        
+        menuControl.contextMenu.placeMenu(messageData.landOn, {
+            ['unread PM(s) - ' +  pmUser.pm.length] : {
+                callback : function (nick) {
+                    createPmPanel(ONLINE.getId(nick));
+                }  
+            }
+        }, true);
     }
 }
 
@@ -405,19 +409,19 @@ var clientSubmit = {
     }
 }
 
-function channelTheme(channelData, updatedBy) {
+function channelTheme(channelData) {
     if (channelData.note) {
         showMessage({
-            message : channelData.note,
+            message : channelData.note.value,
             messageType : 'note'
         });
         Attributes.set('note', channelData.note);
     }
 
     if (channelData.topic) {
-        document.title = channelData.topic;
+        document.title = channelData.topic.value;
         showMessage({
-            message : 'Topic: ' + channelData.topic,
+            message : 'Topic: ' + channelData.topic.value,
             messageType : 'general'
         });
         Attributes.set('topic', channelData.topic);
@@ -425,31 +429,48 @@ function channelTheme(channelData, updatedBy) {
 
     if (channelData.background) {
         if (Attributes.get('toggle-background')) {
-            document.getElementById('messages').style.background = channelData.background;
+            document.getElementById('messages').style.background = channelData.background.value;
         }
         Attributes.set('background', channelData.background);
     }
 
-    if (channelData.themecolors) {
-        document.getElementById('input-bar').style.backgroundColor = channelData.themecolors[0];
-        document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors[1];
+    if (channelData.themecolors && channelData.themecolors.value) {
+        document.getElementById('input-bar').style.backgroundColor = channelData.themecolors.value[0];
+        document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors.value[1];
         if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
             document.styleSheets[0].deleteRule(4);
-            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors[2], 4);
+            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
         }
     }
-
-    if (channelData.lock !== undefined && updatedBy) {
+    
+    if (channelData.lock && (typeof Attributes.get('lock') != 'object' || Attributes.get('lock').value != channelData.lock.value)) {
         var message;
-        if (channelData.lock) {
+        if (channelData.lock.value) {
             message = ' locked this channel';
         } else {
             message = ' unlocked this channel';
         }
         showMessage({
-            message : updatedBy + message,
+            message : channelData.lock.updatedBy + message,
             messageType : 'general'
         });
+        
+        Attributes.set('lock', channelData.lock);
+    }
+    
+    if (channelData.proxy && (typeof Attributes.get('proxy') != 'object' || Attributes.get('proxy').value != channelData.proxy.value)) {
+        var message;
+        if (channelData.proxy.value) {
+            message = ' blocked proxies';
+        } else {
+            message = ' unblocked proxies';
+        }
+        showMessage({
+            message : channelData.proxy.updatedBy + message,
+            messageType : 'general'
+        });
+        
+        Attributes.set('proxy', channelData.proxy);
     }
 }
 
@@ -499,8 +520,7 @@ function createPanel(title, html, func) {
 
 function createPmPanel(id) {
     var validUser = ONLINE.users[id],
-        panel = document.getElementById('PmPanel-' + id),
-        informer;
+        panel = document.getElementById('PmPanel-' + id);
 
     function makePanel() {
         var panelContainer = document.createElement('div'),
@@ -564,10 +584,6 @@ function createPmPanel(id) {
     }
 
     if (validUser && !panel) {
-        informer = validUser.li.getElementsByClassName('informer')[0].getElementsByClassName('pm');
-        if (informer.length !== 0) {
-            validUser.li.getElementsByClassName('informer')[0].removeChild(informer[0]);
-        }
         panel = makePanel();
         $$$.draggable(panel, 'messageContent');
         document.body.appendChild(panel);
@@ -694,6 +710,8 @@ var AutoComplete = {
             messageDiv = document.getElementById('messages');
 
         this.style.height = newHeight + 'px';
+        this.parentNode.style.top = -(newHeight - 18) + 'px';
+        
         messageDiv.style.top = -(newHeight - 18) + 'px';
         
         if (this.value.length === 0) {
@@ -702,7 +720,7 @@ var AutoComplete = {
         }
     });
     
-    $$$.query('.main-container').addEventListener('drop', function (e) {
+    $$$.query('#main-container').addEventListener('drop', function (e) {
         var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
             file = e.dataTransfer.files[0],
             type,
@@ -818,8 +836,10 @@ socket.on('channeldata', function (channel) {
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
         }
     }
-
-    channelTheme(channel.data, channel.updatedBy);
+    
+    if (channel.data) {
+        channelTheme(channel.data);
+    }
 });
 
 socket.on('banlist', function (banlist) {
@@ -908,5 +928,23 @@ socket.on('connect', function () {
         menuControl.updateValues();
     }
 });
+
+socket.on('activeChannels', function (channels) {
+    
+    channels.sort(function (a, b) {
+        return  b.online - a.online;
+    });
+    
+    var channelPanel = document.getElementsByClassName('channelPanel')[0],
+        div,
+        i;
+    
+    for (i = 0; i < channels.length; i++) {
+        div = document.createElement('div');
+        div.textContent = channels[i].name;
+        channelPanel.appendChild(div);   
+    }
+});
+socket.emit('activeChannels');
 
 menuControl.initMissedMessages(socket)
