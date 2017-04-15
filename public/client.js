@@ -147,6 +147,9 @@ var messageBuilder = {
             messageDIV.innerHTML = parser.escape(message);
         } else if (messageType === 'chat-image') {
             messageDIV.innerHTML = parser.parseImage(message.img, message.type);
+            if (count) {
+                container.classList += ' msg-' + count;
+            }
         } else {
 
             if (this.alertMessage(message, messageType, nick)) {
@@ -751,6 +754,44 @@ var AutoComplete = {
             }
         }
     });
+    
+    $$$.query('.main-container').addEventListener('paste', function (e) {
+        var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
+            file,
+            items,
+            reader;
+		if (e.clipboardData) {
+			items = e.clipboardData.items;
+			if (!items) return;
+			
+            if (items[0].type.indexOf("image") !== -1) {
+                e.preventDefault();
+                file = items[0].getAsFile();
+                if (file.size < 7000001) {
+                    if (acceptedFiletypes.indexOf(file.type) > -1) {
+                        reader = new FileReader();
+                        reader.onloadend = function () {
+                            socket.emit("message-image", {
+                                "type" : file.type,
+                                "img" : reader.result 
+                            }, Attributes.get("flair"));
+                        }
+                        reader.readAsBinaryString(file);
+                    } else {
+                        showMessage({
+                            "message" : "Not an acceptable image.",
+                            "messageType" : "error"
+                        });
+                    }
+                } else {
+                    showMessage({
+                        "message" : "Image too large.",
+                        "messageType" : "error"
+                    });
+                }
+            }
+		}
+	}, false);
     
     window.onblur = function() {
         window.blurred = true;
