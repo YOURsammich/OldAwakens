@@ -603,7 +603,7 @@ var AutoComplete = {
         } else {
             var word = this.word = document.getElementById('ac').value.replace(/[\.,-\/#!$%\^&\*;:{}=\_`~()]/g, ' ').trim().split(' ').reverse()[0],
                 valids = Object.keys(ONLINE.users).filter(function (element) {
-                return ONLINE.users[element].nick.indexOf(word) === 0;
+                return ONLINE.users[element].nick.toLowerCase().indexOf(word.toLowerCase()) === 0;
             });
             if (valids.length === 0) return;
             if (valids.length === 1) {
@@ -755,7 +755,7 @@ var AutoComplete = {
         }
     });
     
-    $$$.query('.main-container').addEventListener('paste', function (e) {
+    $$$.query('#main-container').addEventListener('paste', function (e) {
         var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
             file,
             items,
