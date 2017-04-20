@@ -662,7 +662,7 @@ function createChannel(io, channelName) {
             handler : function (user) {
                 var allCursors = dao.getCursors().lowercase;
                 var b = allCursors.pop();
-                showMessage(user.socket, `Cursors available: ${allCursors.join(", ")} and ${b}.`);
+                showMessage(user.socket, 'Cursors available: ' + allCursors.join(", ") + 'and ' + b + '.');
             }
         },
         cursor : {
@@ -968,11 +968,11 @@ function createChannel(io, channelName) {
             
             if (!userData) userData = {};
             
-            function join(channelData, nick, role, hat, cursor) {  
+            function join(channelData, nick, role, hat, cursor) {
                 user.nick = nick;
                 user.role = role;
                 user.token = dao.makeId();
-                user.hat = hat;
+                user.hat = hat && hat.current;
                 user.cursor = cursor;
                 tokens[user.nick] = user.token;
                 
@@ -996,7 +996,8 @@ function createChannel(io, channelName) {
                 socket.emit('update', {
                     nick : user.nick,
                     role : roleNames[user.role],
-                    token : user.token
+                    token : user.token,
+                    hats : hat
                 });
                 
                 roomEmit('joined', user.id, user.nick);
@@ -1011,20 +1012,22 @@ function createChannel(io, channelName) {
                         userData.role = dbuser.role;
                         
                         if (dbuser.hat) {
-                            userData.hat = JSON.parse(dbuser.hat).current;
+                            userData.hat = JSON.parse(dbuser.hat);
                         }
                         
                         if (dbuser.cursor) {
                             userData.cursor = JSON.parse(dbuser.cursor).name;
                         }
-                    } else {
-                        userData.role = 4;
                     }
                 } else {
                     userData.nick = dao.getNick();
                 }
             } else {
                 userData.nick = dao.getNick();
+            }
+            
+            if (userData.role === undefined) {
+                userData.role = 4;
             }
             
             join(channelData, userData.nick, userData.role, userData.hat, userData.cursor);
@@ -1034,8 +1037,8 @@ function createChannel(io, channelName) {
             var apiLink = 'http://check.getipintel.net/check.php?ip=' + user.remote_addr + '&contact=theorignalsandwich@gmail.com&flags=m';
             
             dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
-                if (dbuser && dbuser.role !== 0 && channelData[dbuser.nick]) {//assign channel role
-                    dbuser.role = channelData[dbuser.nick];
+                if (dbuser && dbuser.role !== 0 && channelRoles[dbuser.nick]) {//assign channel role
+                    dbuser.role = channelRoles[dbuser.nick];
                 }
                 
                 function attemptJoin () {
@@ -1096,12 +1099,13 @@ function createChannel(io, channelName) {
         socket.on('requestJoin', function (requestedData) {
             var joinData = {},
                 requestedDataKeys,
-                k;
+                k,
+                accept = ['nick', 'token', 'password'];
             
             if (typeof requestedData === 'object') {//makes sure requestedData is valid, all items are strings
                 requestedDataKeys = Object.keys(requestedData);
                 for (k = 0; k < requestedDataKeys.length; k++) {
-                    if (typeof requestedData[requestedDataKeys[k]] === 'string') {
+                    if (accept.indexOf(requestedDataKeys[k]) !== -1 && typeof requestedData[requestedDataKeys[k]] === 'string') {
                         joinData[requestedDataKeys[k]] = requestedData[requestedDataKeys[k]]
                     }
                 }
