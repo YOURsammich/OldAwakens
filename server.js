@@ -241,7 +241,7 @@ function createChannel(io, channelName) {
         },
         kick : {
             role : 2,
-            params : ['nick', 'reason'],
+            params : ['nick':'TIMELORD', 'reason'],
             handler : function (user, params) {
                 var index = findIndex(channel.online, 'nick', params.nick),
                     message = params.reason ? 'You\'ve been kicked: ' + params.reason : 'You\'ve been kicked';
