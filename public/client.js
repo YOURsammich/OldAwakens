@@ -19,7 +19,7 @@ var ONLINE = {
 var Attributes = {
     notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters'],
     altAtt : {colour : 'color', bg : 'background'},
-    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'filters'],
+    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'filters', 'role', 'token'],
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
@@ -38,7 +38,7 @@ var Attributes = {
             });
         }
         
-        if (this.saveLocal[attribute]) {
+        if (this.saveLocal.indexOf(attribute) !== -1 || attribute.slice(0, 6) == 'toggle') {
             if (typeof newValue === 'object') {
                 localStorage.setItem('chat-' + attribute, JSON.stringify(newValue));
             } else {
@@ -48,6 +48,7 @@ var Attributes = {
     },
     get : function (attribute) {
         var value = '';
+
 
         if (this.altAtt[attribute]) {
             attribute = this.altAtt[attribute];
@@ -431,7 +432,7 @@ function channelTheme(channelData) {
         if (Attributes.get('toggle-background')) {
             document.getElementById('messages').style.background = channelData.background.value;
         }
-        Attributes.set('background', channelData.background);
+        Attributes.set('background', channelData.background.value);
     }
 
     if (channelData.themecolors && channelData.themecolors.value) {
@@ -472,6 +473,11 @@ function channelTheme(channelData) {
         
         Attributes.set('proxy', channelData.proxy);
     }
+    
+    /*console.log(channelData);
+    if (channelData.hats) {
+        console.log(channelData.hats);
+    }*/
 }
 
 function createPanel(title, html, func) {
@@ -888,6 +894,9 @@ socket.on('update', function (allAtt) {
         i;
 
     for (i = 0; i < keys.length; i++) {
+        if (keys[i] === 'hats') {
+            console.log(allAtt[keys[i]]);
+        }
         Attributes.set(keys[i], allAtt[keys[i]], true);
     }
 });

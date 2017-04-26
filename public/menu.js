@@ -266,6 +266,11 @@ var menuControl = {
         if (target.nodeName === 'LI') {
             for (i = 0; i < tabs.length; i++) {
                 panel = document.getElementsByClassName(tabs[i].id)[0];
+                
+                if (target.id === 'channelPanel') {
+                    socket.emit('activeChannels');
+                }
+                
                 if (target.id === panel.className) {
                     panel.style.display = 'block';
                 } else {

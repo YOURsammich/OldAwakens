@@ -10,7 +10,7 @@ var parser = {
     replink : 'ÃƒÂ;ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂºENONHEInoheÃƒÂ¥ÃƒÂ¶',
     repclink : 'ÃƒÂ;ÃƒÂ¤!#@&5cÃƒÂ¸ÃƒÂºENONHEInoheÃƒÂ¥ÃƒÂ¶',
     repnmliz : 'ÃƒÂ;ÃƒÂ¤!#@&5nÃƒÂ¸ÃƒÂ¶EESCHEInoheÃƒÂ_ÃƒÂ¤',
-    matches : 10,
+    matches : 6,
     multiple : function (str, mtch, rep, limit) {
         var ct = 0;
         limit = limit || 3000;
@@ -91,6 +91,8 @@ var parser = {
 
         //convert spaces
         str = str.replace(/\s{2}/gi, ' &nbsp;');
+        
+        str = str.replace(/(<br>)(.+)/g, '<div style="display:block;padding-left:3.5em;">$2</div>');
         return str;
     },
     wordReplace : function (str) {
@@ -146,7 +148,6 @@ var parser = {
         str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', this.matches);
         str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoilerImg spoil">$1</span>', this.matches);
         str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<div class="style spin">$1</div>', this.matches);
-        str = this.multiple(str, /\/\&amp;([^\|]+)\|?/g, '<span class="style marquee">$1</span>', 1);
         str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="style rainbow">$1</span>', this.matches);
         str = this.multiple(str, /\/\&#36;([^\|]+)\|?/g, '<span class="style shake">$1</span>', this.matches);
         str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>', this.matches);
@@ -164,16 +165,7 @@ var parser = {
     },
     parse : function (str, wordReplace) {
         // Convert chars to html codes
-        str = str.replace(/\n/g, '\\n');
-        str = str.replace(/&/gi, '&amp;');
-        str = str.replace(/>/gi, '&gt;');
-        str = str.replace(/</gi, '&lt;');
-        str = str.replace(/"/gi, '&quot;');
-        str = str.replace(/#/gi, '&#35;');
-        str = str.replace(/\\n/g, '<br>');
-        str = str.replace(/\$/gi, '&#36;');
-        str = str.replace(/'/gi, '&#39;');
-        str = str.replace(/~/gi, '&#126;');
+        str = this.escape(str);
 
         //match user escaping
         var escs = str.match(/\\./g);
@@ -189,7 +181,7 @@ var parser = {
 
         //match clinks
         var clinks = str.match(this.clinkreg);
-        str = str.replace(this.clinkreg, this.repclink)
+        str = str.replace(this.clinkreg, this.repclink);
 
         //match links
         var linkesc = str.match(this.linkreg);
@@ -269,7 +261,6 @@ var parser = {
             str = str.replace(this.repnmliz, '<textarea style="overflow:hidden;">' + normalize.replace(/<br>/g, '&#13;') + '</textarea>');
         }
         
-        str = str.replace(/(<br>)(.+)/g, '<div style="display:block;padding-left:3.5em;">$2</div>');
         //.replace(/(<br>)(.+)/, '<div>$2</div>')
         return str;
     },
@@ -285,7 +276,7 @@ var parser = {
         return str;
     },
     changeInput : function(type, value) {
-        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+        /*if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
             if (type == 'font') {
                 $$$.query(':-moz-read-write').style['font-family'] = value;
             } else {
@@ -299,6 +290,6 @@ var parser = {
             }
             
             
-        }
+        }*/
     }
 };
