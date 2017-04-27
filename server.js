@@ -1036,37 +1036,42 @@ function createChannel(io, channelName) {
         function checkChannelStatus (joinData, dbuser) {
             var apiLink = 'http://check.getipintel.net/check.php?ip=' + user.remote_addr + '&contact=theorignalsandwich@gmail.com&flags=m';
             
-            dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
-                if (dbuser && dbuser.role !== 0 && channelRoles[dbuser.nick]) {//assign channel role
-                    dbuser.role = channelRoles[dbuser.nick];
-                }
-                
-                function attemptJoin () {
-                    if (channelData.lock && channelData.lock.value) {
-                        if (dbuser && dbuser.nick) {
-                            joinChannel(joinData, dbuser, channelData);
-                        } else {
-                            socket.emit('locked');
+            dao.banlist(channelName).then(function (nicks) {
+                if (nicks.indexOf(user.nick) == -1 && nicks.indexOf(user.remote_addr) == -1) {
+                    dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
+                        if (dbuser && dbuser.role !== 0 && channelRoles[dbuser.nick]) {//assign channel role
+                            dbuser.role = channelRoles[dbuser.nick];
                         }
-                    } else {
-                        joinChannel(joinData, dbuser, channelData);
-                    }
-                }
-                
-                if (channelData.proxy && channelData.proxy.value) {
-                    request(apiLink, function (error, response, body) {
-                        if (!error) {
-                            if (!parseInt(body)) {
-                                showMessage(user.socket, 'Sorry but this channel has proxies blocked for now.', 'error');
+
+                        function attemptJoin () {
+                            if (channelData.lock && channelData.lock.value) {
+                                if (dbuser && dbuser.nick) {
+                                    joinChannel(joinData, dbuser, channelData);
+                                } else {
+                                    socket.emit('locked');
+                                }
                             } else {
-                                attemptJoin();
+                                joinChannel(joinData, dbuser, channelData);
                             }
                         }
+
+                        if (channelData.proxy && channelData.proxy.value) {
+                            request(apiLink, function (error, response, body) {
+                                if (!error) {
+                                    if (!parseInt(body)) {
+                                        showMessage(user.socket, 'Sorry but this channel has proxies blocked for now.', 'error');
+                                    } else {
+                                        attemptJoin();
+                                    }
+                                }
+                            });
+                        } else {
+                            attemptJoin();
+                        }
                     });
-                } else {
-                    attemptJoin();
                 }
             });
+            
         }
         
         function checkUserStatus (joinData) {

@@ -9,13 +9,14 @@
         <meta name="description" content="Awakens is an online web-based chat client with multiple different styles, games and features. That is constantly updating and growing over time." />
         <link rel="stylesheet" href="/theme.css" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid%20Sans" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material%20Icons">
         <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/emojione/2.2.7/lib/js/emojione.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/emojione/2.2.7/assets/css/emojione.min.css"/>
     </head>
 
     <body>
-        <div class="main-container">
+        <div id="main-container">
             <div id="messages"></div>
             <div id="input-bar">
                 <textarea autocomplete="off" autofocus id="ac" placeholder="Type anything then press enter, or drag image here."></textarea>
@@ -25,13 +26,20 @@
         </div>
         
         <div id="menu-container">
-            <div id="menu-tabs">
-                <button id="userPanel">User Panel</button>
-                <button id="userList" class="listIcon">8</button>
-                <button id="channelPanel">Channel Panel</button>
+            
+            
+            <ul id="menu-tabs">
+                <li id="userPanel">User Panel</li>
+                <li id="userList" class="listIcon">8</li>
+                <li id="channelPanel">Channel Panel</li>
+            </ul>
+            
+            <div class="channelPanel">
+                <h3>Active channels</h3>
             </div>
-            <div class="channelPanel"></div>
-            <div class="userList"></div>
+            <div class="userList">
+                <div></div>
+            </div>
             <div class="userPanel">
                 <h3>Text decoration</h3>
                 <div class="textDecoration">

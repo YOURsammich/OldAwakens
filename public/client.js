@@ -896,8 +896,9 @@ socket.on('update', function (allAtt) {
     for (i = 0; i < keys.length; i++) {
         if (keys[i] === 'hats') {
             console.log(allAtt[keys[i]]);
+        } else {
+            Attributes.set(keys[i], allAtt[keys[i]], true);
         }
-        Attributes.set(keys[i], allAtt[keys[i]], true);
     }
 });
 
