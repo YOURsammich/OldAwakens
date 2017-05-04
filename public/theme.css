@@ -126,8 +126,7 @@ a {
 }
 
 #input-bar {
-    position: relative;
-    z-index: 1;
+    position: absolute;
     bottom: 0px;
     background-color: rgb(58, 58, 58);
     padding-top: 5px;
@@ -484,6 +483,7 @@ a {
 
 .style {
     display: inline-block !important;
+    max-width: 100%;
 }
 
 .spin {
@@ -750,7 +750,16 @@ a {
 
 .cursor { 
     position: absolute;
+    z-index: 1;
     transition: 0.1s;
+    opacity: 0.6;
+    height: 19px;
+    width: 13px;
+    max-height: 32px;
+    max-width: 32px;
+}
+
+.cursor[data-nick]::after {
     text-shadow:
      1px 0px 0 #000,
     -1px 0px 0 #000,
@@ -761,9 +770,7 @@ a {
     -1px 1px 0 #000,
      1px 1px 0 #000;
     color: #FFF;
-    opacity: 0.6;
-    max-height: 32px;
-    max-width: 32px;
+    content: attr(data-nick);
 }
 
 .cursor > img {
@@ -771,20 +778,13 @@ a {
     max-width: 32px;
 }
 
-.cursor[data-nick]::after {
-    display: block;
-    text-shadow:
-     1px 0px 0 #000,
-    -1px 0px 0 #000,
-     0px 1px 0 #000,
-     0px -1px 0 #000,
-    -1px -1px 0 #000,
-     1px -1px 0 #000,
-    -1px 1px 0 #000,
-     1px 1px 0 #000;
-    color: #FFF;
-    opacity: 0.5;
-    content: attr(data-nick);
+.myCursor {
+    opacity: 1;
+    transition: none !important;
+}
+
+.myCursor::after {
+    display: none !important;
 }
 
 :read-write {

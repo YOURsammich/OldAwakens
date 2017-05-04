@@ -3,7 +3,6 @@ var socket = io.connect(window.location.pathname);
 //idle/afk users should change positions on the userlist board after so long of inactivity
 
 var ONLINE = {
-    
     users : {},
     getId : function (nick) {
         var keys = Object.keys(this.users),
@@ -17,9 +16,9 @@ var ONLINE = {
 };
 
 var Attributes = {
-    notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters'],
+    notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
     altAtt : {colour : 'color', bg : 'background'},
-    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'filters', 'role', 'token'],
+    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token'],
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
@@ -716,8 +715,6 @@ var AutoComplete = {
             messageDiv = document.getElementById('messages');
 
         this.style.height = newHeight + 'px';
-        this.parentNode.style.top = -(newHeight - 18) + 'px';
-        
         messageDiv.style.top = -(newHeight - 18) + 'px';
         
         if (this.value.length === 0) {
@@ -838,7 +835,7 @@ socket.on('channeldata', function (channel) {
     if (channel.users) {
         document.getElementsByClassName('userList')[0].innerHTML = '';
         ONLINE.users = {};
-        for (i = 0; i < channel.users.length; i++) {
+        for (i = 0; i < channel.users.length; i++) {            
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
         }
     }
@@ -892,7 +889,7 @@ socket.on('banlist', function (banlist) {
 socket.on('update', function (allAtt) {
     var keys = Object.keys(allAtt),
         i;
-
+    
     for (i = 0; i < keys.length; i++) {
         if (keys[i] === 'hats') {
             console.log(allAtt[keys[i]]);

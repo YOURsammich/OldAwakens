@@ -62,6 +62,16 @@ function createChannel(io, channelName) {
             delete newData.remote_addr;
         }
         
+        if (newData.cursor) {
+            try { 
+                newData.cursor = JSON.parse(newData.cursor).name;
+                user.cursor = newData.cursor;
+                roomEmit('changeCursor', user.id, user.cursor);
+            } catch (err) {
+                //
+            }
+        }
+        
         user.socket.emit('update', newData);
     }
     
@@ -135,7 +145,8 @@ function createChannel(io, channelName) {
                                         token : dao.makeId(),
                                         remote_addr : true,
                                         role : userRole,
-                                        flair : dbuser.flair
+                                        flair : dbuser.flair,
+                                        cursor : dbuser.cursor
                                     });
                                 });
                             });
@@ -677,11 +688,11 @@ function createChannel(io, channelName) {
                     var cursorIndex = allCursors.lowercase.indexOf(params.cursor.toLowerCase());
                     if (cursorIndex !== -1) {
                         var userCursor = {
-                            "name": allCursors.name[cursorIndex]
+                            name : allCursors.name[cursorIndex]
                         }
                         dao.setUserinfo(dbuser.nick, 'cursor', userCursor).then(function () {
                             user.cursor = allCursors.name[cursorIndex];
-                            roomEmit("changeCursor", user.id, user.cursor);
+                            roomEmit('changeCursor', user.id, user.cursor);
                             showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
                         });
                     } else {
@@ -692,10 +703,10 @@ function createChannel(io, channelName) {
                     var cursorIndex = allCursors.lowercase.indexOf(params.cursor.toLowerCase());
                     if (cursorIndex !== -1) {
                         var userCursor = {
-                            "name": allCursors.name[cursorIndex]
+                            name : allCursors.name[cursorIndex]
                         }
                         user.cursor = allCursors.name[cursorIndex];
-                        roomEmit("changeCursor", user.id, user.cursor);
+                        roomEmit('changeCursor', user.id, user.cursor);
                         showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
                     } else {
                         showMessage(user.socket, 'That cursor doesn\'t exist.', 'error');
@@ -729,13 +740,14 @@ function createChannel(io, channelName) {
                 if (!isNaN(parseInt(cursorData.y)) && !isNaN(parseInt(cursorData.x))) {
                     roomEmit('updateCursor', {
                         id : user.id,
-                        position : cursorData
+                        position : cursorData,
+                        cursor : user.cursor
                     });
                 }
             }
         });
         
-        socket.on('removeCursor', function(){
+        socket.on('removeCursor', function (){
             if (findIndex(channel.online, 'id', user.id) !== -1) {
                 roomEmit('removeCursor', user.id);
             }
@@ -996,7 +1008,8 @@ function createChannel(io, channelName) {
                     nick : user.nick,
                     role : roleNames[user.role],
                     token : user.token,
-                    hats : hat
+                    hats : hat,
+                    cursor : cursor
                 });
                 
                 roomEmit('joined', user.id, user.nick);
@@ -1035,66 +1048,68 @@ function createChannel(io, channelName) {
         function checkChannelStatus (joinData, dbuser) {
             var apiLink = 'http://check.getipintel.net/check.php?ip=' + user.remote_addr + '&contact=theorignalsandwich@gmail.com&flags=m';
             
-            dao.banlist(channelName).then(function (nicks) {
-                if (nicks.indexOf(user.nick) == -1 && nicks.indexOf(user.remote_addr) == -1) {
-                    dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
-                        if (dbuser && dbuser.role !== 0 && channelRoles[dbuser.nick]) {//assign channel role
-                            dbuser.role = channelRoles[dbuser.nick];
-                        }
+            dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
+                if (dbuser && dbuser.role !== 0 && channelRoles[dbuser.nick]) {//assign channel role
+                    dbuser.role = channelRoles[dbuser.nick];
+                }
 
-                        function attemptJoin () {
-                            if (channelData.lock && channelData.lock.value) {
-                                if (dbuser && dbuser.nick) {
-                                    joinChannel(joinData, dbuser, channelData);
-                                } else {
-                                    socket.emit('locked');
-                                }
+                function attemptJoin () {
+                    if (channelData.lock && channelData.lock.value) {
+                        if (dbuser && dbuser.nick) {
+                            joinChannel(joinData, dbuser, channelData);
+                        } else {
+                            socket.emit('locked');
+                        }
+                    } else {
+                        joinChannel(joinData, dbuser, channelData);
+                    }
+                }
+
+                if (channelData.proxy && channelData.proxy.value) {
+                    request(apiLink, function (error, response, body) {
+                        if (!error) {
+                            if (parseInt(body)) {
+                                showMessage(user.socket, 'Sorry but this channel has proxies blocked for now.', 'error');
                             } else {
-                                joinChannel(joinData, dbuser, channelData);
+                                attemptJoin();
                             }
                         }
-
-                        if (channelData.proxy && channelData.proxy.value) {
-                            request(apiLink, function (error, response, body) {
-                                if (!error) {
-                                    if (!parseInt(body)) {
-                                        showMessage(user.socket, 'Sorry but this channel has proxies blocked for now.', 'error');
-                                    } else {
-                                        attemptJoin();
-                                    }
-                                }
-                            });
-                        } else {
-                            attemptJoin();
-                        }
                     });
+                } else {
+                    attemptJoin();
                 }
             });
-            
         }
         
         function checkUserStatus (joinData) {
             if (findIndex(channel.online, 'id', user.id) === -1) {
-                if (joinData.nick) {
-                    dao.find(joinData.nick).then(function (dbuser) {//find if user exist
-                        if (joinData.token && joinData.token === tokens[joinData.nick]) {//tokens match? good to go
-                            checkChannelStatus(joinData, dbuser);
-                        } else if (joinData.password) {//tokens don't match try logging in with password
-                            dao.login(joinData.nick, joinData.password).then(function (correctPassword) {
-                                if (correctPassword) {
+                dao.banlist(channelName).then(function (banlist) {
+                    if (banlist.indexOf(joinData.nick) == -1 && banlist.indexOf(user.remote_addr) == -1) {
+                        if (joinData.nick) {
+                            dao.find(joinData.nick).then(function (dbuser) {//find if user exist
+                                if (joinData.token && joinData.token === tokens[joinData.nick]) {//tokens match? good to go
                                     checkChannelStatus(joinData, dbuser);
+                                } else if (joinData.password) {//tokens don't match try logging in with password
+                                    dao.login(joinData.nick, joinData.password).then(function (correctPassword) {
+                                        if (correctPassword) {
+                                            checkChannelStatus(joinData, dbuser);
+                                        } else {
+                                            checkChannelStatus();
+                                        }
+                                    }).fail(checkChannelStatus);
                                 } else {
-                                    checkChannelStatus();
+                                    delete joinData.nick;
+                                    checkChannelStatus(joinData);
                                 }
-                            }).fail(checkChannelStatus);
+                            }).fail(checkChannelStatus.bind(null, joinData));
                         } else {
-                            delete joinData.nick;
-                            checkChannelStatus(joinData);
-                        }
-                    }).fail(checkChannelStatus.bind(null, joinData));
-                } else {
-                    checkChannelStatus();
-                } 
+                            checkChannelStatus();
+                        } 
+                    } else {
+                        showMessage(user.socket, 'You are banned', 'error');
+                        user.socket.disconnect();
+                    }
+                });
             } else {
                 showMessage(socket, 'Only one socket connection allowed', 'error');
             }
