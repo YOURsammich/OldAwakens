@@ -668,7 +668,7 @@ function createChannel(io, channelName) {
             }
         },
         cursors : {
-            role: 0,
+            role: 4,
             handler : function (user) {
                 var allCursors = dao.getCursors().lowercase;
                 var b = allCursors.pop();
