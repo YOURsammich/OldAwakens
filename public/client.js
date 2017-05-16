@@ -917,6 +917,10 @@ socket.on('locked', function () {
 });
 
 socket.on('disconnect', function () {
+    ONLINE.users.forEach(function(user) {
+        user.cursor && user.cursor.parentNode.removeChild(user.cursor);
+    });
+
     showMessage({
         message : 'disconnected',
         messageType : 'error'
