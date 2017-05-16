@@ -41,10 +41,10 @@
     }
     
     function changeCursor(id, newCursor) {
-        var user = ONLINE.users[id],
+        var cuser = ONLINE.users[id],
             cursorImage;
-
-        if (ONLINE.users[id].nick == user.nick) {
+        
+        if (user.nick == cuser.nick) {
             Attributes.set('cursor', newCursor);
             if (newCursor === 'default.png') {
                 document.body.style.cursor = 'default';
@@ -54,12 +54,12 @@
                 user.cursor.style.display = 'block';
             }
         }
-
-        if (user && user.cursor) {
-            cursorImage = user.cursor.getElementsByTagName('img')[0];
+        
+        if (cuser && cuser.cursor) {
+            cursorImage = cuser.cursor.getElementsByTagName('img')[0];
             cursorImage.onload = function () {
-                user.cursor.style.width = cursorImage.width + 'px';
-                user.cursor.style.height = cursorImage.height + 'px';
+                cuser.cursor.style.width = cursorImage.width + 'px';
+                cuser.cursor.style.height = cursorImage.height + 'px';
             };
 
             cursorImage.src = 'cursors/' + newCursor;
