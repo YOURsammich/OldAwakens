@@ -291,7 +291,6 @@ var menuControl = {
                 document.body.removeChild(contextMenu); 
             }
             menuContainer.style.width = '0px';
-            messages.style.width = 'calc(100% - 50px)';
             closing = false;
             messages.scrollTop = currentScroll;
             clearTimeout(timeOut);
@@ -305,7 +304,6 @@ var menuControl = {
             clearTimeout(timeOut);
             timeOut = setTimeout(function () {
                 menuContainer.style.width = '300px';
-                messages.style.width = 'calc(100% - 300px)';
             }, 10);
         }
     });

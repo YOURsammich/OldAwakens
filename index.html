@@ -9,55 +9,55 @@
         <meta name="description" content="Awakens is an online web-based chat client with multiple different styles, games and features. That is constantly updating and growing over time." />
         <link rel="stylesheet" href="/theme.css" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid%20Sans" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material%20Icons">
         <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/emojione/2.2.7/lib/js/emojione.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/emojione/2.2.7/assets/css/emojione.min.css"/>
     </head>
 
     <body>
-        <div id="main-container">
-            <div id="messages"></div>
-            <div id="input-bar">
-                <textarea autocomplete="off" autofocus id="ac" placeholder="Type anything then press enter, or drag image here."></textarea>
-                <div class="toggle-menu"><span></span></div>
+        <main>
+            <div id="main-container">
+                <div id="messages"></div>
+                <div id="input-bar">
+                    <textarea autocomplete="off" autofocus id="ac" placeholder="Type anything then press enter, or drag image here."></textarea>
+                    <div class="toggle-menu"><span></span></div>
+                </div>
+                <div id="cursor-container"></div>
             </div>
-            <div id="cursor-container"></div>
-        </div>
-        
-        <div id="menu-container">
             
-            
-            <ul id="menu-tabs">
-                <li id="userPanel">User Panel</li>
-                <li id="userList" class="listIcon">8</li>
-                <li id="channelPanel">Channel Panel</li>
-            </ul>
-            
-            <div class="channelPanel">
-                <h3>Active channels</h3>
-            </div>
-            <div class="userList">
-                <div></div>
-            </div>
-            <div class="userPanel">
-                <h3>Text decoration</h3>
-                <div class="textDecoration">
-                    <div class="bar color">
-                        <input spellcheck="false"/>
-                        <div class="label">color</div>
-                    </div>
-                    <div class="bar bgcolor">
-                        <input spellcheck="false"/>
-                        <div class="label">bgcolor</div>
-                    </div>
-                    <div class="bar glow">
-                        <input spellcheck="false"/>
-                        <div class="label">glow</div>
+            <div id="menu-container">
+                <ul id="menu-tabs">
+                    <li id="userPanel">User Panel</li>
+                    <li id="userList" class="listIcon">8</li>
+                    <li id="channelPanel">Channel Panel</li>
+                </ul>
+
+                <div class="channelPanel">
+                    <h3>Active channels</h3>
+                </div>
+                <div class="userList">
+                    <div></div>
+                </div>
+                <div class="userPanel">
+                    <h3>Text decoration</h3>
+                    <div class="textDecoration">
+                        <div class="bar color">
+                            <input spellcheck="false"/>
+                            <div class="label">color</div>
+                        </div>
+                        <div class="bar bgcolor">
+                            <input spellcheck="false"/>
+                            <div class="label">bgcolor</div>
+                        </div>
+                        <div class="bar glow">
+                            <input spellcheck="false"/>
+                            <div class="label">glow</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
+
         <script src="/socket.io/socket.io.js"></script>
         <script src="/media.js"></script>
         <script src="/dollarSign.js"></script>

@@ -715,6 +715,7 @@ var AutoComplete = {
             messageDiv = document.getElementById('messages');
 
         this.style.height = newHeight + 'px';
+        this.parentNode.style.top = -(newHeight - 18) + 'px';
         messageDiv.style.top = -(newHeight - 18) + 'px';
         
         if (this.value.length === 0) {
@@ -920,7 +921,7 @@ socket.on('disconnect', function () {
     ONLINE.users.forEach(function(user) {
         user.cursor && user.cursor.parentNode.removeChild(user.cursor);
     });
-
+    
     showMessage({
         message : 'disconnected',
         messageType : 'error'
