@@ -14,7 +14,7 @@ main {
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     overflow: hidden;
 }
 
@@ -31,16 +31,25 @@ main {
     background: #5F5F5F;
 }
 
+#flexOne {
+    height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    flex: 1;
+    order: 2;
+}
+
 #main-container {
     order: 1;
     flex: 1;
     overflow: hidden;
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
 }
 
 #messages {
     transition: width 1s;
-    height: calc(100% - 38px);
+    height: 100%;
     max-width: 100%;
     background-color: black;
     overflow-y: scroll;
@@ -135,6 +144,7 @@ main {
 }
 
 #input-bar {
+    order: 2;
     position: relative;
     z-index: 3;
     cursor: default;
@@ -163,7 +173,7 @@ main {
 }
 
 #menu-container {
-    order: 1;
+    order: 2;
     z-index: 2;
     cursor: default;
     top: 0px;

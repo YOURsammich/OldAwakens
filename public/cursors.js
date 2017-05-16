@@ -14,7 +14,7 @@
             cursor.setAttribute('data-nick', ONLINE.users[id].nick);
             cursor.className = 'cursor';
 
-            if (ONLINE.users[id].nick === Attributes.get('nick')) {
+            if (ONLINE.users[id].nick === user.nick) {
                 cursor.className += ' myCursor';
                 if (cursorType && cursorType !== 'default.png') {
                     document.body.style.cursor = 'none';
