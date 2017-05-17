@@ -917,9 +917,14 @@ socket.on('locked', function () {
 });
 
 socket.on('disconnect', function () {
-    ONLINE.users.forEach(function(user) {
-        user.cursor && user.cursor.parentNode.removeChild(user.cursor);
-    });
+    var userIDs = Reflect.ownKeys(ONLINE.users);
+    for (var i = 0; i < userIDs.length; i++) {
+        var userID = userIDs[i];
+        var user = ONLINE.users[userID];
+        if (user.cursor) {
+            user.cursor.parentNode.removeChild(user.cursor);
+        }
+    }
 
     showMessage({
         message : 'disconnected',
