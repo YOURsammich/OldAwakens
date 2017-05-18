@@ -921,7 +921,7 @@ socket.on('disconnect', function () {
     for (var i = 0; i < userIDs.length; i++) {
         var userID = userIDs[i];
         var user = ONLINE.users[userID];
-        if (user.cursor) {
+        if (user.cursor && user.cursor.parentNode) {
             user.cursor.parentNode.removeChild(user.cursor);
         }
     }
