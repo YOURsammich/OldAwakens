@@ -87,7 +87,6 @@ var menuControl = {
     afk : function (id, message) {
         var user = ONLINE.users[id];
         if (user) {
-            //message = emojione.toImage(message); // add the emoji stuff
             user.li.getElementsByClassName('informer')[0].innerHTML = emojione.toImage(parser.escape(message));
         }
     },
