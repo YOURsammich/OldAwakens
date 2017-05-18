@@ -87,6 +87,7 @@ var menuControl = {
     afk : function (id, message) {
         var user = ONLINE.users[id];
         if (user) {
+            message = emojione.shortnameToUnicode(message); // add the emoji stuff
             user.li.getElementsByClassName('informer')[0].textContent = message;
         }
     },
