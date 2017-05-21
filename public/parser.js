@@ -284,18 +284,10 @@ var parser = {
         return str;
     },
     changeInput : function(type, value) {
-        /*if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-            if (type == 'font') {
-                $$$.query(':-moz-read-write').style.fontFamily = value;
-            } else {
-                $$$.query(':-moz-read-write').style.color = value;
-            }
+        if (type == 'font'){
+            $$$.query('#input-bar textarea').style.fontFamily = value;
         } else {
-            if (type == 'font'){
-                $$$.query('#input-bar textarea').style.fontFamily = value;
-            } else {
-                $$$.query('#input-bar textarea').style.color = value;
-            }   
-        }*/
+            $$$.query('#input-bar textarea').style.color = value;
+        } 
     }
 };
