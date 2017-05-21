@@ -1,5 +1,3 @@
-//10:00am
-
 var parser = {
     linkreg : /(http|https|ftp)\x3A\x2F\x2F(?:[\da-z](?:[\x2D\da-z]*[\da-z])?\.)+[\da-z](?:[\x2D\da-z]*[\da-z])?[a-z0-9\_\-\%\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\`\.]*/gi,
     clinkreg : /([a-z]+:\/\/(([0-9a-z\-\.]+\.[a-z]+\/[a-z0-9\_\-\~\:\/\?\#\[\]\@\!\$\&\'\%\(\)\*\+\,\;\=\`\.]+)|([0-9a-z\-\.]+\.[a-z]+\/)|([0-9a-z\-\.]+\.[a-z]+)))\[\{([\W\w]+)\}\]/gi,
@@ -59,6 +57,7 @@ var parser = {
         message.scrollIntoView();
     },
     showQuote : function (messageNumber) {
+        var container = document.getElementById('messages');
         var messageContainer = document.getElementsByClassName('msg-' + messageNumber)[0];
         if (messageContainer) {
             var quoteHolder = document.createElement('div');
@@ -70,9 +69,17 @@ var parser = {
 
             document.body.appendChild(quoteHolder);
             //follow cursor
-            document.body.addEventListener('mousemove', function(e){
+            document.body.addEventListener('mousemove', function (e) {
+                
+                console.log(e.clientY + (messageContainer.offsetHeight - messageContainer.scrollHeight) , container.offsetHeight);
+                
+                if (e.clientY + (messageContainer.offsetHeight - messageContainer.scrollHeight) > container.offsetHeight) {
+                    quoteHolder.style.top = e.clientY - messageContainer.offsetHeight + 'px';
+                } else {
+                    quoteHolder.style.top = e.clientY + 'px';
+                }
+                
                 quoteHolder.style.left = e.clientX + 'px';
-                quoteHolder.style.top = e.clientY + 'px';
             });
         }
     },
@@ -279,18 +286,16 @@ var parser = {
     changeInput : function(type, value) {
         /*if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
             if (type == 'font') {
-                $$$.query(':-moz-read-write').style['font-family'] = value;
+                $$$.query(':-moz-read-write').style.fontFamily = value;
             } else {
-                $$$.query(':-moz-read-write').style['color'] = value;
+                $$$.query(':-moz-read-write').style.color = value;
             }
         } else {
             if (type == 'font'){
-                $$$.query(':read-write').style['font-family'] = value;
+                $$$.query('#input-bar textarea').style.fontFamily = value;
             } else {
-                $$$.query(':read-write').style['color'] = value;
-            }
-            
-            
+                $$$.query('#input-bar textarea').style.color = value;
+            }   
         }*/
     }
 };

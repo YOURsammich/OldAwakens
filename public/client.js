@@ -1,7 +1,5 @@
 var socket = io.connect(window.location.pathname);
 
-//idle/afk users should change positions on the userlist board after so long of inactivity
-
 var ONLINE = {
     users : {},
     getId : function (nick) {
@@ -23,7 +21,7 @@ var Attributes = {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
 
-        if (this.notifierAtt.includes(attribute) && oldValue !== newValue) {
+        if (this.notifierAtt.indexOf(attribute) !== -1 && oldValue !== newValue) {
             showMessage({
                 nick : this.get('nick'),
                 flair : this.get('flair'),
@@ -36,8 +34,8 @@ var Attributes = {
                 messageType : 'info'
             });
         }
-
-        if (this.saveLocal.indexOf(attribute) !== -1 || attribute.slice(0, 6) == 'toggle') {
+        
+        if (this.saveLocal.indexOf(attribute) !== -1 || attribute.slice(0, 6) === 'toggle') {
             if (typeof newValue === 'object') {
                 localStorage.setItem('chat-' + attribute, JSON.stringify(newValue));
             } else {
@@ -120,7 +118,7 @@ var messageBuilder = {
         }
 
         container.appendChild(timeDIV);
-
+        
         if (nick) {
             if (hat && hat !== 'none') {
                 hatSpan = document.createElement('div');
@@ -143,7 +141,7 @@ var messageBuilder = {
 
             container.appendChild(nickDIV);
         }
-
+        
         messageDIV.className = 'messageContent';
 
         if (messageType === 'info') {
@@ -169,10 +167,10 @@ var messageBuilder = {
                 message = message.slice(0, index) + message.slice(index + 1);
             }
             parser.getAllFonts(message);
-
+            
             messageDIV.innerHTML = ' ' + parser.parse(message, messageType === 'chat' && Attributes.get('toggle-filters'));
         }
-
+        
         if (count) {
             container.classList += ' msg-' + count;
         }
@@ -194,7 +192,7 @@ var messageBuilder = {
                 quotedMessage = document.getElementsByClassName('msg-' + quote[i].replace('>>', ''));
                 if (quotedMessage.length) {
                     quotedNick = quotedMessage[0].getElementsByClassName('nick')[0].textContent;
-                    if (quotedNick.substr(0, quotedNick.length-1) === myNick) {
+                    if (quotedNick.substr(0, quotedNick.length - 1) === myNick) {
                         quoteAlert = true;
                     }
                 }
@@ -207,18 +205,11 @@ var messageBuilder = {
         if (el === undefined) {
             el = document.getElementById('messages');
         }
-
-        /*li = document.createElement('li');
-        li.appendChild(message);*/
-
+        
         el.appendChild(message);
-
-
-
         this.scrollToBottom(el);
     },
     scrollToBottom : function (el) {
-
         function scrollTo(element, to, duration) {
             var start = element.scrollTop,
                 change = to - start,
@@ -255,15 +246,15 @@ var messageBuilder = {
             scrollTo(el, scrollDelta, 200);
         }
     }
-}
+};
 
 function showMessage(messageData, panel, img) {
     var blockUsers = Attributes.get('blocked') || [],
         userID = ONLINE.getId(messageData.nick);
-
+    
     if (blockUsers.indexOf(messageData.nick) === -1) {
         var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
-
+        
         if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
             Attributes.set('lastpm', messageData.nick);
         }
@@ -273,23 +264,36 @@ function showMessage(messageData, panel, img) {
 
 function handlePrivateMessage(messageData) {
     var panel = document.getElementById('PmPanel-' + messageData.landOn),
-        pmUser = ONLINE.users[messageData.landOn];
-
-    if (panel && panel.getElementsByClassName('messages')[0]) {
+        pmUser = ONLINE.users[messageData.landOn],
+        callBack = {};
+    
+    if (panel) {
+        if (!pmUser.pm) {
+            pmUser.pm = 0;
+        }
+        if (window.getComputedStyle(panel).display != 'block') {
+            callBack['unread PM(s) - ' +  ++pmUser.pm] = {
+                callback : function (nick) {
+                    panel.style.display = 'block';
+                }
+            }; 
+        }
+        
+        menuControl.contextMenu.placeMenu(messageData.landOn, callBack, true);
         showMessage(messageData, panel.getElementsByClassName('messages')[0]);
     } else if (pmUser) {
         if (!pmUser.pm) {
             pmUser.pm = [];
         }
         pmUser.pm.push(messageData);
-
-        menuControl.contextMenu.placeMenu(messageData.landOn, {
-            ['unread PM(s) - ' +  pmUser.pm.length] : {
-                callback : function (nick) {
-                    createPmPanel(ONLINE.getId(nick));
-                }
+        
+        callBack['unread PM(s) - ' +  pmUser.pm.length] = {
+            callback : function (nick) {
+                createPmPanel(ONLINE.getId(nick));
             }
-        }, true);
+        };   
+        
+        menuControl.contextMenu.placeMenu(messageData.landOn, callBack, true);
     }
 }
 
@@ -407,7 +411,7 @@ var clientSubmit = {
             this.message.send(value);
         }
     }
-}
+};
 
 function channelTheme(channelData) {
     if (channelData.note && channelData.note.value) {
@@ -442,8 +446,8 @@ function channelTheme(channelData) {
             document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
         }
     }
-
-    if (channelData.lock && (typeof Attributes.get('lock') != 'object' || Attributes.get('lock').value != channelData.lock.value)) {
+    
+    if (channelData.lock && (typeof Attributes.get('lock') !== 'object' || Attributes.get('lock').value !== channelData.lock.value)) {
         var message;
         if (channelData.lock.value) {
             message = ' locked this channel';
@@ -454,11 +458,11 @@ function channelTheme(channelData) {
             message : channelData.lock.updatedBy + message,
             messageType : 'general'
         });
-
+        
         Attributes.set('lock', channelData.lock);
     }
-
-    if (channelData.proxy && (typeof Attributes.get('proxy') != 'object' || Attributes.get('proxy').value != channelData.proxy.value)) {
+    
+    if (channelData.proxy && (typeof Attributes.get('proxy') !== 'object' || Attributes.get('proxy').value !== channelData.proxy.value)) {
         var message;
         if (channelData.proxy.value) {
             message = ' blocked proxies';
@@ -469,10 +473,10 @@ function channelTheme(channelData) {
             message : channelData.proxy.updatedBy + message,
             messageType : 'general'
         });
-
+        
         Attributes.set('proxy', channelData.proxy);
     }
-
+    
     /*console.log(channelData);
     if (channelData.hats) {
         console.log(channelData.hats);
@@ -557,7 +561,18 @@ function createPmPanel(id) {
         inputBar.className = 'input-bar';
         input = document.createElement('input');
         input.placeholder = 'Type anything then press enter';
-
+        
+        minimize.addEventListener('click', function () {
+            panelContainer.style.display = 'none';
+            menuControl.contextMenu.placeMenu(id, {
+                showPMwindow : {
+                    callback : function () {
+                        panelContainer.style.display = 'block';
+                    }  
+                }
+            }, true);
+        });
+        
         cancel.addEventListener('click', function () {
             document.body.removeChild(panelContainer);
         });
@@ -623,7 +638,7 @@ var AutoComplete = {
             this.selected = 0;
             for (var i = 0; i < keys.length; i++) {
                 if (ONLINE.users[keys[i]].nick.indexOf(this.word) === 0) {
-                    let span = document.createElement('span');
+                    var span = document.createElement('span');
                     span.textContent = ONLINE.users[keys[i]].nick + " ";
                     this.bar.appendChild(span);
                 }
@@ -658,7 +673,7 @@ var AutoComplete = {
     $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
         var keyCode = e.which,
             inputValue = this.value;
-
+        
         if (AutoComplete.isBarOpen) e.preventDefault();
         switch (keyCode) {
         case 13:
@@ -700,35 +715,35 @@ var AutoComplete = {
         if (historyIndex !== 0) {
             this.value = history[history.length - historyIndex];
         }
-
+        
         if (!typing) {
             socket.emit('typing', true);
         }
-
+        
         typing = true;
     });
 
     $$$.query('#input-bar textarea').addEventListener('keyup', function (e) {
         this.style.height = '0px';
-
+        
         var newHeight = Math.min(Math.floor(this.scrollHeight / 18) * 18, screen.height / 3),
             messageDiv = document.getElementById('messages');
 
         this.style.height = newHeight + 'px';
-        messageBuilder.scrollToBottom(messageDiv);
-
+        e.shiftKey && messageBuilder.scrollToBottom(messageDiv);
+        
         if (this.value.length === 0) {
             typing = false;
             socket.emit('typing', false);
         }
     });
-
+    
     $$$.query('#main-container').addEventListener('drop', function (e) {
         var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
             file = e.dataTransfer.files[0],
             type,
             reader;
-
+            
         if (file) {
             e.preventDefault();
             e.stopPropagation();
@@ -739,7 +754,7 @@ var AutoComplete = {
                     reader.onloadend = function () {
                         socket.emit("message-image", {
                             "type" : type,
-                            "img" : reader.result
+                            "img" : reader.result 
                         }, Attributes.get("flair"));
                     }
                     reader.readAsBinaryString(file);
@@ -757,7 +772,7 @@ var AutoComplete = {
             }
         }
     });
-
+    
     $$$.query('main').addEventListener('paste', function (e) {
         var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
             file,
@@ -766,7 +781,7 @@ var AutoComplete = {
 		if (e.clipboardData) {
 			items = e.clipboardData.items;
 			if (!items) return;
-
+			
             if (items[0].type.indexOf("image") !== -1) {
                 e.preventDefault();
                 file = items[0].getAsFile();
@@ -776,7 +791,7 @@ var AutoComplete = {
                         reader.onloadend = function () {
                             socket.emit("message-image", {
                                 "type" : file.type,
-                                "img" : reader.result
+                                "img" : reader.result 
                             }, Attributes.get("flair"));
                         }
                         reader.readAsBinaryString(file);
@@ -795,7 +810,7 @@ var AutoComplete = {
             }
 		}
     }, false);
-
+    
     window.onblur = function() {
         window.blurred = true;
     };
@@ -835,11 +850,11 @@ socket.on('channeldata', function (channel) {
     if (channel.users) {
         document.getElementsByClassName('userList')[0].innerHTML = '';
         ONLINE.users = {};
-        for (i = 0; i < channel.users.length; i++) {
+        for (i = 0; i < channel.users.length; i++) {            
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
         }
     }
-
+    
     if (channel.data) {
         channelTheme(channel.data);
     }
@@ -889,7 +904,7 @@ socket.on('banlist', function (banlist) {
 socket.on('update', function (allAtt) {
     var keys = Object.keys(allAtt),
         i;
-
+    
     for (i = 0; i < keys.length; i++) {
         if (keys[i] === 'hats') {
             console.log(allAtt[keys[i]]);
@@ -924,8 +939,8 @@ socket.on('disconnect', function () {
         if (user.cursor && user.cursor.parentNode) {
             user.cursor.parentNode.removeChild(user.cursor);
         }
-    }
-
+    };
+    
     showMessage({
         message : 'disconnected',
         messageType : 'error'
@@ -949,21 +964,21 @@ socket.on('activeChannels', function (channels) {
     var channelPanel = document.getElementsByClassName('channelPanel')[0],
         activeChannels =channelPanel.getElementsByClassName('activeChannel'),
         div,
-        i;
-
+        i; 
+    
     while (activeChannels.length) {
         channelPanel.removeChild(activeChannels[0]);
     }
-
+    
     channels.sort(function (a, b) {
         return  b.online - a.online;
     });
-
+    
     for (i = 0; i < channels.length; i++) {
         div = document.createElement('div');
         div.className = 'activeChannel';
         div.textContent = channels[i].name;
-        channelPanel.appendChild(div);
+        channelPanel.appendChild(div);   
     }
 });
 socket.emit('activeChannels');
