@@ -738,7 +738,7 @@ var AutoComplete = {
         }
     });
     
-    $$$.query('#main-container').addEventListener('drop', function (e) {
+    $$$.query('main').addEventListener('drop', function (e) {
         var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
             file = e.dataTransfer.files[0],
             type,
