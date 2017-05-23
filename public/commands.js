@@ -507,4 +507,7 @@ COMMANDS.bg = COMMANDS.background;
     parser.addFont(Attributes.get('font'));
     parser.changeInput('font', Attributes.get('font'));
     parser.changeInput('color', Attributes.get('color'));
+    if(!Attributes.get('font')) {
+        clientSubmit.command.send('font', {font:'Droid Sans'});
+    }
 })();
