@@ -17,9 +17,9 @@
             if (ONLINE.users[id].nick === user.nick) {
                 cursor.className += ' myCursor';
                 if (cursorType && cursorType !== 'default.png') {
-                    document.body.style.cursor = 'none';
+                    document.getElementById('messages').style.cursor = 'none';
                 } else {
-                    document.body.style.cursor = 'default';
+                    document.getElementById('messages').style.cursor = 'default';
                     cursor.style.display = 'none';
                 }
             }
@@ -47,10 +47,10 @@
         if (user.nick == cuser.nick) {
             Attributes.set('cursor', newCursor);
             if (newCursor === 'default.png') {
-                document.body.style.cursor = 'default';
+                document.getElementById('messages').style.cursor = 'default';
                 user.cursor.style.display = 'none';
             } else {
-                document.body.style.cursor = 'none';
+                document.getElementById('messages').style.cursor = 'none';
                 user.cursor.style.display = 'block';
             }
         }
@@ -81,7 +81,7 @@
     socket.on('removeCursor', function(id) {
         if (ONLINE.users[id].cursor) {
             if (ONLINE.getId(Attributes.get('nick')) == id) {
-                document.body.style.cursor = 'default';
+                document.getElementById('messages').style.cursor = 'default';
             };
             ONLINE.users[id].cursor.parentNode.removeChild(ONLINE.users[id].cursor);
         }

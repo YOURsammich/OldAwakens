@@ -16,7 +16,7 @@ var ONLINE = {
 var Attributes = {
     notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
     altAtt : {colour : 'color', bg : 'background'},
-    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token'],
+    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute'],
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
@@ -669,7 +669,7 @@ var AutoComplete = {
     var history = [],
         historyIndex = 0,
         typing = false;
-
+    
     $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
         var keyCode = e.which,
             inputValue = this.value;
@@ -730,7 +730,6 @@ var AutoComplete = {
             messageDiv = document.getElementById('messages');
 
         this.style.height = newHeight + 'px';
-        e.shiftKey && messageBuilder.scrollToBottom(messageDiv);
         
         if (this.value.length === 0) {
             typing = false;

@@ -32,7 +32,6 @@ main {
 }
 
 #flexOne {
-    height: 100%;
     max-width: 100%;
     overflow: hidden;
     flex: 1;
@@ -45,16 +44,16 @@ main {
     overflow: hidden;
     display: flex;
     flex-direction: row;
+    height: 100%;
 }
 
 #messages {
     transition: width 1s;
-    height: 100%;
     max-width: 100%;
     background-color: black;
     overflow-y: scroll;
     overflow-x: hidden;
-    position: relative;
+    height: 100%;
 }
 
 .message img {
@@ -147,7 +146,6 @@ main {
     order: 2;
     position: relative;
     z-index: 3;
-    cursor: default;
     background-color: rgb(58, 58, 58);
     padding-top: 5px;
     padding-left: 4px;
@@ -175,7 +173,6 @@ main {
 #menu-container {
     order: 2;
     z-index: 2;
-    cursor: default;
     top: 0px;
     right: -4px;
     width: 0px;
