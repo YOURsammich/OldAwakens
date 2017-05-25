@@ -63,7 +63,7 @@ function createChannel(io, channelName) {
         }
         
         if (newData.cursor) {
-            try { 
+            try {
                 newData.cursor = JSON.parse(newData.cursor).name;
                 user.cursor = newData.cursor;
                 roomEmit('changeCursor', user.id, user.cursor);
@@ -101,7 +101,7 @@ function createChannel(io, channelName) {
                                 nick : params.nick,
                                 role : 4
                             });
-                        });   
+                        });
                     } else {
                         showMessage(user.socket, 'That nick is already being used', 'error');
                     }
@@ -223,7 +223,7 @@ function createChannel(io, channelName) {
                         if (userData) {
                             message = 'Nick: ' + userData.nick + '\nRole: ' + userData.role + '\nIP: ' + (user.role <= 1 || user.nick === userData.nick ? userData.remote_addr : 'Private');
                         } else {
-                            message = params.nick + ' doesn\'t exist'
+                            message = params.nick + ' doesn\'t exist';
                         }
                         message += '\nRegistered: No';
                         showMessage(user.socket, message, 'info');
@@ -242,7 +242,7 @@ function createChannel(io, channelName) {
                             });
                         });
                     }).fail(function () {
-                        showMessage(user.socket, 'Wrong password, if you\'ve forgot your password contact an admin', 'error'); 
+                        showMessage(user.socket, 'Wrong password, if you\'ve forgot your password contact an admin', 'error');
                     });
                 } else {
                     showMessage(user.socket, 'Please pick a more secure password', 'error');
@@ -334,17 +334,19 @@ function createChannel(io, channelName) {
                         if (whitelist === undefined) {
                             whitelist = [];
                         }
-                        if (whitelist.indexOf(user.nick) === -1) {
+                        if (whitelist.indexOf(params.nick) === -1) {
                             whitelist.push(params.nick);
-                            dao.setChannelinfo(channelName, 'whitelist', whitelist).then(function () {
-                                showMessage(user.socket, params.nick + ' is now whitelisted');
+                            dao.setChannelinfo(channelName, {
+                                whitelist : whitelist
+                            }).then(function () {
+                                showMessage(user.socket, params.nick + ' is now whitelisted', 'info');
                             });
                         } else {
                             showMessage(user.socket, params.nick + ' is already whitelisted', 'error');
                         }
                     });
                 }).fail(function () {
-                    showMessage(user.nick, user.nick + ' is not registered', 'error'); 
+                    showMessage(user.socket, user.nick + ' is not registered', 'error');
                 });
             }
         },
@@ -359,8 +361,10 @@ function createChannel(io, channelName) {
                     var index = whitelist.indexOf(params.nick);
                     if (index !== -1) {
                         whitelist.splice(index, 1);
-                        dao.setChannelinfo(channelName, 'whitelist', whitelist).then(function () {
-                            showMessage(user.socket, params.nick + ' has been unwhitelisted');
+                        dao.setChannelinfo(channelName, {
+                            whitelist : whitelist
+                        }).then(function () {
+                            showMessage(user.socket, params.nick + ' has been unwhitelisted', 'info');
                         });
                     } else {
                         showMessage(user.socket, params.nick + ' isn\'t whitelisted', 'error');
@@ -497,16 +501,13 @@ function createChannel(io, channelName) {
         give_hat : {
             role : 0,
             params : ['nick', 'hat'],
-            handler : function (user, parmas) {
-                var allHats,
-                    hatIndex,
-                    hatName,
-                    usersHats,
-                    userIndex;
-                    
+            handler : function (user, parmas) {        
                 dao.find(parmas.nick).then(function (dbuser) {
-                    allHats = dao.getHats();
-                    hatIndex = allHats.lowercase.indexOf(parmas.hat.toLowerCase());
+                    var allHats = dao.getHats(),
+                        hatIndex = allHats.lowercase.indexOf(parmas.hat.toLowerCase()),
+                        hatName,
+                        usersHats,
+                        userIndex;
                     
                     if (dbuser.hat) {
                         try {
@@ -668,7 +669,6 @@ function createChannel(io, channelName) {
             }
         },
         cursors : {
-            role: 4,
             handler : function (user) {
                 var allCursors = dao.getCursors().lowercase;
                 var b = allCursors.pop();
@@ -689,7 +689,7 @@ function createChannel(io, channelName) {
                     if (cursorIndex !== -1) {
                         var userCursor = {
                             name : allCursors.name[cursorIndex]
-                        }
+                        };
                         dao.setUserinfo(dbuser.nick, 'cursor', userCursor).then(function () {
                             user.cursor = allCursors.name[cursorIndex];
                             roomEmit('changeCursor', user.id, user.cursor);
@@ -704,7 +704,7 @@ function createChannel(io, channelName) {
                     if (cursorIndex !== -1) {
                         var userCursor = {
                             name : allCursors.name[cursorIndex]
-                        }
+                        };
                         user.cursor = allCursors.name[cursorIndex];
                         roomEmit('changeCursor', user.id, user.cursor);
                         showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
@@ -747,7 +747,7 @@ function createChannel(io, channelName) {
             }
         });
         
-        socket.on('removeCursor', function (){
+        socket.on('removeCursor', function () {
             if (findIndex(channel.online, 'id', user.id) !== -1) {
                 roomEmit('removeCursor', user.id);
             }
@@ -756,9 +756,9 @@ function createChannel(io, channelName) {
         socket.on('message', function (message, flair) {
             throttle.on(user.remote_addr + '-message').then(function (notSpam) {
                 if (notSpam) {
-                    if (findIndex(channel.online, 'id', user.id) != -1) {
+                    if (findIndex(channel.online, 'id', user.id) !== -1) {
                         if (typeof message === 'string' && (typeof flair === 'string' || !flair)) {
-                            if (message.length < 10000 && (flair && flair.length < 500 || !flair)) {
+                            if (message.length < 10000 && ((flair && flair.length < 500) || !flair)) {
                                 roomEmit('message', {
                                     message : message,
                                     messageType : 'chat',
@@ -766,17 +766,17 @@ function createChannel(io, channelName) {
                                     flair : flair,
                                     hat : user.hat,
                                     count : ++channel.messageCount
-                                });      
+                                });
                             }
-                        }   
+                        }
                     }
                 } else {
-                    showMessage(user.socket,'You are spamming, stop or you will be temporarily banned.', 'error');
+                    showMessage(user.socket, 'You are spamming, stop or you will be temporarily banned.', 'error');
                     throttle.warn(user.remote_addr + '-message');
                 }
             }).fail(function () {
-                dao.ban(channelName,user.remote_addr,'Throttle', 'Message spamming');
-                showMessage(user.socket, 'You have been banned for spamming.','error');
+                dao.ban(channelName, user.remote_addr, 'Throttle', 'Message spamming');
+                showMessage(user.socket, 'You have been banned for spamming.', 'error');
                 socket.disconnect();
             });
         });
@@ -785,10 +785,10 @@ function createChannel(io, channelName) {
             var acceptedFiletypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"];
             throttle.on(user.remote_addr + '-message').then(function (notSpam) {
                 if (notSpam) {
-                    if (findIndex(channel.online, 'id', user.id) != -1) {
-                        if (message && typeof message.type === 'string' && acceptedFiletypes.indexOf(message.type) != -1 &&typeof message.img === 'string' && (typeof flair === 'string' || !flair)) {
+                    if (findIndex(channel.online, 'id', user.id) !== -1) {
+                        if (message && typeof message.type === 'string' && acceptedFiletypes.indexOf(message.type) !== -1 && typeof message.img === 'string' && (typeof flair === 'string' || !flair)) {
                             if (message.img.length < 7000001) {
-                                if (flair && flair.length < 500 || !flair) {
+                                if ((flair && flair.length < 500) || !flair) {
                                     roomEmit('message', {
                                         message : message,
                                         messageType : 'chat-image',
@@ -796,24 +796,26 @@ function createChannel(io, channelName) {
                                         flair : flair,
                                         hat : user.hat,
                                         count : ++channel.messageCount
-                                    });      
+                                    });
                                 }
                             }
-                        }   
+                        }
                     }
                 } else {
-                    showMessage(user.socket,'You are spamming, stop or you will be temporarily banned.', 'error');
+                    showMessage(user.socket, 'You are spamming, stop or you will be temporarily banned.', 'error');
                     throttle.warn(user.remote_addr + '-message');
                 }
             }).fail(function () {
-                dao.ban(channelName,user.remote_addr,'Throttle', 'Message spamming');
-                showMessage(user.socket, 'You have been banned for spamming.','error');
+                dao.ban(channelName, user.remote_addr, 'Throttle', 'Message spamming');
+                showMessage(user.socket, 'You have been banned for spamming.', 'error');
                 socket.disconnect();
             });
         });
         
-        socket.on('typing', function(typing) {
-            roomEmit('typing', user.id, typing);
+        socket.on('typing', function (typing) {
+            if (typeof typing === 'boolean') {
+                roomEmit('typing', user.id, typing);
+            }
         });
         
         socket.on('activeChannels', function () {
@@ -826,7 +828,7 @@ function createChannel(io, channelName) {
                     channelInfo.push({
                         name : channelKeys[i],
                         online : channels[channelKeys[i]].online.length
-                    });   
+                    });
                 }
             }
             
@@ -879,7 +881,7 @@ function createChannel(io, channelName) {
                     }
                 } else {
                     command.handler(user);
-                }   
+                }
             } else {
                 showMessage(user.socket, 'Don\'t have access for this command', 'error');
             }
@@ -899,7 +901,7 @@ function createChannel(io, channelName) {
                 }
             }).fail(function () {
                 dao.ban(channelName, user.remote_addr, 'Throttle', 'Command spamming');
-                showMessage(user.socket,'You have been banned for spamming.', 'error');
+                showMessage(user.socket, 'You have been banned for spamming.', 'error');
                 socket.disconnect();
             });
         });
@@ -1082,36 +1084,51 @@ function createChannel(io, channelName) {
         }
         
         function checkUserStatus (joinData) {
-            if (findIndex(channel.online, 'id', user.id) === -1) {
-                dao.banlist(channelName).then(function (banlist) {
-                    if (banlist.indexOf(joinData.nick) == -1 && banlist.indexOf(user.remote_addr) == -1) {
-                        if (joinData.nick) {
-                            dao.find(joinData.nick).then(function (dbuser) {//find if user exist
-                                if (joinData.token && joinData.token === tokens[joinData.nick]) {//tokens match? good to go
-                                    checkChannelStatus(joinData, dbuser);
-                                } else if (joinData.password) {//tokens don't match try logging in with password
-                                    dao.login(joinData.nick, joinData.password).then(function (correctPassword) {
-                                        if (correctPassword) {
-                                            checkChannelStatus(joinData, dbuser);
-                                        } else {
-                                            checkChannelStatus();
-                                        }
-                                    }).fail(checkChannelStatus);
-                                } else {
-                                    delete joinData.nick;
-                                    checkChannelStatus(joinData);
-                                }
-                            }).fail(checkChannelStatus.bind(null, joinData));
+            var totalIPs = 0,
+                i;
+            
+            for (i = 0; i < channel.online.length; i++) {
+                if (channel.online[i].remote_addr == user.remote_addr) {
+                    ++totalIPs;
+                }
+            }
+            
+            if (totalIPs < 4) {
+                if (findIndex(channel.online, 'id', user.id) === -1) {
+                    dao.banlist(channelName).then(function (banlist) {
+                        if (banlist.indexOf(joinData.nick) == -1 && banlist.indexOf(user.remote_addr) == -1) {
+                            if (joinData.nick) {
+                                dao.find(joinData.nick).then(function (dbuser) {//find if user exist
+                                    if (joinData.token && joinData.token === tokens[joinData.nick]) {//tokens match? good to go
+                                        checkChannelStatus(joinData, dbuser);
+                                    } else if (joinData.password) {//tokens don't match try logging in with password
+                                        dao.login(joinData.nick, joinData.password).then(function (correctPassword) {
+                                            if (correctPassword) {
+                                                checkChannelStatus(joinData, dbuser);
+                                            } else {
+                                                checkChannelStatus();
+                                            }
+                                        }).fail(checkChannelStatus);
+                                    } else {
+                                        delete joinData.nick;
+                                        checkChannelStatus(joinData);
+                                    }
+                                }).fail(checkChannelStatus.bind(null, joinData));
+                            } else {
+                                checkChannelStatus();
+                            } 
                         } else {
-                            checkChannelStatus();
-                        } 
-                    } else {
-                        showMessage(user.socket, 'You are banned', 'error');
-                        user.socket.disconnect();
-                    }
-                });
+                            showMessage(socket, 'You are banned', 'error');
+                            socket.disconnect();
+                        }
+                    });
+                } else {
+                    showMessage(socket, 'Only one socket connection allowed', 'error');
+                    user.socket.disconnect();
+                }   
             } else {
-                showMessage(socket, 'Only one socket connection allowed', 'error');
+                showMessage(socket, 'Too many connections with this IP', 'error');
+                socket.disconnect();
             }
         }
         
