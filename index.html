@@ -54,7 +54,7 @@
             </div>
             
             <div id="input-bar">
-                <textarea autocomplete="off" autofocus id="ac" placeholder="Type anything then press enter, or drag image here."></textarea>
+                <textarea autocomplete="off" onblur="socket.emit('typing', false)" autofocus id="ac" placeholder="Type anything then press enter, or drag image here."></textarea>
                 <div class="toggle-menu"><span></span></div>
             </div>
         </main>
