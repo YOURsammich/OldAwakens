@@ -287,7 +287,11 @@ var parser = {
         if (type == 'font'){
             $$$.query('#input-bar textarea').style.fontFamily = value;
         } else {
-            $$$.query('#input-bar textarea').style.color = value;
+            if(parser.coloreg.indexOf(value) === -1){
+                $$$.query('#input-bar textarea').style.color = `#${value}`;
+            } else {
+                $$$.query('#input-bar textarea').style.color = value;
+            }
         } 
     }
 };
