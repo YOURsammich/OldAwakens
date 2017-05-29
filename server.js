@@ -5,6 +5,7 @@ var _ = require('underscore');
 var $ = require('jquery-deferred');
 var express = require('express');
 var fs = require('fs');
+var minify = require('express-minify');
 
 var channels = {};
 var tokens = {};
@@ -1177,6 +1178,7 @@ function createChannel(io, channelName) {
 function intoapp(app, http) {
     var channelRegex = /^\/(\w*\/?)$/;
     var io = require('socket.io')(http);
+    app.use(minify());
     app.use(express.static(__dirname + '/public'));
     app.get(channelRegex, function (req, res) {
         if (!channels[req.url]) {
