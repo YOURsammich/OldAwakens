@@ -1,12 +1,16 @@
 (function () {
     var moves = 0,
-        user,
+        user = ONLINE.getId(Attributes.get('nick')),
         cursor;
     
     function moveCursor(id, position, cursorType) {
         var cursor = document.getElementById('cursor-' + id),
             cursorImage;
 
+        if (!user) {
+            user = ONLINE.users[ONLINE.getId(Attributes.get('nick'))];
+        }
+        
         if (!cursor) {
             cursorImage = new Image();
             cursor = document.createElement('div');
@@ -91,10 +95,6 @@
         var target = e.target;
         var x = e.clientX / window.innerWidth;
         var y = e.clientY / window.innerHeight;
-        
-        if (!user) {
-            user = ONLINE.users[ONLINE.getId(Attributes.get('nick'))];
-        }
         
         if (moves == 0 && Attributes.get('toggle-cursors')) {
             socket.emit('updateCursor', {

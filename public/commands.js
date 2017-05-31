@@ -226,6 +226,14 @@ var COMMANDS = {
             }
         }  
     },
+    clearcursors : {
+        handler : function () {
+            var parent = document.getElementById('messages');
+            while (parent.firstChild) {
+                parent.removeChild(parent.firstChild);
+            }
+        }
+    },
     toggle : {
         params : ['attr'],
         handler : function (params) {
@@ -235,13 +243,9 @@ var COMMANDS = {
             if (validAtts.indexOf(params.attr) !== -1) {
                 Attributes.set('toggle-' + params.attr, !attValue, true);
                 
-                if (params.attr == 'cursors') {
-                    if (attValue) {
-                        document.getElementById('cursor-container').style.display = 'none';
-                        socket.emit('removeCursor');
-                    } else {
-                        document.getElementById('cursor-container').style.display = 'block';
-                    }
+                if (params.attr === 'cursors' && attValue) {
+                    COMMANDS.clearcursors();
+                    socket.emit('removeCursor');
                 }
                 
                 if (params.attr === 'background') {

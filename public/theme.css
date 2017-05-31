@@ -151,7 +151,6 @@ main {
     padding-left: 4px;
     padding-right: 4px;
     padding-bottom: 1px;
-    width: calc(100% - 8px);
 }
 
 #input-bar textarea {
@@ -745,6 +744,14 @@ main {
 
 .typing::before {
     opacity: 1;
+}
+
+.away {
+    color: yellow;
+}
+
+.unavailable {
+    color: #B30000;
 }
 
 .unreadPM::after {

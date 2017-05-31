@@ -819,6 +819,12 @@ function createChannel(io, channelName) {
             }
         });
         
+        socket.on('idleStatus', function (status) {
+            if (typeof status === 'boolean') {
+                roomEmit('idleStatus', user.id, status);
+            }
+        });
+        
         socket.on('activeChannels', function () {
             var channelInfo = [],
                 channelKeys = Object.keys(channels),

@@ -24,9 +24,23 @@ var menuControl = {
         
         ONLINE.users[id] = {
             nick : nick,
-            li : nickContain
+            li : nickContain,
+            resetStatus : function () {
+                var status = this;
+                if (status.idleStatus) {
+                    clearTimeout(status.idleStatus);
+                }
+                
+                status.idleStatus = setTimeout(function () {
+                    socket.emit('idleStatus', true);
+                    status.idleStatus = setTimeout(function () {
+                        socket.emit('idleStatus', false);
+                    }, 90000);
+                }, 3600000);
+            }
         };
         
+        ONLINE.users[id].resetStatus();
         menuControl.updateCount();
         
         if (afk) {
@@ -87,7 +101,18 @@ var menuControl = {
     afk : function (id, message) {
         var user = ONLINE.users[id];
         if (user) {
-            user.li.getElementsByClassName('informer')[0].innerHTML = emojione.toImage(parser.escape(message));
+            user.li.getElementsByClassName('informer')[0].innerHTML = emojione.toImage(parser.escape(message.replace(/\n/g, ' ')));
+        }
+    },
+    idleStatus : function (id, status) {
+        var user = ONLINE.users[id];
+        if (user) {
+            user.li.children[0].classList.remove('away', 'unavailable');
+            if (status) {
+                user.li.children[0].classList.add('away');
+            } else {
+                user.li.children[0].classList.add('unavailable');
+            }
         }
     },
     updateCount : function () {

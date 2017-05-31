@@ -248,12 +248,17 @@ var messageBuilder = {
     }
 };
 
-function showMessage(messageData, panel, img) {
+function showMessage(messageData, panel) {
     var blockUsers = Attributes.get('blocked') || [],
-        userID = ONLINE.getId(messageData.nick);
+        userID = ONLINE.getId(messageData.nick),
+        messageHTML;
+    
+    if (userID) {
+        ONLINE.users[userID].resetStatus();
+    }
     
     if (blockUsers.indexOf(messageData.nick) === -1) {
-        var messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
+        messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
         
         if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
             Attributes.set('lastpm', messageData.nick);
@@ -833,6 +838,8 @@ socket.on('joined', menuControl.addUser);
 socket.on('nick', menuControl.changeNick);
 
 socket.on('typing', menuControl.typing);
+
+socket.on('idleStatus', menuControl.idleStatus);
 
 socket.on('afk', menuControl.afk);
 

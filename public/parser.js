@@ -69,16 +69,13 @@ var parser = {
 
             document.body.appendChild(quoteHolder);
             //follow cursor
-            document.body.addEventListener('mousemove', function (e) {
-                
-                console.log(e.clientY + (messageContainer.offsetHeight - messageContainer.scrollHeight) , container.offsetHeight);
-                
-                if (e.clientY + (messageContainer.offsetHeight - messageContainer.scrollHeight) > container.offsetHeight) {
-                    quoteHolder.style.top = e.clientY - messageContainer.offsetHeight + 'px';
+            container.addEventListener('mousemove', function (e) {
+                if (e.clientY + messageContainer.offsetHeight > container.offsetHeight) {
+                    quoteHolder.style.top = container.offsetHeight - messageContainer.offsetHeight + 'px'
                 } else {
                     quoteHolder.style.top = e.clientY + 'px';
                 }
-                
+
                 quoteHolder.style.left = e.clientX + 'px';
             });
         }
@@ -287,8 +284,8 @@ var parser = {
         if (type == 'font'){
             $$$.query('#input-bar textarea').style.fontFamily = value;
         } else {
-            if(parser.coloreg.indexOf(value) === -1){
-                $$$.query('#input-bar textarea').style.color = `#${value}`;
+            if (parser.coloreg.indexOf(value) === -1) {
+                $$$.query('#input-bar textarea').style.color = '#' + value;
             } else {
                 $$$.query('#input-bar textarea').style.color = value;
             }
