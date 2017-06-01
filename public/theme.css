@@ -264,17 +264,19 @@ main {
     background-color: green;
     width: 8px;
     height: 8px;
-    opacity: 1;
+    opacity: 0;
     margin-left: 4px;
     transition: 0.5s;
 }
 
 .nickText.away::after {
     background-color: orange;
+    opacity: 1;
 }
 
 .nickText.unavailable::after {
     background-color: red;
+    opacity: 1;
 }
 
 .userList .nickContain .informer {
