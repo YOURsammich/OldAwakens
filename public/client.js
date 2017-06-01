@@ -402,6 +402,7 @@ var clientSubmit = {
         },
         send : function (message) {
             socket.emit('message', this.decorateText(message), Attributes.get('flair'));
+            socket.emit('idleStatus');
         },
         sendPrivate : function (message, userID) {
             socket.emit('privateMessage', this.decorateText(message), Attributes.get('flair'), userID);

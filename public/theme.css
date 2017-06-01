@@ -261,12 +261,20 @@ main {
     content: '';
     display: inline-block;
     border-radius: 50%;
-    background-color: #e67e22;
+    background-color: green;
     width: 8px;
     height: 8px;
-    opacity: 0;
+    opacity: 1;
     margin-left: 4px;
     transition: 0.5s;
+}
+
+.nickText.away::after {
+    background-color: orange;
+}
+
+.nickText.unavailable::after {
+    background-color: red;
 }
 
 .userList .nickContain .informer {
@@ -744,14 +752,6 @@ main {
 
 .typing::before {
     opacity: 1;
-}
-
-.away {
-    color: yellow;
-}
-
-.unavailable {
-    color: #B30000;
 }
 
 .unreadPM::after {

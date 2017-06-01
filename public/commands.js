@@ -498,7 +498,15 @@ var COMMANDS = {
         params : ['cursor']
     },
     afk : {
-        params : ['message']
+        params : ['message'],
+        handler : msg => {
+	        if (msg.message === ' ') {
+	            socket.emit('idleStatus');
+	        } else {
+	            socket.emit('idleStatus', true);
+	        }
+            socket.emit('command', 'afk', msg)
+        }
     },
     cursors : {},
     hats : {}

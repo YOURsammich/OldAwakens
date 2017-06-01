@@ -108,10 +108,10 @@ var menuControl = {
         var user = ONLINE.users[id];
         if (user) {
             user.li.children[0].classList.remove('away', 'unavailable');
-            if (status) {
-                user.li.children[0].classList.add('away');
+            if (typeof status === 'boolean') {
+                !0==status?user.li.children[0].classList.add('away'):user.li.children[0].classList.add('unavailable');
             } else {
-                user.li.children[0].classList.add('unavailable');
+                user.resetStatus();
             }
         }
     },

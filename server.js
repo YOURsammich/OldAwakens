@@ -822,6 +822,8 @@ function createChannel(io, channelName) {
         socket.on('idleStatus', function (status) {
             if (typeof status === 'boolean') {
                 roomEmit('idleStatus', user.id, status);
+            } else if (!status) {
+                roomEmit('idleStatus', user.id);
             }
         });
         
