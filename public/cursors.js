@@ -40,7 +40,7 @@
             cursorImage.src = 'cursors/' + (cursorType || 'default.png');
         } else {
             cursor.style.left = (position.x * window.innerWidth) + 'px';
-            cursor.style.top = (position.y * window.innerHeight) + 'px';
+            cursor.style.top = ((position.y * window.innerHeight) - 32) + 'px';
         }
     }
     

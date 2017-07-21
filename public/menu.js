@@ -2,7 +2,8 @@ var menuControl = {
     addUser : function (id, nick, afk, noShow) {
         var nickContain = document.createElement('div'),
             nickText = document.createElement('div'),
-            extraInfo = document.createElement('div');
+            extraInfo = document.createElement('div'),
+            joinMessage = '';
         
         nickContain.id = id;
         nickContain.className = 'nickContain';
@@ -48,8 +49,11 @@ var menuControl = {
         }
         
         if (noShow === undefined) {
+            joinMessage += '/%%' + (Attributes.get('joinmessage').value && Attributes.get('joinmessage').value ? Attributes.get('joinmessage').value[1] + ' ' : '') + nick + '%%';
+            joinMessage += Attributes.get('joinmessage').value && Attributes.get('joinmessage').value[0] ? ' ' + Attributes.get('joinmessage').value[0] : ' has joined';
+            
             showMessage({
-                message : nick + ' has joined',
+                message : joinMessage,
                 messageType : 'general'
             });
         }
@@ -108,10 +112,10 @@ var menuControl = {
         var user = ONLINE.users[id];
         if (user) {
             user.li.children[0].classList.remove('away', 'unavailable');
-            if (typeof status === 'boolean') {
-                !0==status?user.li.children[0].classList.add('away'):user.li.children[0].classList.add('unavailable');
+            if (status) {
+                user.li.children[0].classList.add('away');
             } else {
-                user.resetStatus();
+                user.li.children[0].classList.add('unavailable');
             }
         }
     },
@@ -222,6 +226,52 @@ var menuControl = {
             }
         }
     },
+    sendChanges : function () {
+        var menuContainer = document.getElementsByClassName('channelPanel')[0],
+            lis = menuContainer.getElementsByTagName('li'),
+            inputs,
+            settings = {};
+        
+        for (var i = 0; i < lis.length; i++) {
+            inputs = lis[i].getElementsByClassName('inputfield');
+            
+            if (inputs.length > 1) {
+                settings[lis[i].id] = [];
+                for (var n = 0; n < inputs.length; n++) {
+                    settings[lis[i].id].push(inputs[(inputs.length - n) - 1].value || '');
+                }
+            } else if (inputs[0].type == 'checkbox') {
+                settings[lis[i].id] = inputs[0].checked;
+            } else {
+                settings[lis[i].id] = inputs[0].value;
+            }
+            
+        }
+
+        socket.emit('channelStatus', settings);
+    },
+    setChannelPanel : function (channelSettings) {
+        var menuContainer = document.getElementsByClassName('channelPanel')[0],
+            lis = menuContainer.getElementsByTagName('li'),
+            inputs;
+
+        
+        for (var i = 0; i < lis.length; i++) {
+            if (channelSettings[lis[i].id]) {
+                inputs = lis[i].getElementsByClassName('inputfield');
+
+                if (inputs.length > 1) {
+                    for (var n = 0; n < inputs.length; n++) {
+                        inputs[(inputs.length - n) - 1].value = channelSettings[lis[i].id].value[n] || '';
+                    }
+                } else if (inputs[0].type == 'checkbox') {
+                    inputs[0].checked = channelSettings[lis[i].id].value;
+                } else {
+                    inputs[0].value = channelSettings[lis[i].id].value;
+                }
+            }
+        }
+    },
     initMissedMessages : function (socket) {
         var blurred = false,
             unread = 0;
@@ -323,6 +373,7 @@ var menuControl = {
                 menuContainer.style.display = 'none';
             }, 1000);
         } else {
+            menuContainer.style.width = '0px';
             menuContainer.style.display = 'block';
             closing = true;
             messages.scrollTop = currentScroll;
@@ -341,4 +392,7 @@ var menuControl = {
             menu.parentNode.removeChild(menu);
         }
     });
+    
+
+    
 })();

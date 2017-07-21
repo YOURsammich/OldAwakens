@@ -17,8 +17,9 @@
         <main>
             <div id="main-container">
                 <div id="flexOne">
-                    <div id="messages"></div>
+                    <div id="messages-background"></div>
                     <div id="cursor-container"></div>
+                    <div id="messages"></div>
                 </div>
                 <div id="menu-container">
                     <ul id="menu-tabs">
@@ -28,7 +29,17 @@
                     </ul>
 
                     <div class="channelPanel">
-                        <h3>Active channels</h3>
+                        <h3>Channel Settings</h3>
+                        
+                        <ul>
+                            <li id="lock" class="toggle"><div>Lock Channel:</div> <input class="inputfield" type="checkbox" /></li>
+                            <li id="proxy" class="toggle"><div>Block proxies:</div> <input class="inputfield" type="checkbox" /></li>
+                            <li id="joinmessage"><div>Join Message:</div> 
+                                <input class="inputfield" placeholder="before nick" />
+                                <input class="inputfield" value="has joined" />
+                            </li>
+                        </ul>
+                    <button onclick="menuControl.sendChanges()">Save Changes</button>
                     </div>
                     <div class="userList">
                         <div></div>

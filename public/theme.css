@@ -48,14 +48,21 @@ main {
     height: 100%;
 }
 
+#messages-background { 
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+}
+
 #messages {
     transition: width 1s;
     max-width: 100%;
-    background-color: black;
     overflow-y: scroll;
     overflow-x: hidden;
     height: 100%;
     position: absolute;
+    width: 100%;
 }
 
 .message img {
@@ -174,8 +181,6 @@ main {
 #menu-container {
     order: 2;
     z-index: 2;
-    top: 0px;
-    right: -4px;
     width: 0px;
     text-align: center;
     background-color: rgb(17, 17, 17);
@@ -185,19 +190,56 @@ main {
     border-left: 4px solid #333;
     overflow: hidden;
     display: none;
+    overflow-y: scroll;
+}
+
+#menu-container select {
+    width: 80%;
+    border-bottom: 1px solid #333;
+    font-weight: normal;
+    text-align: left;
+    font-size: 1.3em;
+    background: none;
+    color: inherit;
+    border: none;
+    border-bottom: 1px solid #333;
+    margin: 20px 20px 20px 0px;
+    outline: none;
+}
+
+#menu-container option {
+    background-color: rgb(17, 17, 17);
+    border: 4px solid #333;
+    outline-width: 0px;
+}
+
+#menu-container option:focus {
+    outline: none;
+    border: none;
+    box-shadow:none;
+    background-color:#FFF;
 }
 
 #menu-container h3 {
     width: 80%;
-    margin-left: 10%;
     border-bottom: 1px solid #333;
     font-weight: normal;
+    text-align: left;
+    font-size: 1.3em;
+}
+
+#menu-container h2 {
+    display: inline;
+    font-weight: normal;
+    text-align: left;
+    font-size: 1em;
 }
 
 .userPanel {
     margin-top: 20px;
     width: 300px;
     display: none;
+    padding: 0px 20px 0px 20px;
 }
 
 .textDecoration .bar {
@@ -234,11 +276,67 @@ main {
 
 .channelPanel {
     display: none;
+    padding: 0px 20px 0px 20px;
+    font-family: Montserrat;
+    color: #dbdbdb;
+    text-align: left;
+    max-width: 300px;
+}
+
+.channelPanel ul { 
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+.channelPanel ul li { 
+    padding-bottom: 15px;
+}
+
+.toggle input {
+    border: none !important;
+    box-shadow: none !important;
+    width: 50% !important;
+    float: right;
+}
+
+.toggle div {
+    display: inline;
+    width: 50%;
+}
+
+.channelPanel ul li input, .channelPanel ul li textarea {
+    width: 100%;
+    background-color: #2f2f2f;
+    border: 1px solid #0c0d0e;
+    border-radius: 5px;
+    box-shadow: rgba(255,255,255,0.1) 0 1px 0, rgba(0,0,0,0.2) 0 1px 7px 0 inset;
+    outline: none;
+    padding: 5px;
+    color: #dbdbdb;
+}
+
+.channelPanel ul li div {
+    font-weight: normal;
+    text-align: left;
+    font-size: 1em;
+}
+
+.channelPanel button {
+    position: relative;
+    background-color: rgb(58, 58, 58);
+    border-radius: 3px;
+    border: 1px solid black;
+    text-align: center;
+    padding: 15px 15px 15px 15px;
+    color: white;
+    cursor: pointer;
+    outline: none;
 }
 
 .userList {
     margin-top: 20px;
-    width: 300px;
+    min-width: 300px;
 }
 
 .userList .nickContain {
@@ -775,12 +873,14 @@ main {
 /* Cursor Stuff */
 
 #cursor-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
 }
 
 .cursor { 
     position: absolute;
-    z-index: 1;
     transition: 0.1s;
     opacity: 0.6;
     height: 19px;
@@ -809,6 +909,7 @@ main {
 }
 
 .myCursor {
+    z-index: 1;
     opacity: 1;
     transition: none !important;
 }

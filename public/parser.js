@@ -144,6 +144,7 @@ var parser = {
     },
     stylize : function(str) {
         // Replace styles
+        str = this.multiple(str, /\/\%%([^\%%]+)\%%/g, '<div>$1</div>', this.matches);
         str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', this.matches);
         str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', this.matches);
         str = this.multiple(str, /\/\%([^\|]+)\|?/g, '<span class="style italic">$1</span>', this.matches);
@@ -151,7 +152,7 @@ var parser = {
         str = this.multiple(str, /\/\-([^\|]+)\|?/g, '<strike>$1</strike>', this.matches);
         str = this.multiple(str, /\/\&#126;([^\|]+)\|?/g, '<small>$1</small>', this.matches);
         str = this.multiple(str, /\/\&#35;([^\|]+)\|?/g, '<span class="spoilerImg spoil">$1</span>', this.matches);
-        str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<div class="style spin">$1</div>', this.matches);
+        str = this.multiple(str, /\/\+([^\|]+)\|?/g, '<span class="style spin">$1</span>', this.matches);
         str = this.multiple(str, /\/\!([^\|]+)\|?/g, '<span class="style rainbow">$1</span>', this.matches);
         str = this.multiple(str, /\/\&#36;([^\|]+)\|?/g, '<span class="style shake">$1</span>', this.matches);
         str = this.multiple(str, /\/\@([^\|]+)\|?/g, '<span style="text-shadow: 0 0 2px white;color: transparent;">$1</span>', this.matches);
@@ -266,7 +267,7 @@ var parser = {
             console.log(mp4);
             str = this.multiple(str, gifv[0], gifv[1] + `<video id="gifv" onload="messageBuilder.scrollToBottom('messages');" preload="auto" autoplay="autoplay" loop="loop" style="max-width: 256px; max-height: 256px;"> <source src="${mp4}mp4" type="video/mp4"></source> </video>`, 3);
         }
-    
+
         //replace normalied text
         if (normalize) {
             str = str.replace(this.repnmliz, '<textarea style="overflow:hidden;">' + normalize.replace(/<br>/g, '&#13;') + '</textarea>');

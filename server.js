@@ -822,8 +822,6 @@ function createChannel(io, channelName) {
         socket.on('idleStatus', function (status) {
             if (typeof status === 'boolean') {
                 roomEmit('idleStatus', user.id, status);
-            } else if (!status) {
-                roomEmit('idleStatus', user.id);
             }
         });
         
@@ -938,6 +936,10 @@ function createChannel(io, channelName) {
                     role : 2
                 },
                 themecolors : {
+                    type : 'object',
+                    role : 2
+                },
+                joinmessage : {
                     type : 'object',
                     role : 2
                 }
@@ -1186,7 +1188,7 @@ function createChannel(io, channelName) {
 function intoapp(app, http) {
     var channelRegex = /^\/(\w*\/?)$/;
     var io = require('socket.io')(http);
-    app.use(minify());
+    //app.use(minify());
     app.use(express.static(__dirname + '/public'));
     app.get(channelRegex, function (req, res) {
         if (!channels[req.url]) {

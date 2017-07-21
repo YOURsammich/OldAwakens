@@ -1,3 +1,11 @@
+/*
+    coin
+    /msg
+    /anon
+    part
+    youtube replace thing
+*/
+
 var socket = io.connect(window.location.pathname);
 
 var ONLINE = {
@@ -16,19 +24,19 @@ var ONLINE = {
 var Attributes = {
     notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
     altAtt : {colour : 'color', bg : 'background'},
-    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute'],
+    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute', 'lock', 'proxy'],
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
-
-        if (this.notifierAtt.indexOf(attribute) !== -1 && oldValue !== newValue) {
+        
+        if (this.notifierAtt.indexOf(attribute) !== -1 && oldValue !== newValue && oldValue) {
             showMessage({
                 nick : this.get('nick'),
                 flair : this.get('flair'),
                 message : clientSubmit.message.decorateText('Now your messages look like this'),
                 messageType : 'chat'
             });
-        } else if (notify && oldValue !== newValue && attribute !== 'token') {
+        } else if (notify && oldValue !== newValue && attribute !== 'token' && newValue) {
             showMessage({
                 message : attribute + ' is now set to ' + newValue,
                 messageType : 'info'
@@ -402,7 +410,6 @@ var clientSubmit = {
         },
         send : function (message) {
             socket.emit('message', this.decorateText(message), Attributes.get('flair'));
-            socket.emit('idleStatus');
         },
         sendPrivate : function (message, userID) {
             socket.emit('privateMessage', this.decorateText(message), Attributes.get('flair'), userID);
@@ -420,7 +427,7 @@ var clientSubmit = {
 };
 
 function channelTheme(channelData) {
-    if (channelData.note && channelData.note.value) {
+    if (channelData.note && channelData.note.value && channelData.note.value != Attributes.get('note').value) {
         showMessage({
             message : channelData.note.value,
             messageType : 'note'
@@ -428,7 +435,7 @@ function channelTheme(channelData) {
         Attributes.set('note', channelData.note);
     }
 
-    if (channelData.topic && channelData.topic.value) {
+    if (channelData.topic && channelData.topic.value && channelData.topic.value != Attributes.get('topic').value) {
         document.title = channelData.topic.value;
         showMessage({
             message : 'Topic: ' + channelData.topic.value,
@@ -439,9 +446,9 @@ function channelTheme(channelData) {
 
     if (channelData.background && channelData.background.value) {
         if (Attributes.get('toggle-background')) {
-            document.getElementById('messages').style.background = channelData.background.value;
+            document.getElementById('messages-background').style.background = channelData.background.value;
         }
-        Attributes.set('background', channelData.background.value);
+        Attributes.set('background', channelData.background);
     }
 
     if (channelData.themecolors && channelData.themecolors.value) {
@@ -483,10 +490,16 @@ function channelTheme(channelData) {
         Attributes.set('proxy', channelData.proxy);
     }
     
+    if (channelData.joinmessage && channelData.joinmessage.value) {
+        Attributes.set('joinmessage', channelData.joinmessage);
+    }
+    
     /*console.log(channelData);
     if (channelData.hats) {
         console.log(channelData.hats);
     }*/
+    
+    menuControl.setChannelPanel(channelData);
 }
 
 function createPanel(title, html, func) {
@@ -968,7 +981,7 @@ socket.on('connect', function () {
 });
 
 socket.on('activeChannels', function (channels) {
-    var channelPanel = document.getElementsByClassName('channelPanel')[0],
+    /*var channelPanel = document.getElementsByClassName('channelPanel')[0],
         activeChannels =channelPanel.getElementsByClassName('activeChannel'),
         div,
         i; 
@@ -986,7 +999,7 @@ socket.on('activeChannels', function (channels) {
         div.className = 'activeChannel';
         div.textContent = channels[i].name;
         channelPanel.appendChild(div);   
-    }
+    }*/
 });
 socket.emit('activeChannels');
 

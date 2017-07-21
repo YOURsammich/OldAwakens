@@ -228,7 +228,7 @@ var COMMANDS = {
     },
     clearcursors : {
         handler : function () {
-            var parent = document.getElementById('messages');
+            var parent = document.getElementById('cursor-container');
             while (parent.firstChild) {
                 parent.removeChild(parent.firstChild);
             }
@@ -244,15 +244,15 @@ var COMMANDS = {
                 Attributes.set('toggle-' + params.attr, !attValue, true);
                 
                 if (params.attr === 'cursors' && attValue) {
-                    COMMANDS.clearcursors();
+                    COMMANDS.clearcursors.handler();
                     socket.emit('removeCursor');
                 }
                 
                 if (params.attr === 'background') {
                     if (!attValue) {
-                        document.getElementById('messages').style.background = Attributes.get('background');
+                        document.getElementById('messages-background').style.background = Attributes.get('background').value;
                     } else {
-                        document.getElementById('messages').style.background = 'black';
+                        document.getElementById('messages-background').style.background = 'black';
                     }   
                 }
             } else {
@@ -305,6 +305,15 @@ var COMMANDS = {
         handler : function (params) {
             socket.emit('channelStatus', {
                 background : params.background
+            });
+        }
+    },
+    joinmessage : {
+        params : ['afterNick|beforeNick'],
+        handler : function (params) {
+            
+            socket.emit('channelStatus', {
+                joinmessage : [params.afterNick, params.beforeNick]
             });
         }
     },
@@ -498,15 +507,7 @@ var COMMANDS = {
         params : ['cursor']
     },
     afk : {
-        params : ['message'],
-        handler : msg => {
-	        if (msg.message === ' ') {
-	            socket.emit('idleStatus');
-	        } else {
-	            socket.emit('idleStatus', true);
-	        }
-            socket.emit('command', 'afk', msg)
-        }
+        params : ['message']
     },
     cursors : {},
     hats : {}
