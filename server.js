@@ -275,8 +275,7 @@ function createChannel(io, channelName) {
         },
         ban : {
             role : 1,
-            params : ['nick'],
-            optionalParams : ['reason'],
+            params : ['nick', 'reason'],
             handler : function (user, params) {
                 var index = findIndex(channel.online, 'nick', params.nick),
                     message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
@@ -286,7 +285,7 @@ function createChannel(io, channelName) {
                     channel.online[index].socket.disconnect();
                 }
                 
-                dao.ban(channelName, params.nick, user.nick, params.reason).then(function () {
+                dao.ban(channelName, null, params.nick, user.nick, params.reason).then(function () {
                     roomEmit('message', {
                         message : user.nick + ' banned ' + params.nick + (params.reason ? ': ' + params.reason : ''),
                         messageType : 'general'
@@ -305,7 +304,7 @@ function createChannel(io, channelName) {
                     message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
                 
                 if (index !== -1) {
-                    dao.ban(channelName, channel.online[index].remote_addr, user.nick, params.reason).then(function () {
+                    dao.ban(channelName, channel.online[index].remote_addr, channel.online[index].nick, user.nick, params.reason).then(function () {
                         showMessage(channel.online[index].socket, message, 'error');
                         channel.online[index].socket.disconnect();
                         showMessage(user.socket, params.nick + ' is now IP banned', 'info');
@@ -494,8 +493,8 @@ function createChannel(io, channelName) {
         },
         banlist : {
             handler : function (user) {
-                dao.banlist(channelName).then(function (banlist, banData) {
-                    user.socket.emit('banlist', banData);
+                dao.banlist(channelName).then(function (banlist) {
+                    user.socket.emit('banlist', banlist);
                 });
             }
         },
@@ -718,7 +717,23 @@ function createChannel(io, channelName) {
         flair : {
             params : ['flair'],
             handler : function (user, params) {
-                dao.setUserinfo(user.nick, 'flair', params.flair);
+                if (params.flair.length < 900) {
+                    dao.setUserinfo(user.nick, 'flair', params.flair);
+                }
+            }
+        },
+        part : {
+            params : ['part'],
+            handler : function (user, params) {
+                if (params.part.length < 200) {
+                    user.part = params.part;
+                    dao.setUserinfo(user.nick, 'part', user.part);
+                    user.socket.emit('update', {
+                        part : user.part
+                    });
+                } else {
+                    showMessage(user.socket, 'Part must be under 200 characters', 'error');
+                }
             }
         }
     };
@@ -878,7 +893,7 @@ function createChannel(io, channelName) {
             if (command.role === undefined || command.role >= user.role) {
                 if (command.params) {
                     for (i = 0; i < command.params.length; i++) {
-                        if (typeof params[command.params[i]] !== 'string' && (command.optionalParams && typeof params[command.optionalParams[i]] !== 'string')) {
+                        if (typeof params[command.params[i]] !== 'string' && typeof params[command.params[i]] !== 'undefined') {
                             valid = false;
                         }
                     }
@@ -938,10 +953,6 @@ function createChannel(io, channelName) {
                 themecolors : {
                     type : 'object',
                     role : 2
-                },
-                joinmessage : {
-                    type : 'object',
-                    role : 2
                 }
             },
                 keys = Object.keys(settings),
@@ -992,12 +1003,13 @@ function createChannel(io, channelName) {
             
             if (!userData) userData = {};
             
-            function join(channelData, nick, role, hat, cursor) {
+            function join(channelData, nick, role, hat, cursor, part) {
                 user.nick = nick;
                 user.role = role;
                 user.token = dao.makeId();
                 user.hat = hat && hat.current;
                 user.cursor = cursor;
+                user.part = part;
                 tokens[user.nick] = user.token;
                 
                 for (i = 0; i < channel.online.length; i++) {
@@ -1022,7 +1034,8 @@ function createChannel(io, channelName) {
                     role : roleNames[user.role],
                     token : user.token,
                     hats : hat,
-                    cursor : cursor
+                    cursor : cursor,
+                    part : part
                 });
                 
                 roomEmit('joined', user.id, user.nick);
@@ -1043,6 +1056,10 @@ function createChannel(io, channelName) {
                         if (dbuser.cursor) {
                             userData.cursor = JSON.parse(dbuser.cursor).name;
                         }
+                        
+                        if (dbuser.part) {
+                            userData.part = dbuser.part;
+                        }
                     }
                 } else {
                     userData.nick = dao.getNick();
@@ -1055,7 +1072,7 @@ function createChannel(io, channelName) {
                 userData.role = 4;
             }
             
-            join(channelData, userData.nick, userData.role, userData.hat, userData.cursor);
+            join(channelData, userData.nick, userData.role, userData.hat, userData.cursor, userData.part);
         }
         
         function checkChannelStatus (joinData, dbuser) {
@@ -1106,8 +1123,8 @@ function createChannel(io, channelName) {
             
             if (totalIPs < 4) {
                 if (findIndex(channel.online, 'id', user.id) === -1) {
-                    dao.banlist(channelName).then(function (banlist) {
-                        if (banlist.indexOf(joinData.nick) == -1 && banlist.indexOf(user.remote_addr) == -1) {
+                    dao.isBanned(channelName, joinData.nick, user.remote_addr).then(function (banned) {
+                        if (!banned) {
                             if (joinData.nick) {
                                 dao.find(joinData.nick).then(function (dbuser) {//find if user exist
                                     if (joinData.token && joinData.token === tokens[joinData.nick]) {//tokens match? good to go
@@ -1129,10 +1146,11 @@ function createChannel(io, channelName) {
                                 checkChannelStatus();
                             } 
                         } else {
-                            showMessage(socket, 'You are banned', 'error');
+                            showMessage(socket, 'You are banned' + (banned.reason ? ': ' + banned.reason : ''), 'error');
                             socket.disconnect();
                         }
                     });
+
                 } else {
                     showMessage(socket, 'Only one socket connection allowed', 'error');
                     user.socket.disconnect();
@@ -1147,7 +1165,7 @@ function createChannel(io, channelName) {
             var joinData = {},
                 requestedDataKeys,
                 k,
-                accept = ['nick', 'token', 'password'];
+                accept = ['nick', 'token', 'password', 'part'];
             
             if (typeof requestedData === 'object') {//makes sure requestedData is valid, all items are strings
                 requestedDataKeys = Object.keys(requestedData);
@@ -1175,7 +1193,7 @@ function createChannel(io, channelName) {
         socket.on('disconnect', function () {
             var index = findIndex(channel.online, 'nick', user.nick);
             if (index !== -1) {
-                roomEmit('left', user.id);
+                roomEmit('left', user.id, user.part);
                 channel.online.splice(index, 1);
             }
         });

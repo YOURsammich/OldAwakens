@@ -24,7 +24,7 @@ var ONLINE = {
 var Attributes = {
     notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
     altAtt : {colour : 'color', bg : 'background'},
-    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute', 'lock', 'proxy'],
+    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute', 'lock', 'proxy', 'part'],
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
@@ -489,11 +489,7 @@ function channelTheme(channelData) {
         
         Attributes.set('proxy', channelData.proxy);
     }
-    
-    if (channelData.joinmessage && channelData.joinmessage.value) {
-        Attributes.set('joinmessage', channelData.joinmessage);
-    }
-    
+        
     /*console.log(channelData);
     if (channelData.hats) {
         console.log(channelData.hats);
@@ -902,18 +898,19 @@ socket.on('banlist', function (banlist) {
 
     table = document.createElement('table');
     table.innerHTML = '<tr><th>Nick</th><th>Banned by</th><th>Reason</th></tr>';
-
-    banlist.map(function(user){
+    
+    for (var q = 0; q < banlist.length; q++) {
         var tr = document.createElement('tr');
-        var keys = Object.keys(user);
-        for(var i = 0; i < 3; i++){
+        var keys = Object.keys(banlist[q]);
+        console.log(keys);
+        for(var i = 3; i < 6; i++){
             var key = keys[i];
             var td = document.createElement('td');
-            td.textContent = user[key] || ' ';
+            td.textContent = banlist[q][keys[i]] || ' ';
             tr.appendChild(td);
         }
         table.appendChild(tr);
-    });
+    }
 
     insideHolder.appendChild(table);
     $$$.draggable(border);

@@ -2,8 +2,7 @@ var menuControl = {
     addUser : function (id, nick, afk, noShow) {
         var nickContain = document.createElement('div'),
             nickText = document.createElement('div'),
-            extraInfo = document.createElement('div'),
-            joinMessage = '';
+            extraInfo = document.createElement('div');
         
         nickContain.id = id;
         nickContain.className = 'nickContain';
@@ -49,11 +48,8 @@ var menuControl = {
         }
         
         if (noShow === undefined) {
-            joinMessage += '/%%' + (Attributes.get('joinmessage').value && Attributes.get('joinmessage').value ? Attributes.get('joinmessage').value[1] + ' ' : '') + nick + '%%';
-            joinMessage += Attributes.get('joinmessage').value && Attributes.get('joinmessage').value[0] ? ' ' + Attributes.get('joinmessage').value[0] : ' has joined';
-            
             showMessage({
-                message : joinMessage,
+                message : nick + ' has joined',
                 messageType : 'general'
             });
         }
@@ -62,7 +58,7 @@ var menuControl = {
             document.body.removeChild(document.getElementsByClassName('LoginPanel')[0].parentNode);
         }
     },
-    removeUser : function (id) {
+    removeUser : function (id, part) {
         var user = ONLINE.users[id],
             pmPanel = document.getElementById('PmPanel-' + id);
         
@@ -81,9 +77,9 @@ var menuControl = {
         delete ONLINE.users[id];
         
         menuControl.updateCount();
-        
+
         showMessage({
-            message : user.nick + ' has left',
+            message : user.nick + ' has left' + (part ? ': ' + part : ''),
             messageType : 'general'
         });
     },
@@ -278,14 +274,14 @@ var menuControl = {
         
         socket.on('message', function () {
             if (blurred && ++unread) {
-                document.title = '(' + unread + ') ' + Attributes.get('topic').value;
+                document.title = '(' + unread + ') ' + (Attributes.get('topic').value || 'Awakens - The chat that never sleeps');
             }
         });
 
         window.addEventListener('focus', function () {
             unread = 0;
             blurred = false;
-            document.title = Attributes.get('topic').value;
+            document.title = Attributes.get('topic').value || 'Awakens - The chat that never sleeps';
         });
         
         window.addEventListener('blur', function () {

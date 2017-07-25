@@ -323,13 +323,13 @@ main {
 }
 
 .channelPanel button {
-    position: relative;
-    background-color: rgb(58, 58, 58);
+    width: 45%;
+    background-color: #dbdbdb;
     border-radius: 3px;
-    border: 1px solid black;
+    border: none;
     text-align: center;
-    padding: 15px 15px 15px 15px;
-    color: white;
+    padding: 10px 10px 10px 10px;
+    color: black;
     cursor: pointer;
     outline: none;
 }

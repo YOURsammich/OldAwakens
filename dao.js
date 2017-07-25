@@ -212,55 +212,52 @@ module.exports = {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `channel_banned` WHERE `channelName` = ?;"
         db.query(sql, channelName, function (err, rows, fields) {
-            var banlist = [],
-                rows;
-            
-            if(rows && rows.length){
-                rows = JSON.parse(rows[0].banned);
-                for(var i = 0; i < rows.length; i++){
-                    banlist.push(rows[i].nick);
-                }
-                defer.resolve(banlist, rows).promise();
-            } else {
-                db.query("INSERT INTO `awakens`.`channel_banned` (`channelName`, `banned`) VALUES (?, '[]');", channelName);
-                defer.resolve([]).promise();
+            if (!err) {
+                defer.resolve(rows).promise();
             }
         });
         return defer;
     },
-    ban : function(channelName, nick, bannedBy, reason){
+    isBanned : function (channelName, nick, ip) {
         var defer = $.Deferred();
-        var sql = "UPDATE `awakens`.`channel_banned` SET `banned` = ? WHERE `channelName` = ?;";
-        this.banlist(channelName).then(function(banlist, banData){
-            if (banlist.indexOf(nick) === -1) {
-                banData.push({
-                    nick : nick,
-                    bannedBy : bannedBy, 
-                    reason : reason
-                });
-                db.query(sql, [JSON.stringify(banData), channelName],function(err, rows, fields){
-                    defer.resolve().promise();
-                });
-            } else {
-                defer.reject();
+        var sql = "SELECT * FROM `awakens`.`channel_banned` WHERE `channelName` = ? AND `nick` = ? OR `remote_addr` = ?";
+        
+        db.query(sql, [channelName, nick, ip], function (err, rows, fields) {
+            if (!err) {
+                defer.resolve(rows.length ? rows[0] : false).promise();
             }
         });
+        
+        return defer;
+    },
+    ban : function(channelName, ip, nick, bannedBy, reason){
+        var defer = $.Deferred();
+        var sql = "INSERT INTO `awakens`.`channel_banned`(`channelName`, `remote_addr`, `nick`, `bannedBy`, `reason`) VALUES(?, ?, ?, ?, ?)";
+        
+        this.isBanned(channelName, nick, ip).then(function (banned) {
+            if (banned) {
+                defer.reject();
+            } else {
+                db.query(sql, [channelName, ip, nick, bannedBy, reason], function (err, rows, fields) {
+                    defer.resolve().promise();
+                });
+            }
+        });
+        
         return defer;
     },
     unban : function(channelName, nick) {
         var defer = $.Deferred();
-        var sql = "UPDATE `awakens`.`channel_banned` SET `banned` = ? WHERE `channelName` = ?;";
-        this.banlist(channelName).then(function (banlist, banData) {
-            var index = findIndex(banData, 'nick', nick);
-            if (index !== -1) {
-                banData.splice(index, 1);
-                db.query(sql, [JSON.stringify(banData), channelName],function(err, rows, fields){
-                    defer.resolve().promise();
-                });
+        var sql = "DELETE FROM `awakens`.`channel_banned` WHERE `channelName` = ? AND `nick` = ?";
+        
+        db.query(sql, [channelName, nick], function (err, rows, fields) {
+            if (!err) {
+                defer.resolve().promise();
             } else {
                 defer.reject();
             }
         });
+        
         return defer;
     },
     getNick : function () {

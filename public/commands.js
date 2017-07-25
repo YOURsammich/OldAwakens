@@ -510,7 +510,10 @@ var COMMANDS = {
         params : ['message']
     },
     cursors : {},
-    hats : {}
+    hats : {},
+    part : {
+        params : ['part']
+    }
 };
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
