@@ -34,12 +34,15 @@
                         <ul>
                             <li id="lock" class="toggle"><div>Lock Channel:</div> <input class="inputfield" type="checkbox" /></li>
                             <li id="proxy" class="toggle"><div>Block proxies:</div> <input class="inputfield" type="checkbox" /></li>
-                            <li id="joinmessage"><div>Join Message:</div> 
-                                <input class="inputfield" placeholder="before nick" />
-                                <input class="inputfield" value="has joined" />
-                            </li>
                         </ul>
-                    <button onclick="menuControl.sendChanges()">Save Changes</button>
+                        
+                        <button onclick="menuControl.sendChanges()">Save Changes</button>
+                        
+                        <h3>Banlist</h3>
+                        
+                        <button onclick="clientSubmit.handleInput('/banlist')">Show Banlist</button>
+                        <button onclick="">Clear Banlist</button>
+                        
                     </div>
                     <div class="userList">
                         <div></div>
