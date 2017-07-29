@@ -1,8 +1,6 @@
 /*
     coin
-    /msg
     /anon
-    part
     youtube replace thing
 */
 
@@ -53,7 +51,6 @@ var Attributes = {
     },
     get : function (attribute) {
         var value = '';
-
 
         if (this.altAtt[attribute]) {
             attribute = this.altAtt[attribute];
@@ -215,9 +212,10 @@ var messageBuilder = {
         }
         
         el.appendChild(message);
-        this.scrollToBottom(el);
+        
+        this.scrollToBottom(el, message);
     },
-    scrollToBottom : function (el) {
+    scrollToBottom : function (parent, el) {
         function scrollTo(element, to, duration) {
             var start = element.scrollTop,
                 change = to - start,
@@ -245,13 +243,13 @@ var messageBuilder = {
             return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
         }
 
-        if (typeof el === 'string') {
-            el = document.getElementById(el);
+        if (typeof parent === 'string') {
+            parent = document.getElementById(parent);
         }
 
-        var scrollDelta = el.scrollHeight - el.clientHeight;
-        if (scrollDelta - el.scrollTop < 600) {
-            scrollTo(el, scrollDelta, 200);
+        var scrollDelta = parent.scrollHeight - parent.clientHeight;
+        if (scrollDelta - parent.scrollTop <= el.clientHeight + 15) {
+            scrollTo(parent, scrollDelta, 200);
         }
     }
 };
@@ -745,6 +743,7 @@ var AutoComplete = {
             messageDiv = document.getElementById('messages');
 
         this.style.height = newHeight + 'px';
+        messageDiv.scrollTop = messageDiv.scrollHeight;
         
         if (this.value.length === 0) {
             typing = false;
@@ -854,6 +853,10 @@ socket.on('idleStatus', menuControl.idleStatus);
 socket.on('afk', menuControl.afk);
 
 socket.on('left', menuControl.removeUser);
+
+socket.on('returnMsg', function (text) {
+    document.getElementById('center-text').innerHTML = parser.parse(text);
+});
 
 socket.on('captcha', function (captcha) {
     var messageHTML = messageBuilder.createMessage(captcha, 'captcha');

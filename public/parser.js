@@ -259,12 +259,11 @@ var parser = {
 
         var img = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:agif|apng|gif|jpg|jpeg|png|bmp|svg))<\/a>/gi.exec(str);
         if (img && Attributes.get('toggle-images')) {
-            str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="messageBuilder.scrollToBottom(\'messages\');"/></a>', 3);
+            str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="messageBuilder.scrollToBottom(\'messages\', this);"/></a>', 3);
         }
         var gifv = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:gifv))<\/a>/gi.exec(str);
         if (gifv && Attributes.get('toggle-images')) {
             var mp4 = gifv[2].slice(0,-4);
-            console.log(mp4);
             str = this.multiple(str, gifv[0], gifv[1] + `<video id="gifv" onload="messageBuilder.scrollToBottom('messages');" preload="auto" autoplay="autoplay" loop="loop" style="max-width: 256px; max-height: 256px;"> <source src="${mp4}mp4" type="video/mp4"></source> </video>`, 3);
         }
 

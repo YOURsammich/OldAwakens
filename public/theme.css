@@ -49,10 +49,19 @@ main {
 }
 
 #messages-background { 
+    display: table;
     position: absolute;
     width: 100%;
     height: 100%;
     background-color: black;
+}
+
+#center-text {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    color: white;
+    font-size: 4em;
 }
 
 #messages {

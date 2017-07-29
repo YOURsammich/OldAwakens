@@ -439,7 +439,7 @@ var COMMANDS = {
     },
     vpm : {
         params : ['nick'],
-        handler: function (params) {
+        handler : function (params) {
             createPmPanel(ONLINE.getId(params.nick));
         }  
     },
@@ -513,7 +513,10 @@ var COMMANDS = {
     hats : {},
     part : {
         params : ['part']
-    }
+    },
+    msg : {
+        params : ['msg']
+    },
 };
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
