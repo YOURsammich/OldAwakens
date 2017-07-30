@@ -239,6 +239,9 @@ module.exports = {
                 defer.reject();
             } else {
                 db.query(sql, [channelName, ip, nick, bannedBy, reason], function (err, rows, fields) {
+                    if (err) {
+                        console.log(err);
+                    }
                     defer.resolve().promise();
                 });
             }
@@ -248,11 +251,17 @@ module.exports = {
     },
     unban : function(channelName, nick) {
         var defer = $.Deferred();
-        var sql = "DELETE FROM `awakens`.`channel_banned` WHERE `channelName` = ? AND `nick` = ?";
+        var sql = "DELETE FROM `awakens`.`channel_banned` WHERE `channelName` = ? AND `nick` = ? OR `remote_addr` = ?";
         
-        db.query(sql, [channelName, nick], function (err, rows, fields) {
-            if (!err) {
-                defer.resolve().promise();
+        this.isBanned(channelName, nick, nick).then(function (banned) {
+            if (banned) {
+                db.query(sql, [channelName, nick, nick], function (err, rows, fields) {
+                    if (!err) {
+                        defer.resolve().promise();
+                    } else {
+                        defer.reject();
+                    }
+                });
             } else {
                 defer.reject();
             }

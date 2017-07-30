@@ -278,6 +278,43 @@ function createChannel(io, channelName) {
             params : ['nick', 'reason'],
             handler : function (user, params) {
                 var index = findIndex(channel.online, 'nick', params.nick),
+                    message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned',
+                    nick = params.nick,
+                    ip = null;
+                
+                
+                
+                dao.find(nick).then(function (dbuser) {
+                    dao.ban(channelName, dbuser.remote_addr, dbuser.nick, user.nick, params.reason).then(function () {
+                        roomEmit('message', {
+                            message : user.nick + ' banned ' + nick + (params.reason ? ': ' + params.reason : ''),
+                            messageType : 'general'
+                        });
+                        showMessage(user.socket, nick + ' is now IP banned', 'info');
+                    }).fail(function () {
+                        showMessage(user.socket, nick + ' is already banned', 'error');
+                    });
+                }).fail(function () {
+                    if (index !== -1) {
+                        nick = channel.online[index].nick;
+                        ip = channel.online[index].remote_addr;
+                        showMessage(channel.online[index].socket, message, 'error');
+                        channel.online[index].socket.disconnect();
+                    }
+                    
+                    dao.ban(channelName, ip, nick, user.nick, params.reason).then(function () {
+                        showMessage(user.socket, nick + ' is now banned', 'info');
+                    }).then(function () {
+                        showMessage(user.socket, nick + ' is already banned', 'error');
+                    });
+                });
+            }
+        },
+        bannick : {
+            role : 1,
+            params : ['nick', 'reason'],
+            handler : function (user, params) {
+                var index = findIndex(channel.online, 'nick', params.nick),
                     message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
                 
                 if (index !== -1) {
@@ -298,20 +335,21 @@ function createChannel(io, channelName) {
         },
         banip : {
             role : 1,
-            params : ['nick', 'reason'],
+            params : ['ip', 'reason'],
             handler : function (user, params) {
-                var index = findIndex(channel.online, 'nick', params.nick),
+                var index = findIndex(channel.online, 'remote_addr', params.ip),
                     message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
                 
                 if (index !== -1) {
-                    dao.ban(channelName, channel.online[index].remote_addr, channel.online[index].nick, user.nick, params.reason).then(function () {
-                        showMessage(channel.online[index].socket, message, 'error');
-                        channel.online[index].socket.disconnect();
-                        showMessage(user.socket, params.nick + ' is now IP banned', 'info');
-                    }).fail(function () {
-                        showMessage(user.socket, params.nick + ' is already banned', 'error');
-                    });
+                    showMessage(channel.online[index].socket, message, 'error');
+                    channel.online[index].socket.disconnect();
                 }
+                
+                dao.ban(channelName, params.ip, null, user.nick, params.reason).then(function () {
+                    showMessage(user.socket, params.ip + ' is now a banned IP address', 'info');
+                }).fail(function () {
+                    showMessage(user.socket, params.ip + ' is already banned', 'error');
+                });
             }
         },
         unban : {
@@ -733,6 +771,16 @@ function createChannel(io, channelName) {
                     });
                 } else {
                     showMessage(user.socket, 'Part must be under 200 characters', 'error');
+                }
+            }
+        },
+        msg : {
+            params : ['msg'],
+            handler : function (user, params) {
+                if (params.msg.length < 100) {
+                    roomEmit('returnMsg', params.msg);
+                } else {
+                    showMessage(user.socket, 'Msg must be under 100 characters', 'error');
                 }
             }
         }

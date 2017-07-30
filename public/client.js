@@ -2,6 +2,8 @@
     coin
     /anon
     youtube replace thing
+    
+    ALTER TABLE `channel_banned` CHANGE `nick` `nick` VARCHAR(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL;
 */
 
 var socket = io.connect(window.location.pathname);
@@ -900,13 +902,13 @@ socket.on('banlist', function (banlist) {
     border.appendChild(cancel);
 
     table = document.createElement('table');
-    table.innerHTML = '<tr><th>Nick</th><th>Banned by</th><th>Reason</th></tr>';
+    table.innerHTML = '<tr><th>IP</th><th>nick</th><th>Banned by</th><th>Reason</th></tr>';
     
     for (var q = 0; q < banlist.length; q++) {
         var tr = document.createElement('tr');
         var keys = Object.keys(banlist[q]);
-        console.log(keys);
-        for(var i = 3; i < 6; i++){
+
+        for(var i = 2; i < 6; i++){
             var key = keys[i];
             var td = document.createElement('td');
             td.textContent = banlist[q][keys[i]] || ' ';
