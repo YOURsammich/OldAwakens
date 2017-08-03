@@ -127,65 +127,83 @@ module.exports = {
     getChannelinfo : function (channelName) {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `channel_info` WHERE `channelName` = ?";
+        var returnObj = {},
+            i;
         db.query(sql, channelName, function (err, rows, fields) {
             if (rows && rows.length) {
-                try {
-                    defer.resolve(JSON.parse(rows[0].roles), JSON.parse(rows[0].data)).promise();
-                } catch (err) {
-                    defer.reject(err);
+                for (i = 0; i < rows.length; i++) {
+                    try { 
+                        returnObj[rows[i].attribute] = rows[i].value;
+                    } catch (err) {
+                        //
+                    }
                 }
-            } else {
-                db.query("INSERT INTO `awakens`.`channel_info` (`channelName`, `roles`, `data`) VALUES (?, '{}', '{}');", channelName, function (err, rows, fields) {
-                    defer.resolve({}, {}).promise();
-                });
             }
+            defer.resolve(returnObj).promise();
         });
         return defer;
     },
     getChannelAtt : function (channelName, att) {
         var defer = $.Deferred();
-        this.getChannelinfo(channelName).then(function (roles, channelData) {
+        this.getChannelinfo(channelName).then(function (channelData) {
             defer.resolve(channelData[att]).promise();
+        });
+        return defer;
+    },
+    setChannelAtt : function (channelName, att, value) {
+        var defer = $.Deferred();
+        var sqlUpdate = "UPDATE `channel_info` SET `value` = ? WHERE `channelName` = ? AND `attribute` = ?";
+        var sqlInsert = "INSERT INTO `channel_info` (`channelName`, `attribute`, `value`) VALUES (?, ?, ?);";
+        this.getChannelAtt(channelName, att).then(function (exist) {
+            if (exist) {
+                db.query(sqlUpdate, [JSON.stringify(value), channelName, att], function (err) {
+                    defer.resolve().promise(); 
+                });
+            } else {
+                db.query(sqlInsert, [channelName, att, JSON.stringify(value)], function (err) {
+                    console.log(err);
+                    defer.resolve().promise(); 
+                });
+            }
         });
         return defer;
     },
     setChannelinfo : function (channelName, newValues){
         var defer = $.Deferred(),
-            sql = "UPDATE `awakens`.`channel_info` SET `data` = ? WHERE `channel_info`.`channelName` = ?",
             keys = Object.keys(newValues),
             i;
         
-        this.getChannelinfo(channelName).then(function (roles, channelData) {
-            
-            for (i = 0; i < keys.length; i++) {
-                channelData[keys[i]] = newValues[keys[i]];
-            }
-            
-            db.query(sql, [JSON.stringify(channelData), channelName], function(err, rows, fields){
-                if (err) {
-                    defer.reject(err);
-                } else {
-                    defer.resolve().promise();   
-                }
-            });
-        }).fail(function () {
-            channelData = {};
-            channelData[att] = value;
-            db.query("INSERT INTO `awakens`.`channel_info` (`channelName`, `roles`, `data`) VALUES (?, '{}', ?);", [channelName, JSON.stringify(channelData)]);
-            defer.resolve().promise();   
-        });
+        for (i = 0; i < keys.length; i++) {
+            this.setChannelAtt(channelName, keys[i], newValues[keys[i]]);
+        }
+                
+        defer.resolve().promise();
+        
         return defer;
     },
     setChannelRole : function (channelName, nick, role) {
         var defer = $.Deferred();
-        var sql = "UPDATE `awakens`.`channel_info` SET `roles` = ? WHERE `channel_info`.`channelName` = ?";
-        this.getChannelinfo(channelName).then(function (roles) {
+        this.getChannelAtt(channelName, 'roles').then(function (roles) {
+            if (!roles) {
+                roles = {};
+            } else {
+                try { 
+                    roles = JSON.parse(roles);
+                    if (typeof roles !== 'object') {
+                        roles = {};
+                    }
+                } catch (err) {
+                    roles = {};
+                }
+            }
+            
             if (role === 4) {
                 delete roles[nick];
             } else {
                 roles[nick] = role;
             }
-            db.query(sql, [JSON.stringify(roles), channelName], function (err, rows, fields) {
+
+            module.exports.setChannelAtt(channelName, 'roles', roles).then(function () {
                 defer.resolve().promise();
             });
         });

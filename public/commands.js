@@ -124,7 +124,7 @@ var COMMANDS = {
             
             if (attData) {
                 
-                if (attData.value) {
+                if (attData.value !== undefined) {
                     formatTime = new Date();
                     formatTime.setTime(attData.date);
                     showMessage({
@@ -308,12 +308,14 @@ var COMMANDS = {
             });
         }
     },
-    joinmessage : {
-        params : ['afterNick|beforeNick'],
+    msg : {
+        params : ['msg'],
         handler : function (params) {
-            
+            if (params.msg == 'none') {
+                params.msg = ' ';
+            }
             socket.emit('channelStatus', {
-                joinmessage : [params.afterNick, params.beforeNick]
+                msg : params.msg
             });
         }
     },
@@ -513,10 +515,7 @@ var COMMANDS = {
     hats : {},
     part : {
         params : ['part']
-    },
-    msg : {
-        params : ['msg']
-    },
+    }
 };
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;

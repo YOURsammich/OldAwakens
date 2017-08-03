@@ -114,7 +114,8 @@ function createChannel(io, channelName) {
         login : {
             params : ['nick', 'password'],
             handler : function (user, params) {
-                var userRole;
+                var userRole,
+                    channelRoles;
                 dao.login(params.nick, params.password).then(function (correctPassword, dbuser) {
                     if (correctPassword) {
                         if (params.nick !== user.nick) {
@@ -124,10 +125,12 @@ function createChannel(io, channelName) {
                             }
                             
                             dao.find(params.nick).then(function (dbuser) {
-                                dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {//check for channel roles
+                                dao.getChannelinfo(channelName).then(function (channelData) {//check for channel roles
+                                    channelRoles = JSON.parse(channelData.roles);
+                                    console.log(channelRoles, typeof channelRoles, dbuser.nick)
                                     if (dbuser.role === 0) {// check if god role
                                         userRole = 0;
-                                    } else if (channelRoles[dbuser.nick]) {
+                                    } else if (channelRoles && channelRoles[dbuser.nick]) {
                                         if (channelRoles[dbuser.nick] !== 0) {
                                             userRole = channelRoles[dbuser.nick];
                                         } else {
@@ -486,18 +489,20 @@ function createChannel(io, channelName) {
                 var role = parseInt(params.role, 10);
                 
                 if (role > 0 && role < 5) {
-                    dao.find(params.nick).then(function () {
-                        dao.setChannelRole(channelName, params.nick, role).then(function () {
-                            var index = findIndex(channel.online, 'nick', params.nick);
+                    dao.find(params.nick).then(function (dbuser) {
+                        dao.setChannelRole(channelName, dbuser.nick, role).then(function () {
+                            var index = findIndex(channel.online, 'nick', dbuser.nick);
                             if (index !== -1) {
                                 channel.online[index].role = parseInt(role, 10);
-                                showMessage(user.socket, params.nick + ' now has role ' + role, 'info');
                                 showMessage(channel.online[index].socket, 'role is now set to ' + role, 'info');
                             }
+                            showMessage(user.socket, dbuser.nick + ' now has role ' + role, 'info');
                         });
                     }).fail(function () {
                         showMessage(user.socket, 'That user isn\'t registered', 'error');
                     });   
+                } else {
+                    showMessage(user.socket, 'Invalid role', 'error');
                 }
             }
         },
@@ -773,16 +778,6 @@ function createChannel(io, channelName) {
                     showMessage(user.socket, 'Part must be under 200 characters', 'error');
                 }
             }
-        },
-        msg : {
-            params : ['msg'],
-            handler : function (user, params) {
-                if (params.msg.length < 100) {
-                    roomEmit('returnMsg', params.msg);
-                } else {
-                    showMessage(user.socket, 'Msg must be under 100 characters', 'error');
-                }
-            }
         }
     };
     
@@ -1001,6 +996,10 @@ function createChannel(io, channelName) {
                 themecolors : {
                     type : 'object',
                     role : 2
+                },
+                msg : {
+                    type : 'string',
+                    role : 4
                 }
             },
                 keys = Object.keys(settings),
@@ -1017,7 +1016,7 @@ function createChannel(io, channelName) {
                                     value : settings[keys[i]],
                                     updatedBy : user.nick,
                                     date : new Date().getTime()
-                                }
+                                };
                             } else {
                                 valid = false;
                                 errorMessage = 'Don\'t have access for this command';
@@ -1124,9 +1123,11 @@ function createChannel(io, channelName) {
         }
         
         function checkChannelStatus (joinData, dbuser) {
-            var apiLink = 'http://check.getipintel.net/check.php?ip=' + user.remote_addr + '&contact=theorignalsandwich@gmail.com&flags=m';
+            var apiLink = 'http://check.getipintel.net/check.php?ip=' + user.remote_addr + '&contact=theorignalsandwich@gmail.com&flags=m',
+                channelRoles;
             
-            dao.getChannelinfo(channelName).then(function (channelRoles, channelData) {
+            dao.getChannelinfo(channelName).then(function (channelData) {
+                channelRoles = JSON.parse(channelData.roles);
                 if (dbuser && dbuser.role !== 0 && channelRoles[dbuser.nick]) {//assign channel role
                     dbuser.role = channelRoles[dbuser.nick];
                 }

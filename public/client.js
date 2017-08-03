@@ -2,8 +2,6 @@
     coin
     /anon
     youtube replace thing
-    
-    ALTER TABLE `channel_banned` CHANGE `nick` `nick` VARCHAR(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL;
 */
 
 var socket = io.connect(window.location.pathname);
@@ -427,6 +425,18 @@ var clientSubmit = {
 };
 
 function channelTheme(channelData) {
+    var keys = Object.keys(channelData),
+        i;
+    
+    for (i = 0; i < keys.length; i++) {
+        try {
+            channelData[keys[i]] = JSON.parse(channelData[keys[i]])
+        } catch (err) {
+            //
+        }
+    }
+    
+    
     if (channelData.note && channelData.note.value && channelData.note.value != Attributes.get('note').value) {
         showMessage({
             message : channelData.note.value,
@@ -458,6 +468,10 @@ function channelTheme(channelData) {
             document.styleSheets[0].deleteRule(4);
             document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
         }
+    }
+    
+    if (channelData.msg && channelData.msg.value) {
+        document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value);
     }
     
     if (channelData.lock && (typeof Attributes.get('lock') !== 'object' || Attributes.get('lock').value !== channelData.lock.value)) {
@@ -855,10 +869,6 @@ socket.on('idleStatus', menuControl.idleStatus);
 socket.on('afk', menuControl.afk);
 
 socket.on('left', menuControl.removeUser);
-
-socket.on('returnMsg', function (text) {
-    document.getElementById('center-text').innerHTML = parser.parse(text);
-});
 
 socket.on('captcha', function (captcha) {
     var messageHTML = messageBuilder.createMessage(captcha, 'captcha');
