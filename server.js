@@ -1110,6 +1110,8 @@ function createChannel(io, channelName) {
                             userData.role = 1;
                         } else if (dbuser.role !== 0 && channelRoles[dbuser.nick]) {
                             userData.role = channelRoles[dbuser.nick];
+                        } else {
+                            userData.role = dbuser.role;
                         }
                         
                         if (dbuser.hat) {
