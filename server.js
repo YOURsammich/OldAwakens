@@ -285,35 +285,34 @@ function createChannel(io, channelName) {
             params : ['nick', 'reason'],
             handler : function (user, params) {
                 var index = findIndex(channel.online, 'nick', params.nick),
-                    message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned',
-                    nick = params.nick,
-                    ip = null;
+                    message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
                 
-                
-                
-                dao.find(nick).then(function (dbuser) {
+                dao.find(params.nick).then(function (dbuser) {
                     dao.ban(channelName, dbuser.remote_addr, dbuser.nick, user.nick, params.reason).then(function () {
                         roomEmit('message', {
-                            message : user.nick + ' banned ' + nick + (params.reason ? ': ' + params.reason : ''),
+                            message : user.nick + ' banned ' + params.nick + (params.reason ? ': ' + params.reason : ''),
                             messageType : 'general'
                         });
-                        showMessage(user.socket, nick + ' is now IP banned', 'info');
+                        showMessage(user.socket, params.nick + ' is now IP and nick banned', 'info');
                     }).fail(function () {
-                        showMessage(user.socket, nick + ' is already banned', 'error');
+                        showMessage(user.socket, params.nick + ' is already banned', 'error');
                     });
                 }).fail(function () {
                     if (index !== -1) {
-                        nick = channel.online[index].nick;
-                        ip = channel.online[index].remote_addr;
+                        dao.ban(channelName, channel.online[index].remote_addr, null, user.nick, params.reason).then(function () {
+                            showMessage(user.socket, params.nick + ' is now IP banned', 'info');
+                        }).fail(function () {
+                            showMessage(user.socket, params.nick + ' is already banned', 'error');
+                        });
                         showMessage(channel.online[index].socket, message, 'error');
                         channel.online[index].socket.disconnect();
+                    } else {
+                        dao.ban(channelName, null, params.nick, user.nick, params.reason).then(function () {
+                            showMessage(user.socket, params.nick + ' is now nick banned', 'info');
+                        }).fail(function () {
+                            showMessage(user.socket, params.nick + ' is already banned', 'error');
+                        });
                     }
-                    
-                    dao.ban(channelName, ip, null, user.nick, params.reason).then(function () {
-                        showMessage(user.socket, nick + ' is now banned', 'info');
-                    }).then(function () {
-                        showMessage(user.socket, nick + ' is already banned', 'error');
-                    });
                 });
             }
         },
