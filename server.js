@@ -126,8 +126,12 @@ function createChannel(io, channelName) {
                             
                             dao.find(params.nick).then(function (dbuser) {
                                 dao.getChannelinfo(channelName).then(function (channelData) {//check for channel roles
-                                    channelRoles = JSON.parse(channelData.roles);
-                                    console.log(channelRoles, typeof channelRoles, dbuser.nick)
+                                    try { 
+                                        channelRoles = JSON.parse(channelData.roles);
+                                    } catch (err) {
+                                        channelRoles = {};
+                                    }
+                                    
                                     if (dbuser.role === 0) {// check if god role
                                         userRole = 0;
                                     } else if (channelRoles && channelRoles[dbuser.nick]) {
