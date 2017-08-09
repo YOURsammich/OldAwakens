@@ -305,7 +305,7 @@ function createChannel(io, channelName) {
                         channel.online[index].socket.disconnect();
                     }
                     
-                    dao.ban(channelName, ip, nick, user.nick, params.reason).then(function () {
+                    dao.ban(channelName, ip, null, user.nick, params.reason).then(function () {
                         showMessage(user.socket, nick + ' is now banned', 'info');
                     }).then(function () {
                         showMessage(user.socket, nick + ' is already banned', 'error');
@@ -488,7 +488,7 @@ function createChannel(io, channelName) {
             handler : function (user, params) {
                 var role = parseInt(params.role, 10);
                 
-                if (role > 0 && role < 5) {
+                if (role > 1 && role < 5) {
                     dao.find(params.nick).then(function (dbuser) {
                         dao.setChannelRole(channelName, dbuser.nick, role).then(function () {
                             var index = findIndex(channel.online, 'nick', dbuser.nick);
@@ -1046,7 +1046,8 @@ function createChannel(io, channelName) {
         function joinChannel(userData, dbuser, channelData) {
             var i,
                 onlineUsers = [],
-                roleNames = ['God', 'Channel Owner', 'Admin', 'Mod', 'Basic'];
+                roleNames = ['God', 'Channel Owner', 'Admin', 'Mod', 'Basic'],
+                channelRoles;
             
             if (!userData) userData = {};
             
@@ -1094,7 +1095,18 @@ function createChannel(io, channelName) {
                 
                 if (index === -1) {
                     if (dbuser) {
-                        userData.role = dbuser.role;
+                        
+                        try {
+                            channelRoles = JSON.parse(channelData.roles);
+                        } catch (err) {
+                            channelRoles = {};
+                        }
+                        
+                        if (channelData.owner === dbuser.nick) {
+                            userData.role = 1;
+                        } else if (dbuser.role !== 0 && channelRoles[dbuser.nick]) {
+                            userData.role = channelRoles[dbuser.nick];
+                        }
                         
                         if (dbuser.hat) {
                             userData.hat = JSON.parse(dbuser.hat);
@@ -1123,15 +1135,9 @@ function createChannel(io, channelName) {
         }
         
         function checkChannelStatus (joinData, dbuser) {
-            var apiLink = 'http://check.getipintel.net/check.php?ip=' + user.remote_addr + '&contact=theorignalsandwich@gmail.com&flags=m',
-                channelRoles;
+            var apiLink = 'http://check.getipintel.net/check.php?ip=' + user.remote_addr + '&contact=theorignalsandwich@gmail.com&flags=m';
             
             dao.getChannelinfo(channelName).then(function (channelData) {
-                channelRoles = JSON.parse(channelData.roles);
-                if (dbuser && dbuser.role !== 0 && channelRoles[dbuser.nick]) {//assign channel role
-                    dbuser.role = channelRoles[dbuser.nick];
-                }
-
                 function attemptJoin () {
                     if (channelData.lock && channelData.lock.value) {
                         if (dbuser && dbuser.nick) {
