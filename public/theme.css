@@ -930,3 +930,8 @@ main {
 :read-write {
     font-family: 'Droid Sans';
 }
+
+#qoute {
+    background: #111;
+    padding: 4px;
+}

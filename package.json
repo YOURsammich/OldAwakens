@@ -7,6 +7,7 @@
     "bcrypt-nodejs": "^0.0.3",
     "compression": "^1.0.8",
     "express": "*",
+    "express-minify": "^0.2.0",
     "jquery-deferred": "^0.3.0",
     "mysql": "^2.3.2",
     "request": "^2.39.0",
