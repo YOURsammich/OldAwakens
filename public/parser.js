@@ -47,7 +47,7 @@ var parser = {
         if (testfonts.indexOf(font.toLowerCase()) > -1) {
             return fonts[testfonts.indexOf(font.toLowerCase())];
         } else {
-            return "Droid Sans";
+            return font;
         }
     
     },
