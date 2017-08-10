@@ -6,6 +6,7 @@ var $ = require('jquery-deferred');
 var express = require('express');
 var fs = require('fs');
 var minify = require('express-minify');
+var url = require("url");
 
 var channels = {};
 var tokens = {};
@@ -1268,6 +1269,22 @@ function intoapp(app, http) {
     var io = require('socket.io')(http);
     //app.use(minify());
     app.use(express.static(__dirname + '/public'));
+    app.get("/img/*", function (req, res) {
+        if (req.query.url) {
+            var uri = url.parse(req.query.url);
+            if (uri.protocol) {
+                request.get(uri.href).on('error', function(err) {
+                    console.log(err);
+                    res.send("Error: Cannot load");
+                    return;
+                }).pipe(res);
+            } else {
+                res.send("Error: Invalid URL"); 
+            }
+        } else {
+            res.send("Error: No URL");
+        }
+    });
     app.get(channelRegex, function (req, res) {
         if (!channels[req.url]) {
             channels[req.url] = createChannel(io, req.url);

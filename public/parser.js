@@ -208,7 +208,15 @@ var parser = {
         str = this.color(str);
 
         //replace fonts
-        str = this.multiple(str, this.fontRegex, '<span style="font-family:\'$3\'">$4</span>');
+        str = this.multiple(str, this.fontRegex, function(match, p1, p2, p3, p4, p5, p6){
+            if (typeof p5 === "undefined") {
+                parser.addFont(p3);
+                return '<span style="font-family:\''+p3+'\'">'+p6+'</span>';
+            } else {
+                parser.addFont(p3+":"+p5);
+                return '<span style="font-family:\''+p3+'\';font-weight: '+p5+'">'+p6+'</span>';
+            }
+        });
         str = this.multiple(str, this.customFontRegex, '<span style="font-family:\'$3\'">$4</span>');
         //replace user escaping
         for (var i in escs)
@@ -259,7 +267,7 @@ var parser = {
 
         var img = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:agif|apng|gif|jpg|jpeg|png|bmp|svg))<\/a>/gi.exec(str);
         if (img && Attributes.get('toggle-images')) {
-            str = this.multiple(str, img[0], img[1] + '<img src="' + img[2] + '" onload="messageBuilder.scrollToBottom(\'messages\', this);"/></a>', 3);
+            str = this.multiple(str, img[0], img[1] + '<img src="/img/?url=' + encodeURIComponent(img[2]) + '" onload="messageBuilder.scrollToBottom(\'messages\', this);"/></a>', 3);
         }
         var gifv = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:gifv))<\/a>/gi.exec(str);
         if (gifv && Attributes.get('toggle-images')) {
