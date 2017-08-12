@@ -269,23 +269,22 @@ var menuControl = {
         }
     },
     initMissedMessages : function (socket) {
-        var blurred = false,
-            unread = 0;
+        var unread = 0;
         
         socket.on('message', function () {
-            if (blurred && ++unread) {
+            if (window.blurred && ++unread) {
                 document.title = '(' + unread + ') ' + (Attributes.get('topic').value || 'Awakens - The chat that never sleeps');
             }
         });
 
         window.addEventListener('focus', function () {
             unread = 0;
-            blurred = false;
+            window.blurred = false;
             document.title = Attributes.get('topic').value || 'Awakens - The chat that never sleeps';
         });
         
         window.addEventListener('blur', function () {
-            blurred = true;
+            window.blurred = true;
         });
     },
     typing : function (id, typing) {

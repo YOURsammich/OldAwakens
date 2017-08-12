@@ -246,10 +246,14 @@ var messageBuilder = {
         if (typeof parent === 'string') {
             parent = document.getElementById(parent);
         }
-
+        
         var scrollDelta = parent.scrollHeight - parent.clientHeight;
         if (scrollDelta - parent.scrollTop <= el.clientHeight + 15) {
-            scrollTo(parent, scrollDelta, 200);
+            if (window.blurred) {
+                parent.scrollTop = scrollDelta;
+            } else {
+                scrollTo(parent, scrollDelta, 200);
+            }
         }
     }
 };
@@ -472,6 +476,7 @@ function channelTheme(channelData) {
     
     if (channelData.msg && channelData.msg.value) {
         document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value);
+        Attributes.set('msg', channelData.msg);
     }
     
     if (channelData.lock && (typeof Attributes.get('lock') !== 'object' || Attributes.get('lock').value !== channelData.lock.value)) {

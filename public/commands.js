@@ -465,7 +465,7 @@ var COMMANDS = {
         params : ['nick|reason']
     },
     banip : {
-        params : ['nick|reason']  
+        params : ['ip|reason']  
     },
     unban : {
         params : ['nick']  
