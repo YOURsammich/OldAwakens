@@ -248,7 +248,7 @@ var messageBuilder = {
         }
         
         var scrollDelta = parent.scrollHeight - parent.clientHeight;
-        if (scrollDelta - parent.scrollTop <= el.clientHeight + 15) {
+        if (scrollDelta - parent.scrollTop <= el.clientHeight + 50) {
             if (window.blurred) {
                 parent.scrollTop = scrollDelta;
             } else {
