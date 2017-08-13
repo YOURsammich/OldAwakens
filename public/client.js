@@ -213,14 +213,18 @@ var messageBuilder = {
         
         el.appendChild(message);
         
-        this.scrollToBottom(el, message);
+        this.scrollToBottom(el);
     },
+    autoScrolling : false,
+    scrolledOff : false,
     scrollToBottom : function (parent, el) {
         function scrollTo(element, to, duration) {
             var start = element.scrollTop,
                 change = to - start,
                 increment = 20;
-
+            
+            messageBuilder.autoScrolling = true;
+            
             var animateScroll = function (elapsedTime) {
                 elapsedTime += increment;
                 var position = easeInOut(elapsedTime, start, change, duration);
@@ -229,6 +233,8 @@ var messageBuilder = {
                     setTimeout(function () {
                         animateScroll(elapsedTime);
                     }, increment);
+                } else {
+                    messageBuilder.autoScrolling = false;
                 }
             };
             animateScroll(0);
@@ -247,8 +253,8 @@ var messageBuilder = {
             parent = document.getElementById(parent);
         }
         
-        var scrollDelta = parent.scrollHeight - parent.clientHeight;
-        if (scrollDelta - parent.scrollTop <= el.clientHeight + 50) {
+        var scrollDelta = parent.scrollHeight - parent.offsetHeight;
+        if (!this.scrolledOff) {
             if (window.blurred) {
                 parent.scrollTop = scrollDelta;
             } else {
@@ -855,6 +861,15 @@ var AutoComplete = {
     emojione.imageType = 'svg';
     emojione.sprites = true;
     emojione.imagePathSVGSprites = 'images/emojione.sprites.svg';
+    
+    document.getElementById('messages').addEventListener('scroll', function (e) {
+        if (this.scrollTop + this.offsetHeight == this.scrollHeight) {
+            messageBuilder.scrolledOff = false;
+        } else if (!messageBuilder.autoScrolling) {
+            messageBuilder.scrolledOff = true;
+        }
+        
+    });
 })();
 
 socket.on('message', showMessage);
