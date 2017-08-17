@@ -212,12 +212,45 @@ var messageBuilder = {
         }
         
         el.appendChild(message);
-        
-        this.scrollToBottom(el);
+        if ((el.scrollTop+el.offsetHeight) > message.offsetTop-Math.min(message.offsetHeight, 20)) {
+            this.scrollToBottom(el);
+        }
     },
     autoScrolling : false,
     scrolledOff : false,
-    scrollToBottom : function (parent, el) {
+    scrollToBottom : function(element) {
+        var SCROLL = 0;
+    
+        function easeInOutQuad(t, b, c, d) {
+    	    t /= d/2;
+        	if (t < 1) return c/2*t*t + b;
+        	t--;
+    	    return -c/2 * (t*(t-2) - 1) + b;
+        }
+    
+        function scroll(start, end, lengthMs, cb) {
+        	var time = 0;
+            SCROLL = setInterval(function() {
+    			var value = easeInOutQuad(time, start, end, lengthMs);
+        		if (time == lengthMs || value == end) {
+    	    		clearInterval(SCROLL);
+                }
+                cb(value, time);
+                time++;
+            }, 1);
+        }
+        
+        if (window.blurred) {
+            element.scrollTop = element.scrollHeight-element.offsetHeight;
+        } else {
+            var scrollStart = element.scrollTop;
+            var scrollEnd = element.scrollHeight-element.offsetHeight;
+            scroll(scrollStart, scrollEnd, 100, function(value, time) {
+                element.scrollTop = value;
+            });
+        }
+    }
+    /*scrollToBottom : function (parent, el) {
         function scrollTo(element, to, duration) {
             var start = element.scrollTop,
                 change = to - start,
@@ -261,7 +294,7 @@ var messageBuilder = {
                 scrollTo(parent, scrollDelta, 200);
             }
         }
-    }
+    }*/
 };
 
 function showMessage(messageData, panel) {
