@@ -4,6 +4,8 @@
     youtube replace thing
 */
 
+
+
 var socket = io.connect(window.location.pathname);
 
 var ONLINE = {
@@ -468,18 +470,7 @@ var clientSubmit = {
 };
 
 function channelTheme(channelData) {
-    var keys = Object.keys(channelData),
-        i;
-    
-    for (i = 0; i < keys.length; i++) {
-        try {
-            channelData[keys[i]] = JSON.parse(channelData[keys[i]])
-        } catch (err) {
-            //
-        }
-    }
-    
-    
+
     if (channelData.note && channelData.note.value && channelData.note.value != Attributes.get('note').value) {
         showMessage({
             message : channelData.note.value,

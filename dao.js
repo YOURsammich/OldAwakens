@@ -133,9 +133,9 @@ module.exports = {
             if (rows && rows.length) {
                 for (i = 0; i < rows.length; i++) {
                     try { 
-                        returnObj[rows[i].attribute] = rows[i].value;
+                        returnObj[rows[i].attribute] = JSON.parse(rows[i].value);
                     } catch (err) {
-                        //
+                        returnObj[rows[i].attribute] = rows[i].value;
                     }
                 }
             }
@@ -182,7 +182,7 @@ module.exports = {
         return defer;
     },
     setChannelRole : function (channelName, nick, role) {
-        var defer = $.Deferred();
+        var defer = $.Deferred(); 
         this.getChannelAtt(channelName, 'roles').then(function (roles) {
             if (!roles) {
                 roles = {};
