@@ -6,7 +6,6 @@ var $ = require('jquery-deferred');
 var express = require('express');
 var fs = require('fs');
 var minify = require('express-minify');
-var url = require("url");
 
 var channels = {};
 var tokens = {};
@@ -115,8 +114,7 @@ function createChannel(io, channelName) {
         login : {
             params : ['nick', 'password'],
             handler : function (user, params) {
-                var userRole,
-                    channelRoles;
+                var userRole;
                 dao.login(params.nick, params.password).then(function (correctPassword, dbuser) {
                     if (correctPassword) {
                         if (params.nick !== user.nick) {
@@ -127,17 +125,11 @@ function createChannel(io, channelName) {
                             
                             dao.find(params.nick).then(function (dbuser) {
                                 dao.getChannelinfo(channelName).then(function (channelData) {//check for channel roles
-                                    try { 
-                                        channelRoles = JSON.parse(channelData.roles);
-                                    } catch (err) {
-                                        channelRoles = {};
-                                    }
-                                    
                                     if (dbuser.role === 0) {// check if god role
                                         userRole = 0;
-                                    } else if (channelRoles && channelRoles[dbuser.nick]) {
-                                        if (channelRoles[dbuser.nick] !== 0) {
-                                            userRole = channelRoles[dbuser.nick];
+                                    } else if (channelData.roles && channelData.roles[dbuser.nick]) {
+                                        if (channelData.roles[dbuser.nick] !== 0) {
+                                            userRole = channelData.roles[dbuser.nick];
                                         } else {
                                             userRole = 4;
                                         }
@@ -346,6 +338,8 @@ function createChannel(io, channelName) {
             handler : function (user, params) {
                 var index = findIndex(channel.online, 'remote_addr', params.ip),
                     message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
+                
+                console.log(params);
                 
                 if (index !== -1) {
                     showMessage(channel.online[index].socket, message, 'error');
@@ -838,7 +832,7 @@ function createChannel(io, channelName) {
                     throttle.warn(user.remote_addr + '-message');
                 }
             }).fail(function () {
-                dao.ban(channelName, user.remote_addr, 'Throttle', 'Message spamming');
+                dao.ban(channelName, user.remote_addr, null, 'Throttle', 'Message spamming');
                 showMessage(user.socket, 'You have been banned for spamming.', 'error');
                 socket.disconnect();
             });
@@ -869,7 +863,7 @@ function createChannel(io, channelName) {
                     throttle.warn(user.remote_addr + '-message');
                 }
             }).fail(function () {
-                dao.ban(channelName, user.remote_addr, 'Throttle', 'Message spamming');
+                dao.ban(channelName, user.remote_addr, null,'Throttle', 'Message spamming');
                 showMessage(user.socket, 'You have been banned for spamming.', 'error');
                 socket.disconnect();
             });
@@ -969,7 +963,7 @@ function createChannel(io, channelName) {
                     throttle.warn(user.remote_addr);
                 }
             }).fail(function () {
-                dao.ban(channelName, user.remote_addr, 'Throttle', 'Command spamming');
+                dao.ban(channelName, user.remote_addr, null, 'Throttle', 'Command spamming');
                 showMessage(user.socket, 'You have been banned for spamming.', 'error');
                 socket.disconnect();
             });
@@ -1050,8 +1044,7 @@ function createChannel(io, channelName) {
         function joinChannel(userData, dbuser, channelData) {
             var i,
                 onlineUsers = [],
-                roleNames = ['God', 'Channel Owner', 'Admin', 'Mod', 'Basic'],
-                channelRoles;
+                roleNames = ['God', 'Channel Owner', 'Admin', 'Mod', 'Basic'];
             
             if (!userData) userData = {};
             
@@ -1099,17 +1092,10 @@ function createChannel(io, channelName) {
                 
                 if (index === -1) {
                     if (dbuser) {
-                        
-                        try {
-                            channelRoles = JSON.parse(channelData.roles);
-                        } catch (err) {
-                            channelRoles = {};
-                        }
-                        
                         if (channelData.owner === dbuser.nick) {
                             userData.role = 1;
-                        } else if (dbuser.role !== 0 && channelRoles[dbuser.nick]) {
-                            userData.role = channelRoles[dbuser.nick];
+                        } else if (dbuser.role !== 0 && channelData.roles[dbuser.nick]) {
+                            userData.role = channelData.roles[dbuser.nick];
                         } else {
                             userData.role = dbuser.role;
                         }
@@ -1245,7 +1231,7 @@ function createChannel(io, channelName) {
                     throttle.warn(user.remote_addr + '-join');
                 }
             }).fail(function () {
-                dao.ban(channelName, user.remote_addr, 'Throttle', 'Join spamming');
+                dao.ban(channelName, user.remote_addr, null, 'Throttle', 'Join spamming');
                 showMessage(socket, 'You have been banned for spamming.', 'error');
                 socket.disconnect();
             });

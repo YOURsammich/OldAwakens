@@ -186,15 +186,6 @@ module.exports = {
         this.getChannelAtt(channelName, 'roles').then(function (roles) {
             if (!roles) {
                 roles = {};
-            } else {
-                try { 
-                    roles = JSON.parse(roles);
-                    if (typeof roles !== 'object') {
-                        roles = {};
-                    }
-                } catch (err) {
-                    roles = {};
-                }
             }
             
             if (role === 4) {
