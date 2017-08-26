@@ -6,6 +6,7 @@ var $ = require('jquery-deferred');
 var express = require('express');
 var fs = require('fs');
 var minify = require('express-minify');
+var url = require("url");
 
 var channels = {};
 var tokens = {};
