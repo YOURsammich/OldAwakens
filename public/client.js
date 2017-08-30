@@ -221,6 +221,9 @@ var messageBuilder = {
     autoScrolling : false,
     scrolledOff : false,
     scrollToBottom : function(element) {
+        if (typeof element == "string") {
+            element = document.getElementById(element);
+        }
         var SCROLL = 0;
     
         function easeInOutQuad(t, b, c, d) {

@@ -283,7 +283,7 @@ var parser = {
         var gifv = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:gifv))<\/a>/gi.exec(str);
         if (gifv && Attributes.get('toggle-images')) {
             var mp4 = gifv[2].slice(0,-4);
-            str = this.multiple(str, gifv[0], gifv[1] + `<video id="gifv" oncanplay="messageBuilder.scrollToBottom('messages');" preload="auto" autoplay="autoplay" loop="loop" style="max-width: 256px; max-height: 256px;"> <source src="${mp4}mp4" type="video/mp4"></source> </video>`, 3);
+            str = this.multiple(str, gifv[0], gifv[1] + `<video id="gifv" oncanplay="messageBuilder.scrollToBottom('messages');" preload="auto" autoplay="autoplay" loop="loop" muted="true" style="max-width: 256px; max-height: 256px;"> <source src="${mp4}mp4" type="video/mp4"></source> </video>`, 3);
         }
 
         //replace normalied text
