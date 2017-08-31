@@ -237,7 +237,7 @@ var COMMANDS = {
     toggle : {
         params : ['attr'],
         handler : function (params) {
-            var validAtts = ['background', 'images', '12h', 'filters', 'cursors'],
+            var validAtts = ['background', 'images', '12h', 'filters', 'cursors', 'msg'],
                 attValue = Attributes.get('toggle-' + params.attr);
             
             if (validAtts.indexOf(params.attr) !== -1) {
@@ -253,6 +253,14 @@ var COMMANDS = {
                         document.getElementById('messages-background').style.background = Attributes.get('background').value;
                     } else {
                         document.getElementById('messages-background').style.background = 'black';
+                    }   
+                }
+                
+                if (params.attr === 'msg') {
+                    if (!attValue) {
+                        document.getElementById('center-text').style.display = 'table-cell';
+                    } else {
+                        document.getElementById('center-text').style.display = 'none';
                     }   
                 }
             } else {

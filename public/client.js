@@ -24,7 +24,7 @@ var ONLINE = {
 var Attributes = {
     notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
     altAtt : {colour : 'color', bg : 'background'},
-    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute', 'lock', 'proxy', 'part'],
+    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute', 'lock', 'proxy', 'part', 'msg'],
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
@@ -224,6 +224,7 @@ var messageBuilder = {
         if (typeof element == "string") {
             element = document.getElementById(element);
         }
+        
         var SCROLL = 0;
     
         function easeInOutQuad(t, b, c, d) {
@@ -508,6 +509,9 @@ function channelTheme(channelData) {
     }
     
     if (channelData.msg && channelData.msg.value) {
+        if (!Attributes.get('toggle-msg')) {
+            document.getElementById('center-text').style.display = 'none';
+        }
         document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value);
         Attributes.set('msg', channelData.msg);
     }
