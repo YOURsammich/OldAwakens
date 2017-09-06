@@ -90,7 +90,7 @@ var parser = {
             });
         }
     },
-    escape : function (str) {
+    escape : function (str, noFormat) {
         // Convert chars to html codes
         str = str.replace(/\n/g, '\\n');
         str = str.replace(/&/gi, '&amp;');
@@ -106,7 +106,9 @@ var parser = {
         //convert spaces
         str = str.replace(/\s{2}/gi, ' &nbsp;');
         
-        str = str.replace(/(<br>)(.+)/g, '<div style="display:block;padding-left:3.5em;">$2</div>');
+        if (!noFormat) {
+            str = str.replace(/(<br>)(.+)/g, '<div style="display:block;padding-left:3.5em;">$2</div>');
+        }
         return str;
     },
     wordReplace : function (str) {
@@ -178,9 +180,9 @@ var parser = {
         str = this.multiple(str, RegExp('&#35;(' + this.coloreg + ')(.+)$', 'i'), '<span style="color: $1;">$2</span>');
         return str;
     },
-    parse : function (str, wordReplace) {
+    parse : function (str, wordReplace, noFormat) {
         // Convert chars to html codes
-        str = this.escape(str);
+        str = this.escape(str, noFormat);
 
         //match user escaping
         var escs = str.match(/\\./g);
@@ -282,8 +284,8 @@ var parser = {
         }
         var gifv = /(<a target="_blank" href="[^"]+?">)([^<]+?\.(?:gifv))<\/a>/gi.exec(str);
         if (gifv && Attributes.get('toggle-images')) {
-            var mp4 = gifv[2].slice(0,-4);
-            str = this.multiple(str, gifv[0], gifv[1] + `<video id="gifv" oncanplay="messageBuilder.scrollToBottom('messages');" preload="auto" autoplay="autoplay" loop="loop" muted="true" style="max-width: 256px; max-height: 256px;"> <source src="${mp4}mp4" type="video/mp4"></source> </video>`, 3);
+            var mp4 = gifv[2].slice(0, -4);
+            str = this.multiple(str, gifv[0], gifv[1] + '<video id="gifv" oncanplay="messageBuilder.scrollToBottom("messages");" preload="auto" autoplay="autoplay" loop="loop" muted="true" style="max-width: 256px; max-height: 256px;"> <source src="' + mp4 + 'mp4" type="video/mp4"></source> </video>', 3);
         }
 
         //replace normalied text

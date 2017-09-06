@@ -178,16 +178,6 @@ var COMMANDS = {
             });
         }  
     },
-    code : {
-        params : ['code'],
-        handler : function (params) {
-            socket.emit('requestJoin', {
-                captcha : params.code,
-                nick : Attributes.get('nick'),
-                token : Attributes.get('token')
-            });
-        }  
-    },
     echo : {
         params : ['message'],
         handler : function (params) {
@@ -209,12 +199,12 @@ var COMMANDS = {
     },
     mute : {
         handler : function () {
-            Attributes.set('mute', 'true', true);
+            Attributes.set('mute', true, true);
         }
     },
     unmute : {
         handler : function () {
-            Attributes.set('mute', 'false', true);
+            Attributes.set('mute', false, true);
         }
     },
     clear : {
@@ -242,27 +232,6 @@ var COMMANDS = {
             
             if (validAtts.indexOf(params.attr) !== -1) {
                 Attributes.set('toggle-' + params.attr, !attValue, true);
-                
-                if (params.attr === 'cursors' && attValue) {
-                    COMMANDS.clearcursors.handler();
-                    socket.emit('removeCursor');
-                }
-                
-                if (params.attr === 'background') {
-                    if (!attValue) {
-                        document.getElementById('messages-background').style.background = Attributes.get('background').value;
-                    } else {
-                        document.getElementById('messages-background').style.background = 'black';
-                    }   
-                }
-                
-                if (params.attr === 'msg') {
-                    if (!attValue) {
-                        document.getElementById('center-text').style.display = 'table-cell';
-                    } else {
-                        document.getElementById('center-text').style.display = 'none';
-                    }   
-                }
             } else {
                 showMessage({
                     message : 'Not a toggleable attribute'
@@ -270,19 +239,21 @@ var COMMANDS = {
             }
         }
     },
-    captchaon : {
+    safe : {
         handler : function () {
-            socket.emit('channelStatus', {
-                captcha : true
-            });
+            Attributes.set('mute', true);
+            Attributes.set('toggle-images', false);
+            Attributes.set('toggle-background', false);
+            Attributes.set('toggle-msg', false);
         }
     },
-    captchaoff : {
+    unsafe : {
         handler : function () {
-            socket.emit('channelStatus', {
-                captcha : false
-            });
-        }
+            Attributes.set('mute', false);
+            Attributes.set('toggle-images', true);
+            Attributes.set('toggle-background', true);
+            Attributes.set('toggle-msg', true);
+        }  
     },
     topic : {
         params : ['topic'],

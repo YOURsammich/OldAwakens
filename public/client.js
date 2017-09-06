@@ -36,11 +36,28 @@ var Attributes = {
                 message : clientSubmit.message.decorateText('Now your messages look like this'),
                 messageType : 'chat'
             });
-        } else if (notify && oldValue !== newValue && attribute !== 'token' && newValue) {
+        } else if (notify && oldValue !== newValue && attribute !== 'token' && newValue !== undefined) {
             showMessage({
                 message : attribute + ' is now set to ' + newValue,
                 messageType : 'info'
             });
+        }
+        
+        if (attribute === 'toggle-cursors') {
+            COMMANDS.clearcursors.handler();
+            socket.emit('removeCursor');
+        } else if (attribute === 'toggle-background') {
+            if (newValue) {
+                document.getElementById('messages-background').style.background = Attributes.get('background').value;
+            } else {
+                document.getElementById('messages-background').style.background = 'black';
+            } 
+        } else if (attribute === 'toggle-msg') {
+            if (newValue) {
+                document.getElementById('center-text').style.display = 'table-cell';
+            } else {
+                document.getElementById('center-text').style.display = 'none';
+            } 
         }
         
         if (this.saveLocal.indexOf(attribute) !== -1 || attribute.slice(0, 6) === 'toggle') {
@@ -512,7 +529,7 @@ function channelTheme(channelData) {
         if (!Attributes.get('toggle-msg')) {
             document.getElementById('center-text').style.display = 'none';
         }
-        document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value);
+        document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value, true, true);
         Attributes.set('msg', channelData.msg);
     }
     
@@ -920,11 +937,6 @@ socket.on('idleStatus', menuControl.idleStatus);
 socket.on('afk', menuControl.afk);
 
 socket.on('left', menuControl.removeUser);
-
-socket.on('captcha', function (captcha) {
-    var messageHTML = messageBuilder.createMessage(captcha, 'captcha');
-    messageBuilder.appendMessageTo(messageHTML);
-});
 
 socket.on('channeldata', function (channel) {
     var i;

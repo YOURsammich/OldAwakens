@@ -343,6 +343,14 @@ main {
     outline: none;
 }
 
+/*#channelSettings {
+    display: none;
+}
+
+#channelClaim {
+    height: 100%;
+}*/
+
 .userList {
     margin-top: 20px;
     min-width: 300px;
