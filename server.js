@@ -169,7 +169,6 @@ function createChannel(io, channelName) {
                 if (params.nick.length < 50 && /^[\x21-\x7E]*$/i.test(params.nick)) {
                     if (params.password.length > 4) {
                         dao.findip(user.remote_addr).then(function (accounts) {
-                            console.log('test', accounts);
                             if (accounts.length < 5) {
                                 dao.register(params.nick, params.password, user.remote_addr).then(function () {
                                     showMessage(user.socket, 'account registered', 'info');
@@ -1007,6 +1006,8 @@ function createChannel(io, channelName) {
                 errorMessage,
                 formatSettings = {};
             
+            console.log(settings);
+            
             if (typeof settings === 'object') {
                 for (var i = 0; i < keys.length; i++) {
                     if (validSettings[keys[i]]) {
@@ -1034,7 +1035,7 @@ function createChannel(io, channelName) {
                 if (valid) {
                     dao.setChannelinfo(channelName, formatSettings).then(function () {
                         roomEmit('channeldata', {
-                            data : formatSettings
+                            settings : formatSettings
                         });
                     }).fail(handleException);     
                 } else {
