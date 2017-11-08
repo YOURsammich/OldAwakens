@@ -233,7 +233,11 @@ module.exports = {
         
         db.query(sql, [channelName, nick, ip], function (err, rows, fields) {
             if (!err) {
-                defer.resolve(rows.length ? rows[0] : false).promise();
+                if (rows.length) {
+                    defer.reject(rows[0]);
+                } else {
+                    defer.resolve().promise();
+                }
             }
         });
         
