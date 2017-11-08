@@ -22,12 +22,12 @@ module.exports = {
          
         if (++t.count > max) {
             if(THROTTLES[id].warn >= 3){
-                done.reject();
+                done.reject(true);
             } else {
-                done.resolve(false).promise();
+                done.reject(false);
             }
         } else {
-            done.resolve(true).promise();
+            done.resolve().promise();
         }
         return done.promise();
     }, warn : function(id){

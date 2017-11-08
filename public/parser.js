@@ -156,6 +156,7 @@ var parser = {
     },
     stylize : function(str) {
         // Replace styles
+        str = this.multiple(str, /\/\%%([^\|]+)\|?/g, '<span class="style wave">$1</span>', this.matches);
         str = this.multiple(str, /\/\%%([^\%%]+)\%%/g, '<div>$1</div>', this.matches);
         str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', this.matches);
         str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', this.matches);

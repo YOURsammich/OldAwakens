@@ -49,7 +49,6 @@ main {
 }
 
 #messages-background { 
-    display: table;
     position: absolute;
     width: 100%;
     height: 100%;
@@ -57,16 +56,15 @@ main {
 }
 
 #center-text {
-    display: table-cell;
-    text-align: center;
-    vertical-align: middle;
+    position: absolute;
     color: white;
     font-size: 4em;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #messages {
-    transition: width 1s;
-    max-width: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
     height: 100%;
@@ -194,12 +192,60 @@ main {
     text-align: center;
     background-color: rgb(17, 17, 17);
     color: white;
-    box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset, rgba(255, 255, 255, 0.2) 0px -1px 0px 0px;
-    transition: width 1s;
-    border-left: 4px solid #333;
-    overflow: hidden;
+    box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px inset, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px, rgba(255, 255, 255, 0.2) 0px -1px 0px 0px inset;
+    transition: width .5s;
+    border-left: 2px solid #222;
     display: none;
-    overflow-y: scroll;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+#menu-container ul {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+#main-container ul li {
+    padding: 10px 0px 10px 0px;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    text-align: left;
+    text-indent: 20px;
+}
+
+#main-container ul li:hover .menuTab {
+    display: block;
+}
+
+#menu-container .menuTab {
+    display: none;
+    overflow: hidden;
+    background-color: #111;
+    max-height: 500px;
+}
+
+#menu-container #moreOptions {
+    font-size: x-small;
+    display: inline;
+    cursor: pointer;
+    padding: 5px;
+}
+
+#menu-container #moreOptions:hover {
+    background-color: #fff;
+    color: black;
+}
+
+#menu-container ul li span {
+    float: right;
+    margin-right: 10px;
+    margin-top: 5px;
+    font-size: x-small;
+}
+
+#menu-container ul li:hover {
+   
 }
 
 #menu-container select {
@@ -244,11 +290,16 @@ main {
     font-size: 1em;
 }
 
-.userPanel {
-    margin-top: 20px;
+#menu-container #myHats img {
+    max-height: 50px;
+    max-width: 50px;
+    margin: 5px;
+    display: inline-block;
+}
+
+.mySettings {
     width: 300px;
     display: none;
-    padding: 0px 20px 0px 20px;
 }
 
 .textDecoration .bar {
@@ -283,7 +334,7 @@ main {
     background-image: url("https://www.transparenttextures.com/patterns/az-subtle.png");
 }
 
-.channelPanel {
+.channelSettings {
     display: none;
     padding: 0px 20px 0px 20px;
     font-family: Montserrat;
@@ -292,13 +343,13 @@ main {
     max-width: 300px;
 }
 
-.channelPanel ul { 
+.channelSettings ul { 
     list-style-type: none;
     padding: 0px;
     margin: 0px;
 }
 
-.channelPanel ul li { 
+.channelSettings ul li { 
     padding-bottom: 15px;
 }
 
@@ -314,7 +365,7 @@ main {
     width: 50%;
 }
 
-.channelPanel ul li input, .channelPanel ul li textarea {
+.channelSettings ul li input, .channelSettings ul li textarea {
     width: 100%;
     background-color: #2f2f2f;
     border: 1px solid #0c0d0e;
@@ -325,13 +376,13 @@ main {
     color: #dbdbdb;
 }
 
-.channelPanel ul li div {
+.channelSettings ul li div {
     font-weight: normal;
     text-align: left;
     font-size: 1em;
 }
 
-.channelPanel button {
+.channelSettings button {
     width: 45%;
     background-color: #dbdbdb;
     border-radius: 3px;
@@ -403,38 +454,49 @@ main {
 }
 
 #menu-tabs {
-    width: 100%;
     padding: 0px;
     padding-top: 15px;
     padding-bottom: 15px;
     background-color: rgb(34, 34, 34);
     box-shadow: rgba(0, 0, 0, 0.8) 5px 0px 7px 0px;
-    white-space: nowrap;
     margin: 0px;
+    width: 300px;
 }
 
-#menu-tabs li {
-    box-sizing: border-box;
+#menu-tabs div {
     display: inline-block;
-    font: 13.3333px Arial;
-    background-color: rgb(51, 51, 51);
+    font-size: 25px;
     color: white;
     cursor: pointer;
-    padding: 10px;
-    outline: none;
-    border: 1px solid rgb(17, 17, 17);
-    width: 130px;
+    padding: 5px 10px 5px 10px;
+    font-family: Material Icons;
 }
 
-#menu-tabs .listIcon {
-    position: relative;
-    vertical-align: middle;
-    width: 40px;
-    height: 40px;
-    border-radius: 100%;
-    margin: -15px;
-    z-index: 5;
-    padding: 11px 0px;
+#menu-tabs div .label {
+    font-family: Droid Sans;
+    font-size: small;
+    display: block;
+    padding: 0px;
+    color: rgb(34, 34, 34);
+}
+
+#menu-tabs div:hover {
+    background-color: #fff;
+    color: black;
+}
+
+#more-tabs {
+    width: 150px;
+    background-color: white;
+    color: black;
+    border-radius: 5px 0px 0px 5px;
+    font-size: small;
+    position: absolute;
+    right: 0px;
+}
+
+#more-tabs span {
+    color: black;
 }
 
 .toggle-menu {
@@ -649,6 +711,11 @@ main {
   animation-iteration-count: 20;
 }
 
+.wave {
+    animation-name: wave;
+    animation-duration: 1s;
+}
+
 .italic {
     transform: skewX(-15deg);
 }
@@ -666,6 +733,15 @@ main {
 
 .nlink {
     text-decoration: none;
+}
+
+@keyframes wave {
+    0% {
+        transform: translate(-110px) skewX(30deg);;
+    }
+    100% {
+        transform: translate(0px);
+    }
 }
 
 @keyframes spin {

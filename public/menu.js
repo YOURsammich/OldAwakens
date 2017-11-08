@@ -118,7 +118,7 @@ var menuControl = {
     updateCount : function () {
         var length = Object.keys(ONLINE.users).length;
         $$$.query('.toggle-menu span').textContent = length;
-        document.getElementById('userList').textContent = length;
+        //$$$.query('#userList').textContent = 'User list (' + length + ')';
     },
     updateValues : function () {
         var allBars = document.getElementsByClassName('bar'),
@@ -247,7 +247,7 @@ var menuControl = {
         socket.emit('channelStatus', settings);
     },
     setChannelPanel : function (channelSettings) {
-        var menuContainer = document.getElementsByClassName('channelPanel')[0],
+        var menuContainer = document.getElementsByClassName('channelSettings')[0],
             lis = menuContainer.getElementsByTagName('li'),
             inputs;
 
@@ -332,8 +332,8 @@ var menuControl = {
             tabs = this.children,
             panel,
             i;
-        
-        if (target.nodeName === 'LI') {
+
+        if (target.nodeName === 'DIV') {
             for (i = 0; i < tabs.length; i++) {
                 panel = document.getElementsByClassName(tabs[i].id)[0];
                 
@@ -366,7 +366,7 @@ var menuControl = {
             clearTimeout(timeOut);
             timeOut = setTimeout(function () {
                 menuContainer.style.display = 'none';
-            }, 1000);
+            }, 500);
         } else {
             menuContainer.style.width = '0px';
             menuContainer.style.display = 'block';

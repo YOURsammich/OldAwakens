@@ -5,6 +5,36 @@
 */
 
 
+/*
+
+userList
+direct messages
+user info
+    hats
+    cursors
+    text/style
+        font
+        color
+        glow
+        backgroundColor
+        text mods
+activeChannels
+channelPanel
+    theme
+        background
+        topic
+        note
+    settings
+        proxy
+        private
+    
+    
+    
+    
+
+
+*/
+
 
 var socket = io.connect(window.location.pathname);
 
@@ -241,7 +271,7 @@ var messageBuilder = {
         if (typeof element == "string") {
             element = document.getElementById(element);
         }
-        
+
         var SCROLL = 0;
     
         function easeInOutQuad(t, b, c, d) {
@@ -490,85 +520,98 @@ var clientSubmit = {
     }
 };
 
-function channelTheme(channelData) {
-
-    if (channelData.note && channelData.note.value && channelData.note.value != Attributes.get('note').value) {
-        showMessage({
-            message : channelData.note.value,
-            messageType : 'note'
-        });
-        Attributes.set('note', channelData.note);
-    }
-
-    if (channelData.topic && channelData.topic.value && channelData.topic.value != Attributes.get('topic').value) {
-        document.title = channelData.topic.value;
-        showMessage({
-            message : 'Topic: ' + channelData.topic.value,
-            messageType : 'general'
-        });
-        Attributes.set('topic', channelData.topic);
-    }
-
-    if (channelData.background && channelData.background.value) {
-        if (Attributes.get('toggle-background')) {
-            document.getElementById('messages-background').style.background = channelData.background.value;
+var channelSet = {
+    hats : function (hats) {
+        var hatNames = hats,
+            i,
+            hatPanel = document.getElementById('myHats');
+            
+        for (i = 0; i < hatNames.length; i++) {
+            var hatImg = new Image();
+            hatImg.src = '/hats/' + hatNames[i];
+            hatPanel.appendChild(hatImg);
         }
-        Attributes.set('background', channelData.background);
-    }
-
-    if (channelData.themecolors && channelData.themecolors.value) {
-        document.getElementById('input-bar').style.backgroundColor = channelData.themecolors.value[0];
-        document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors.value[1];
-        if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
-            document.styleSheets[0].deleteRule(4);
-            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
-        }
-    }
-    
-    if (channelData.msg && channelData.msg.value) {
-        if (!Attributes.get('toggle-msg')) {
-            document.getElementById('center-text').style.display = 'none';
-        }
-        document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value, true, true);
-        Attributes.set('msg', channelData.msg);
-    }
-    
-    if (channelData.lock && (typeof Attributes.get('lock') !== 'object' || Attributes.get('lock').value !== channelData.lock.value)) {
-        var message;
-        if (channelData.lock.value) {
-            message = ' locked this channel';
-        } else {
-            message = ' unlocked this channel';
-        }
-        showMessage({
-            message : channelData.lock.updatedBy + message,
-            messageType : 'general'
-        });
         
-        Attributes.set('lock', channelData.lock);
-    }
-    
-    if (channelData.proxy && (typeof Attributes.get('proxy') !== 'object' || Attributes.get('proxy').value !== channelData.proxy.value)) {
-        var message;
-        if (channelData.proxy.value) {
-            message = ' blocked proxies';
-        } else {
-            message = ' unblocked proxies';
+        
+    },
+    settings : function (channelData) {
+        if (channelData.note && channelData.note.value && channelData.note.value != Attributes.get('note').value) {
+            showMessage({
+                message : channelData.note.value,
+                messageType : 'note'
+            });
+            Attributes.set('note', channelData.note);
         }
-        showMessage({
-            message : channelData.proxy.updatedBy + message,
-            messageType : 'general'
-        });
+
+        if (channelData.topic && channelData.topic.value && channelData.topic.value != Attributes.get('topic').value) {
+            document.title = channelData.topic.value;
+            showMessage({
+                message : 'Topic: ' + channelData.topic.value,
+                messageType : 'general'
+            });
+            Attributes.set('topic', channelData.topic);
+        }
+
+        if (channelData.background && channelData.background.value) {
+            if (Attributes.get('toggle-background')) {
+                document.getElementById('messages-background').style.background = channelData.background.value;
+            }
+            Attributes.set('background', channelData.background);
+        }
+
+        if (channelData.themecolors && channelData.themecolors.value) {
+            document.getElementById('input-bar').style.backgroundColor = channelData.themecolors.value[0];
+            document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors.value[1];
+            if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
+                document.styleSheets[0].deleteRule(4);
+                document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
+            }
+        }
         
-        Attributes.set('proxy', channelData.proxy);
+        if (channelData.msg && channelData.msg.value) {
+            if (!Attributes.get('toggle-msg')) {
+                document.getElementById('center-text').style.display = 'none';
+            }
+            document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value, true, true);
+            Attributes.set('msg', channelData.msg);
+        }
+        
+        if (channelData.lock && (typeof Attributes.get('lock') !== 'object' || Attributes.get('lock').value !== channelData.lock.value)) {
+            var message;
+            if (channelData.lock.value) {
+                message = ' locked this channel';
+            } else {
+                message = ' unlocked this channel';
+            }
+            showMessage({
+                message : channelData.lock.updatedBy + message,
+                messageType : 'general'
+            });
+            
+            Attributes.set('lock', channelData.lock);
+        }
+        
+        if (channelData.proxy && (typeof Attributes.get('proxy') !== 'object' || Attributes.get('proxy').value !== channelData.proxy.value)) {
+            var message;
+            if (channelData.proxy.value) {
+                message = ' blocked proxies';
+            } else {
+                message = ' unblocked proxies';
+            }
+            showMessage({
+                message : channelData.proxy.updatedBy + message,
+                messageType : 'general'
+            });
+            
+            Attributes.set('proxy', channelData.proxy);
+        }
+            
+        if (channelData.hats) {
+            channelSet.hats(channelData.hats);
+        }
+        
+        menuControl.setChannelPanel(channelData);
     }
-        
-    /*console.log(channelData);
-    if (channelData.hats) {
-        console.log(channelData.hats);
-    }*/
-    
-    menuControl.setChannelPanel(channelData);
 }
 
 function createPanel(title, html, func) {
@@ -949,8 +992,16 @@ socket.on('channeldata', function (channel) {
         }
     }
     
-    if (channel.data) {
-        channelTheme(channel.data);
+    if (channel.settings) {
+        channelSet.settings(channel.settings);
+    }
+    
+    if (channel.hats) {
+       channelSet.hats(channel.hats); 
+    }
+    
+    if (channel.cursors) {
+        //channelSet.cursors(channel.cursors);
     }
 });
 
@@ -996,7 +1047,7 @@ socket.on('banlist', function (banlist) {
     document.body.appendChild(border);
 });
 
-socket.on('update', function (allAtt) {
+socket.on('update', function (allAtt) {console.log(allAtt);
     var keys = Object.keys(allAtt),
         i;
     
@@ -1004,7 +1055,9 @@ socket.on('update', function (allAtt) {
         if (keys[i] === 'hats') {
             console.log(allAtt[keys[i]]);
         } else {
-            Attributes.set(keys[i], allAtt[keys[i]], true);
+            if (allAtt[keys[i]]) {
+                Attributes.set(keys[i], allAtt[keys[i]], true);
+            }
         }
     }
 });
@@ -1027,7 +1080,7 @@ socket.on('locked', function () {
 });
 
 socket.on('disconnect', function () {
-    var userIDs = Reflect.ownKeys(ONLINE.users);
+    var userIDs = Object.keys(ONLINE.users);
     for (var i = 0; i < userIDs.length; i++) {
         var userID = userIDs[i];
         var user = ONLINE.users[userID];
