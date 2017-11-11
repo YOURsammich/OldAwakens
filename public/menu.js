@@ -101,7 +101,7 @@ var menuControl = {
     afk : function (id, message) {
         var user = ONLINE.users[id];
         if (user) {
-            user.li.getElementsByClassName('informer')[0].innerHTML = emojione.toImage(parser.escape(message.replace(/\n/g, ' ')));
+            user.li.getElementsByClassName('informer')[0].innerHTML = emojione.toImage(parser.escape(message.replace(/\n/g, ' '), true));
         }
     },
     idleStatus : function (id, status) {
@@ -333,13 +333,9 @@ var menuControl = {
             panel,
             i;
 
-        if (target.nodeName === 'DIV') {
+        if (target.nodeName === 'SPAN') {
             for (i = 0; i < tabs.length; i++) {
                 panel = document.getElementsByClassName(tabs[i].id)[0];
-                
-                if (target.id === 'channelPanel') {
-                    socket.emit('activeChannels');
-                }
                 
                 if (target.id === panel.className) {
                     panel.style.display = 'block';

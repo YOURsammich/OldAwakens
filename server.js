@@ -1053,12 +1053,7 @@ function createChannel(io, channelName) {
             
             if (!userData) userData = {};
             
-            function join(channelData, nick, role, hat, cursor, part) {
-                user.nick = nick;
-                user.role = role;
-                user.hat = hat && hat.current;
-                user.cursor = cursor;
-                user.part = part;
+            function join(channelData, user) {
                 user.token = dao.makeId();
                 tokens[user.nick] = user.token;
                 
@@ -1085,50 +1080,60 @@ function createChannel(io, channelName) {
                     nick : user.nick,
                     role : roleNames[user.role],
                     token : user.token,
-                    hats : hat,
-                    cursor : cursor,
-                    part : part
+                    hats : user.hat,
+                    cursor : user.cursor,
+                    part : user.part
                 });
                 
                 roomEmit('joined', user.id, user.nick);
-                console.log('USER JOIN', nick, user.role, user.remote_addr);
+                console.log('USER JOIN', user.nick, user.role, user.remote_addr);
             }
             
             var index = findIndex(channel.online, 'nick', userData.nick);
             
             if (index === -1) {
                 if (dbuser) {
-                    if (channelData.owner === dbuser.nick) {
-                        userData.role = 1;
-                    } else if (dbuser.role !== 0 && channelData.roles && channelData.roles[dbuser.nick]) {
-                        userData.role = channelData.roles[dbuser.nick];
+                    user.nick = dbuser.nick;
+                    
+                    if (dbuser.role === 0) {
+                        user.role = 0;
+                    } else if (channelData.owner === dbuser.nick) {
+                        user.role = 1;
+                    } else if (channelData.roles && channelData.roles[dbuser.nick]) {
+                        user.role = channelData.roles[dbuser.nick];
                     } else {
-                        userData.role = dbuser.role;
+                        user.role = 4;
                     }
                     
                     if (dbuser.hat) {
-                        userData.hat = JSON.parse(dbuser.hat);
+                        try { 
+                            user.hat = JSON.parse(dbuser.hat).current;
+                        } catch (err) {
+                            user.hat = '';
+                        }
                     }
                     
                     if (dbuser.cursor) {
-                        userData.cursor = JSON.parse(dbuser.cursor).name;
+                        try {
+                            user.cursor = JSON.parse(dbuser.cursor).name;
+                        } catch (err) {
+                            user.cursor = '';
+                        }
                     }
                     
                     if (dbuser.part) {
-                        userData.part = dbuser.part;
+                        user.part = dbuser.part;
                     }
+                } else {
+                    user.nick = userData.nick;
+                    user.role = 4;
                 }
+            } else {
+                user.nick = dao.getNick();
+                user.role = 4;
             }
             
-            if (userData.role === undefined) {
-                userData.role = 4;
-            }
-            
-            if (userData.nick === undefined) {
-                userData.nick = dao.getNick();
-            }
-            
-            join(channelData, userData.nick, userData.role, userData.hat, userData.cursor, userData.part);
+            join(channelData, user);
         }
         
         function checkChannelStatus (joinData, dbuser) {

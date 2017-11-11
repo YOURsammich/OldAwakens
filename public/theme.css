@@ -463,26 +463,28 @@ main {
     width: 300px;
 }
 
-#menu-tabs div {
+#menu-tabs span {
     display: inline-block;
     font-size: 25px;
-    color: white;
+    color: #eee;
     cursor: pointer;
     padding: 5px 10px 5px 10px;
     font-family: Material Icons;
+    border-radius: 2px;
 }
 
-#menu-tabs div .label {
-    font-family: Droid Sans;
-    font-size: small;
-    display: block;
-    padding: 0px;
-    color: rgb(34, 34, 34);
+#menu-tabs span:hover {
+    animation: fade .2s forwards;
 }
 
-#menu-tabs div:hover {
-    background-color: #fff;
-    color: black;
+@keyframes fade {
+    from {
+        background-color: #222;
+        color: #eee;
+    } to {
+        background-color: #eee;
+        color: #222;
+    }
 }
 
 #more-tabs {
