@@ -1125,7 +1125,7 @@ function createChannel(io, channelName) {
                         user.part = dbuser.part;
                     }
                 } else {
-                    user.nick = userData.nick;
+                    user.nick = userData.nick || dao.getNick();
                     user.role = 4;
                 }
             } else {
