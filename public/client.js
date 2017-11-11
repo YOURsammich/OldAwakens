@@ -252,8 +252,8 @@ var messageBuilder = {
                 }
             }
         }
-
-        return messageType === 'chat' && nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert);
+	    
+        return messageType === 'chat' && nick !== myNick && (message.match(new RegExp('\\b' + myNick + '\\b', 'g')) || quoteAlert);
     },
     appendMessageTo : function (message, el) {
         if (el === undefined) {
