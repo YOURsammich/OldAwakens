@@ -398,6 +398,22 @@ main {
     }
 }
 
+#channelSettings {
+    font-family: Montserrat;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#channelSettings button {
+    border: none;
+    background-color: #39F;
+    color: white;
+    padding: 5px;
+    width: 50%;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
 #more-tabs {
     width: 150px;
     background-color: white;

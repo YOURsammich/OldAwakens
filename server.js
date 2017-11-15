@@ -1006,8 +1006,6 @@ function createChannel(io, channelName) {
                 errorMessage,
                 formatSettings = {};
             
-            console.log(settings);
-            
             if (typeof settings === 'object') {
                 for (var i = 0; i < keys.length; i++) {
                     if (validSettings[keys[i]]) {
@@ -1042,6 +1040,21 @@ function createChannel(io, channelName) {
                     showMessage(user.socket, errorMessage, 'error');
                 }
             }
+        });
+        
+        socket.on('claimChannel', function () {
+            dao.getChannelAtt(channelName, 'owner').then(function (owner) {
+                showMessage(user.socket, 'This channel has already been claimed by: ' + owner, 'error');
+            }).fail(function () {
+                dao.find(user.nick).then(function (dbuser) {
+                    dao.setChannelAtt(channelName, 'owner', dbuser.nick).then(function () {
+                        showMessage(user.socket, 'You\'ve claimed this channel, its yours :)', 'info');
+                        updateUserData(user, {role : 1});
+                    });
+                }).fail(function () {
+                    showMessage(user.socket, 'You must have an account to claim a channel, register with /register', 'info');
+                });
+             });
         });
         
         function joinChannel(userData, dbuser, channelData) {
@@ -1206,29 +1219,30 @@ function createChannel(io, channelName) {
                 }
             }
             
-            dao.checkBan(channelName, joinData.nick, user.remoteAddress).then(function () {
-                    throttle.on(user.remote_addr + '-join', 3).then(function (notSpam) {
-                        if (totalIPs < 4) {
-                            if (findIndex(channel.online, 'id', user.id) === -1) {
-                                checkUserStatus(joinData);
-                            } else {
-                                showMessage(socket, 'Only one socket connection allowed', 'error');
-                                socket.disconnect();
-                            }
+            dao.checkBan(channelName, joinData.nick, user.remote_addr).then(function () {
+                console.log(user.remote_addr);
+                throttle.on(user.remote_addr + '-join', 3).then(function (notSpam) {
+                    if (totalIPs < 4) {
+                        if (findIndex(channel.online, 'id', user.id) === -1) {
+                            checkUserStatus(joinData);
                         } else {
-                            showMessage(socket, 'Too many connections with this IP', 'error');
+                            showMessage(socket, 'Only one socket connection allowed', 'error');
                             socket.disconnect();
                         }
-                    }).fail(function (spammer) {
-                        if (spammer) {
-                            dao.ban(channelName, user.remote_addr, null, 'Throttle', 'Join spamming');
-                            showMessage(socket, 'You have been banned for spamming.', 'error');
-                            socket.disconnect();
-                        } else {
-                            showMessage(socket, 'You are spamming, stop or you will be temporarily banned.', 'error');
-                            throttle.warn(user.remote_addr + '-join');
-                        }
-                    });
+                    } else {
+                        showMessage(socket, 'Too many connections with this IP', 'error');
+                        socket.disconnect();
+                    }
+                }).fail(function (spammer) {
+                    if (spammer) {
+                        dao.ban(channelName, user.remote_addr, null, 'Throttle', 'Join spamming');
+                        showMessage(socket, 'You have been banned for spamming.', 'error');
+                        socket.disconnect();
+                    } else {
+                        showMessage(socket, 'You are spamming, stop or you will be temporarily banned.', 'error');
+                        throttle.warn(user.remote_addr + '-join');
+                    }
+                });
             }).fail(function (banned) {
                 showMessage(socket, 'You are banned' + (banned.reason ? ': ' + banned.reason : ''), 'error');
                 socket.disconnect();

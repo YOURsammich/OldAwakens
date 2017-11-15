@@ -146,25 +146,30 @@ module.exports = {
     getChannelAtt : function (channelName, att) {
         var defer = $.Deferred();
         this.getChannelinfo(channelName).then(function (channelData) {
-            defer.resolve(channelData[att]).promise();
+            if (channelData[att]) {
+                defer.resolve(channelData[att]).promise();
+            } else {
+                defer.reject();
+            }
         });
         return defer;
+    },
+    checkChannelOwnerShip : function (nick) {
+        var defer = $.Deferred();
+        var sql = "SELECT * FROM `channel_info` WHERE "
     },
     setChannelAtt : function (channelName, att, value) {
         var defer = $.Deferred();
         var sqlUpdate = "UPDATE `channel_info` SET `value` = ? WHERE `channelName` = ? AND `attribute` = ?";
         var sqlInsert = "INSERT INTO `channel_info` (`channelName`, `attribute`, `value`) VALUES (?, ?, ?);";
-        this.getChannelAtt(channelName, att).then(function (exist) {
-            if (exist) {
-                db.query(sqlUpdate, [JSON.stringify(value), channelName, att], function (err) {
-                    defer.resolve().promise(); 
-                });
-            } else {
-                db.query(sqlInsert, [channelName, att, JSON.stringify(value)], function (err) {
-                    console.log(err);
-                    defer.resolve().promise(); 
-                });
-            }
+        this.getChannelAtt(channelName, att).then(function () {
+            db.query(sqlUpdate, [JSON.stringify(value), channelName, att], function (err) {
+                defer.resolve().promise(); 
+            });
+        }).fail(function () {
+            db.query(sqlInsert, [channelName, att, JSON.stringify(value)], function (err) {
+                defer.resolve().promise(); 
+            });
         });
         return defer;
     },
@@ -231,8 +236,11 @@ module.exports = {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `awakens`.`channel_banned` WHERE `channelName` = ? AND `nick` = ? OR `remote_addr` = ?";
         
+        console.log(ip, 'check ban');
+        
         db.query(sql, [channelName, nick, ip], function (err, rows, fields) {
             if (!err) {
+                console.log(rows);
                 if (rows.length) {
                     defer.reject(rows[0]);
                 } else {

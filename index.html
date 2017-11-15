@@ -64,7 +64,11 @@
                         </div>
                         <div class="menuPanel" id="directMessages"></div>
                         <div class="menuPanel" id="activeChannels"></div>
-                        <div class="menuPanel" id="channelSettings"></div>
+                        <div class="menuPanel" id="channelSettings">
+                            <h2>Claim this channel as your own</h2>
+                            <br>
+                            <button onclick="socket.emit('claimChannel')">Claim</button>
+                        </div>
                     </div>
                 </div>
             </div>
