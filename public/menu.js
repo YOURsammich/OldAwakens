@@ -20,7 +20,7 @@ var menuControl = {
         nickContain.appendChild(nickText);
         nickContain.appendChild(extraInfo);
         
-        document.getElementsByClassName('userList')[0].appendChild(nickContain);
+        document.getElementById('userList').appendChild(nickContain);
         
         ONLINE.users[id] = {
             nick : nick,
@@ -73,7 +73,7 @@ var menuControl = {
             user.cursor.parentNode.removeChild(user.cursor);
         }
         
-        document.getElementsByClassName('userList')[0].removeChild(user.li);
+        document.getElementById('userList').removeChild(user.li);
         delete ONLINE.users[id];
         
         menuControl.updateCount();
@@ -247,7 +247,7 @@ var menuControl = {
         socket.emit('channelStatus', settings);
     },
     setChannelPanel : function (channelSettings) {
-        var menuContainer = document.getElementsByClassName('channelSettings')[0],
+        var menuContainer = document.getElementById('channelSettings'),
             lis = menuContainer.getElementsByTagName('li'),
             inputs;
 
@@ -300,51 +300,9 @@ var menuControl = {
 };
 
 (function () {
-    var allBars = document.getElementsByClassName('bar'),
-        i,
+    var i,
         closing = false,
         timeOut;
-    
-    for (i = 0; i < allBars.length; i++) {
-        allBars[i].addEventListener('mousemove', function () {
-            this.getElementsByTagName('input')[0].focus();
-            this.getElementsByClassName('label')[0].style.height = '0%';
-            this.getElementsByClassName('label')[0].style.top = '0px';
-        });
-        
-        allBars[i].addEventListener('mouseleave', function () {
-            $$$.query('#input-bar textarea').focus();
-            this.getElementsByClassName('label')[0].style.height = '22px';
-            this.getElementsByClassName('label')[0].style.top = '-22px';
-        });
-        
-        allBars[i].getElementsByTagName('input')[0].addEventListener('keydown', function (e) {
-            if (e.which === 13) {
-                clientSubmit.command.send(this.parentNode.classList[1], {
-                    color : this.value
-                });
-            }
-        });
-    }
-    
-    document.getElementById('menu-tabs').addEventListener('click', function (e) {
-        var target = e.target,
-            tabs = this.children,
-            panel,
-            i;
-
-        if (target.nodeName === 'SPAN') {
-            for (i = 0; i < tabs.length; i++) {
-                panel = document.getElementsByClassName(tabs[i].id)[0];
-                
-                if (target.id === panel.className) {
-                    panel.style.display = 'block';
-                } else {
-                    panel.style.display = 'none';
-                }
-            }
-        }
-    });
     
     $$$.query('.toggle-menu').addEventListener('click', function () {
         var menuContainer = document.getElementById('menu-container'),
@@ -365,7 +323,7 @@ var menuControl = {
             }, 500);
         } else {
             menuContainer.style.width = '0px';
-            menuContainer.style.display = 'block';
+            menuContainer.style.display = 'flex';
             closing = true;
             messages.scrollTop = currentScroll;
             clearTimeout(timeOut);
@@ -383,7 +341,4 @@ var menuControl = {
             menu.parentNode.removeChild(menu);
         }
     });
-    
-
-    
 })();

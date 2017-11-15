@@ -196,8 +196,8 @@ main {
     transition: width .5s;
     border-left: 2px solid #222;
     display: none;
-    overflow-y: hidden;
-    overflow-x: hidden;
+    overflow: hidden;
+    flex-flow: column;
 }
 
 #menu-container ul {
@@ -212,67 +212,18 @@ main {
     cursor: pointer;
     text-align: left;
     text-indent: 20px;
+    max-height: 200px;
 }
 
-#main-container ul li:hover .menuTab {
-    display: block;
-}
-
-#menu-container .menuTab {
-    display: none;
-    overflow: hidden;
-    background-color: #111;
-    max-height: 500px;
-}
-
-#menu-container #moreOptions {
-    font-size: x-small;
-    display: inline;
-    cursor: pointer;
-    padding: 5px;
-}
-
-#menu-container #moreOptions:hover {
-    background-color: #fff;
-    color: black;
+#menu-container ul li:hover {
+    background-color: #39F;
 }
 
 #menu-container ul li span {
     float: right;
     margin-right: 10px;
-    margin-top: 5px;
-    font-size: x-small;
-}
-
-#menu-container ul li:hover {
-   
-}
-
-#menu-container select {
-    width: 80%;
-    border-bottom: 1px solid #333;
-    font-weight: normal;
-    text-align: left;
-    font-size: 1.3em;
-    background: none;
-    color: inherit;
-    border: none;
-    border-bottom: 1px solid #333;
-    margin: 20px 20px 20px 0px;
-    outline: none;
-}
-
-#menu-container option {
-    background-color: rgb(17, 17, 17);
-    border: 4px solid #333;
-    outline-width: 0px;
-}
-
-#menu-container option:focus {
-    outline: none;
-    border: none;
-    box-shadow:none;
-    background-color:#FFF;
+    font-size: small;
+    font-family: Material Icons;
 }
 
 #menu-container h3 {
@@ -290,67 +241,14 @@ main {
     font-size: 1em;
 }
 
-#menu-container #myHats img {
-    max-height: 50px;
-    max-width: 50px;
-    margin: 5px;
-    display: inline-block;
-}
-
 .mySettings {
     width: 300px;
     display: none;
 }
 
-.textDecoration .bar {
-    border: solid 1px #333;
-    width: 60%;
-    margin-left: 20%;
-    height: 20px;
-    margin-top: 15px;
-}
-
-.textDecoration .bar .label {
-    width: 100%;
-    height: 22px;
-    background-color: white;
-    color: black;
-    position: relative;
-    top: -22px;
-    overflow: hidden;
-    transition: height .3s, top .3s;
-    font-family: "Droid Sans", sans-serif;
-}
-
-.textDecoration .bar input {
-    width: 100%;
-    height: 20px;
-    outline: none;
-    border: none;
-}
-
 .transparent {
     background-color: #fcfcfc;
     background-image: url("https://www.transparenttextures.com/patterns/az-subtle.png");
-}
-
-.channelSettings {
-    display: none;
-    padding: 0px 20px 0px 20px;
-    font-family: Montserrat;
-    color: #dbdbdb;
-    text-align: left;
-    max-width: 300px;
-}
-
-.channelSettings ul { 
-    list-style-type: none;
-    padding: 0px;
-    margin: 0px;
-}
-
-.channelSettings ul li { 
-    padding-bottom: 15px;
 }
 
 .toggle input {
@@ -365,49 +263,12 @@ main {
     width: 50%;
 }
 
-.channelSettings ul li input, .channelSettings ul li textarea {
-    width: 100%;
-    background-color: #2f2f2f;
-    border: 1px solid #0c0d0e;
-    border-radius: 5px;
-    box-shadow: rgba(255,255,255,0.1) 0 1px 0, rgba(0,0,0,0.2) 0 1px 7px 0 inset;
-    outline: none;
-    padding: 5px;
-    color: #dbdbdb;
-}
-
-.channelSettings ul li div {
-    font-weight: normal;
-    text-align: left;
-    font-size: 1em;
-}
-
-.channelSettings button {
-    width: 45%;
-    background-color: #dbdbdb;
-    border-radius: 3px;
-    border: none;
-    text-align: center;
-    padding: 10px 10px 10px 10px;
-    color: black;
-    cursor: pointer;
-    outline: none;
-}
-
-/*#channelSettings {
-    display: none;
-}
-
-#channelClaim {
-    height: 100%;
-}*/
-
-.userList {
+#userList {
     margin-top: 20px;
     min-width: 300px;
 }
 
-.userList .nickContain {
+#userList .nickContain {
     list-style-type: none;
     cursor: pointer;
     margin-top: 5px;
@@ -447,7 +308,7 @@ main {
     opacity: 1;
 }
 
-.userList .nickContain .informer {
+#userList .nickContain .informer {
     color: lightgrey;
     font-size: 12px;
     font-style: italic;
@@ -461,6 +322,7 @@ main {
     box-shadow: rgba(0, 0, 0, 0.8) 5px 0px 7px 0px;
     margin: 0px;
     width: 300px;
+    display: block !important;
 }
 
 #menu-tabs span {
@@ -475,6 +337,55 @@ main {
 
 #menu-tabs span:hover {
     animation: fade .2s forwards;
+}
+
+#menu-panels {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#menu-panels .menuPanel {
+    display: none;
+}
+
+#stylePanels .menuPanel {
+    padding: 15px;
+    overflow: auto;
+}
+
+#stylePanels #goBack {
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+#stylePanels #goBack span {
+    cursor: pointer;
+}
+
+#stylePanels #goBackArrow:before {
+    content: 'arrow_backwards';
+    font-family: Material Icons;
+    font-size: small;
+    vertical-align: middle;
+}
+
+#stylePanels #goBackArrow:after {
+    content: 'Go back';
+    font-family: Montserrat;
+    font-size: small;
+    margin-left: -50px;
+    vertical-align: bottom;
+}
+
+#stylePanels img {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+#stylePanels img:hover {
+    box-shadow: green 0px 0px 0px 3px;
 }
 
 @keyframes fade {
@@ -663,7 +574,7 @@ main {
 /* userOptions */
 
 .menuOptions {
-    background-color: rgb(51, 51, 51);
+    background-color: #333;
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 11px;
 }

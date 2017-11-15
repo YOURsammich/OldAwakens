@@ -443,6 +443,9 @@ var COMMANDS = {
     ban : {
         params : ['nick|reason']
     },
+    bannick : {
+        params : ['nick|reason']  
+    },
     banip : {
         params : ['ip|reason']  
     },

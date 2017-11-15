@@ -1206,7 +1206,7 @@ function createChannel(io, channelName) {
                 }
             }
             
-            dao.isBanned(channelName, joinData.nick, user.remoteAddress).then(function () {
+            dao.checkBan(channelName, joinData.nick, user.remoteAddress).then(function () {
                     throttle.on(user.remote_addr + '-join', 3).then(function (notSpam) {
                         if (totalIPs < 4) {
                             if (findIndex(channel.online, 'id', user.id) === -1) {

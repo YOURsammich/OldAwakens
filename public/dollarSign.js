@@ -47,5 +47,15 @@ window.$$$ = {
         
         el.addEventListener('mouseup', remove);
         container.addEventListener('mouseup', remove);
+    },
+    tabber : function (panels, openPanelID) {
+        var i,
+            allPanels = document.getElementById(panels).children;
+        
+        for (i = 0; i < allPanels.length; i++) {
+            allPanels[i].style.display = 'none';
+        }
+
+        document.getElementById(openPanelID).style.display = 'block';
     }
 };

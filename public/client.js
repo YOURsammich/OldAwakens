@@ -252,8 +252,8 @@ var messageBuilder = {
                 }
             }
         }
-	    
-        return messageType === 'chat' && nick !== myNick && (message.match(new RegExp('\\b' + myNick + '\\b', 'g')) || quoteAlert);
+
+        return messageType === 'chat' && nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert);
     },
     appendMessageTo : function (message, el) {
         if (el === undefined) {
@@ -524,15 +524,40 @@ var channelSet = {
     hats : function (hats) {
         var hatNames = hats,
             i,
-            hatPanel = document.getElementById('myHats');
+            hatPanel = document.getElementById('displayHats');
             
         for (i = 0; i < hatNames.length; i++) {
             var hatImg = new Image();
             hatImg.src = '/hats/' + hatNames[i];
+            
             hatPanel.appendChild(hatImg);
+            
+            hatImg.onclick = function () {
+                var split = this.src.split('/'),
+                    splitUp = split[split.length - 1];
+
+                clientSubmit.handleInput('/hat ' + splitUp.substr(0, splitUp.length - 4));
+            }
         }
-        
-        
+    },
+    cursors : function (cursors) {
+        var cursorNames = cursors,
+            i,
+            cursorPanel = document.getElementById('displayCursors');
+            
+        for (i = 0; i < cursorNames.length; i++) {
+            var cursorImg = new Image();
+            cursorImg.src = '/cursors/' + cursorNames[i];
+            
+            cursorPanel.appendChild(cursorImg);
+            
+            cursorImg.onclick = function () {
+                var split = this.src.split('/'),
+                    splitUp = split[split.length - 1];
+
+                clientSubmit.handleInput('/cursor ' + splitUp.substr(0, splitUp.length - 4));
+            }
+        }
     },
     settings : function (channelData) {
         if (channelData.note && channelData.note.value && channelData.note.value != Attributes.get('note').value) {
@@ -604,10 +629,6 @@ var channelSet = {
             });
             
             Attributes.set('proxy', channelData.proxy);
-        }
-            
-        if (channelData.hats) {
-            channelSet.hats(channelData.hats);
         }
         
         menuControl.setChannelPanel(channelData);
@@ -985,7 +1006,7 @@ socket.on('channeldata', function (channel) {
     var i;
 
     if (channel.users) {
-        document.getElementsByClassName('userList')[0].innerHTML = '';
+        document.getElementById('userList').innerHTML = '';
         ONLINE.users = {};
         for (i = 0; i < channel.users.length; i++) {            
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
@@ -997,11 +1018,11 @@ socket.on('channeldata', function (channel) {
     }
     
     if (channel.hats) {
-       channelSet.hats(channel.hats); 
+        channelSet.hats(channel.hats); 
     }
     
     if (channel.cursors) {
-        //channelSet.cursors(channel.cursors);
+        channelSet.cursors(channel.cursors);
     }
 });
 
@@ -1047,13 +1068,13 @@ socket.on('banlist', function (banlist) {
     document.body.appendChild(border);
 });
 
-socket.on('update', function (allAtt) {console.log(allAtt);
+socket.on('update', function (allAtt) {
     var keys = Object.keys(allAtt),
         i;
     
     for (i = 0; i < keys.length; i++) {
         if (keys[i] === 'hats') {
-            console.log(allAtt[keys[i]]);
+            //console.log(allAtt[keys[i]]);
         } else {
             if (allAtt[keys[i]]) {
                 Attributes.set(keys[i], allAtt[keys[i]], true);

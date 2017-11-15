@@ -4,6 +4,7 @@
     <head>
         <link id="icon" rel="icon" type="image/png" href="/images/awakenslogo.png" />
         <title>Awakens - The chat that never sleeps</title>
+        <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="keywords" content="chat,awakens,awakens.me" />
         <meta name="description" content="Awakens is an online web-based chat client with multiple different styles, games and features. That is constantly updating and growing over time." />
@@ -27,61 +28,44 @@
                 <div id="menu-container">
                 
                     <div id="menu-tabs">
-                        <span id="userList">group</span>
-                        <span id="mySettings">palette</span>
-                        <span id="directMessages">chat</span>
-                        <span id="channelSettings">settings</span>
+                        <span onclick="$$$.tabber('menu-panels', 'userList');">group</span>
+                        <span onclick="$$$.tabber('menu-panels', 'mySettings');">palette</span>
+                        <span onclick="$$$.tabber('menu-panels', 'directMessages');">chat</span>
+                        <span onclick="$$$.tabber('menu-panels', 'channelSettings');">settings</span>
                     </div>
-
-                    <div class="channelSettings">
-                        <div id="channelSettings">
-                        
-                            <h3>Channel Theme</h3>
-                        
-                            <h3>Channel Settings</h3>
-
-                            <ul>
-                                <li id="lock" class="toggle"><div>Lock Channel:</div> <input class="inputfield" type="checkbox" /></li>
-                                <li id="proxy" class="toggle"><div>Block proxies:</div> <input class="inputfield" type="checkbox" /></li>
-                            </ul>
-
-                            <button onclick="menuControl.sendChanges()">Save Changes</button>
+                    
+                    <div id="menu-panels">
+                        <div id="userList">
+                            <div></div>
                         </div>
-                    </div>
-                    <div class="userList">
-                        <div></div>
-                    </div>
-                    <div class="mySettings">
-                    
-                        <ul>
-                            <li>Hats<span>&#9660;</span><div class="menuTab">
-                            
-                                <div id="myHats"></div>
-                            
-                            </div></li>
-                            <li>cursors<span>&#9660;</span><div class="menuTab">my cursors</div></li>
-                            <li>text<span>&#9660;</span><div class="menuTab">
-                                <div class="textDecoration">
-                                    <div class="bar color">
-                                        <input spellcheck="false"/>
-                                        <div class="label">color</div>
-                                    </div>
-                                    <div class="bar bgcolor">
-                                        <input spellcheck="false"/>
-                                        <div class="label">bgcolor</div>
-                                    </div>
-                                    <div class="bar glow">
-                                        <input spellcheck="false"/>
-                                        <div class="label">glow</div>
-                                    </div>
+                        <div class="menuPanel" id="mySettings">
+
+                            <div id="stylePanels">
+                                <div id="styleMenu">
+                                    <ul>
+                                        <li onclick="$$$.tabber('stylePanels', 'myHats');">Pick a Hat<span>arrow_forward</span></li>
+                                        <li onclick="$$$.tabber('stylePanels', 'myCursors');">Pick a cursor<span>arrow_forward</span></li>
+                                    </ul>
                                 </div>
-                            </div></li>
-                        </ul>
-                    
-                    
+                                <div class="menuPanel" id="myHats">
+                                    <div id="goBack" onclick="$$$.tabber('stylePanels', 'styleMenu');">
+                                        <span id="goBackArrow"></span>
+                                    </div>
+                                    <div id="displayHats"></div>
+                                </div>
+                                <div class="menuPanel" id="myCursors">
+                                    <div id="goBack" onclick="$$$.tabber('stylePanels', 'styleMenu');">
+                                        <span id="goBackArrow"></span>
+                                    </div>
+                                    <div id="displayCursors"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="menuPanel" id="directMessages"></div>
+                        <div class="menuPanel" id="activeChannels"></div>
+                        <div class="menuPanel" id="channelSettings"></div>
                     </div>
-                    <div class="directMessages"></div>
-                    <div class="activeChannels"></div>
                 </div>
             </div>
             
