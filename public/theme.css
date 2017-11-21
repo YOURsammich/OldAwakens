@@ -24,19 +24,6 @@ h2 {
     font-size: 1em;
 }
 
-::-webkit-scrollbar{
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background-color: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background: #5F5F5F;
-}
-
 #flexOne {
     max-width: 100%;
     overflow: hidden;
@@ -980,4 +967,17 @@ h2 {
 #qoute {
     background: #111;
     padding: 4px;
+}
+
+::-webkit-scrollbar{
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: #5F5F5F;
 }
