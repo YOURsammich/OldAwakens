@@ -832,7 +832,7 @@ function createChannel(io, channelName) {
                 var role = parseInt(params.role, 10),
                     notThese = ['lockcommand', 'access'];
                 if (COMMANDS[params.command] && notThese.indexOf(params.command == -1)) {
-                    if (role > 1 && role < 5) {
+                    if (role > 0 && role < 5) {
                         channel.commandRoles[params.command] = role;
                         COMMANDS[params.command].channelRole = role;
                         showMessage(user.socket, params.command + ' set role: ' + role);
