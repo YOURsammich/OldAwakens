@@ -39,7 +39,8 @@ function createChannel(io, channelName) {
         online : [],
         status : 'public',
         blockProxy : false,
-        messageCount : 0
+        messageCount : 0,
+        commandRoles : {}
     };
     
     function updateUserData(user, newData) {
@@ -88,6 +89,22 @@ function createChannel(io, channelName) {
         room.in('chat').emit.apply(room, arguments);
     }
     
+    function updateChannelInfo(nick, att, value) {
+        var formatSettings = {
+            value : value,
+            updatedBy : nick,
+            date : new Date().getTime()
+        };
+
+        dao.setChannelAtt(channelName, att, formatSettings).then(function () {
+            roomEmit('channeldata', {
+                settings : {
+                    [att] : formatSettings
+                }
+            });
+        })
+    }
+    
     var COMMANDS = {
         nick : {
             params : ['nick'],
@@ -116,6 +133,7 @@ function createChannel(io, channelName) {
             params : ['nick', 'password'],
             handler : function (user, params) {
                 var userRole;
+
                 dao.login(params.nick, params.password).then(function (correctPassword, dbuser) {
                     if (correctPassword) {
                         if (params.nick !== user.nick) {
@@ -339,8 +357,6 @@ function createChannel(io, channelName) {
             handler : function (user, params) {
                 var index = findIndex(channel.online, 'remote_addr', params.ip),
                     message = params.reason ? 'You\'ve been banned: ' + params.reason : 'You\'ve been banned';
-                
-                console.log(params);
                 
                 if (index !== -1) {
                     showMessage(channel.online[index].socket, message, 'error');
@@ -777,6 +793,128 @@ function createChannel(io, channelName) {
                     showMessage(user.socket, 'Part must be under 200 characters', 'error');
                 }
             }
+        },
+        claimchannel : {
+            handler : function (user, params) {
+                dao.getChannelAtt(channelName, 'owner').then(function (owner) {
+                    showMessage(user.socket, 'This channel has already been claimed by: ' + owner, 'error');
+                }).fail(function () {
+                    dao.find(user.nick).then(function (dbuser) {
+                        dao.checkChannelOwnerShip(dbuser.nick).then(function (userOwnedChannel) {
+                            showMessage(user.socket, 'You may only own one channel at a time, first give up ownership of ' + userOwnedChannel + ' with /giveupchannel', 'info');
+                        }).fail(function () {
+                            dao.setChannelAtt(channelName, 'owner', dbuser.nick).then(function () {
+                                showMessage(user.socket, 'You\'ve claimed "' + channelName + '", its yours :)', 'info');
+                                updateUserData(user, {role : 1});
+                            });
+                        });
+                    }).fail(function () {
+                        showMessage(user.socket, 'You must have an account to claim a channel, register with /register', 'info');
+                    });
+                });
+            }
+        },
+        giveupchannel : {
+            handler : function (user) {
+                dao.checkChannelOwnerShip(user.nick).then(function (userOwnedChannel) {
+                    dao.deleteChannelAtt(userOwnedChannel, 'owner').then(function () {
+                        showMessage(user.socket, 'You\'ve given up ownership of: ' + userOwnedChannel, 'info'); 
+                    });
+                }).fail(function () {
+                    showMessage(user.socket, 'You don\'t own a channel', 'error'); 
+                });
+            }
+        },
+        lockcommand : {
+            role : 1,
+            params : ['command', 'role'],
+            handler : function (user, params) {
+                var role = parseInt(params.role, 10),
+                    notThese = ['lockcommand', 'access'];
+                if (COMMANDS[params.command] && notThese.indexOf(params.command == -1)) {
+                    if (role > 1 && role < 5) {
+                        channel.commandRoles[params.command] = role;
+                        COMMANDS[params.command].channelRole = role;
+                        showMessage(user.socket, params.command + ' set role: ' + role);
+                        roomEmit('channeldata', {
+                            commandRoles : channel.commandRoles
+                        });
+                    } else {
+                        showMessage(user.socket, 'Invalid role', 'error');
+                    }
+                } else {
+                    showMessage(user.socket, params.command + ' isn\'t a command', 'info');
+                }
+            }
+        },
+        topic : {
+            role : 3,
+            params : ['topic'],
+            handler : function (user, params) {
+                if (params.topic.length < 500) {
+                    updateChannelInfo(user.nick, 'topic', params.topic);   
+                } else {
+                    showMessage(user.socket, 'Topic may not be over 500 characters', 'info');
+                }
+            }
+        },
+        note : {
+            role : 1,
+            params : ['note'],
+            handler : function (user, params) {
+                if (params.note.length < 2000) {
+                    updateChannelInfo(user.nick, 'note', params.note);   
+                } else {
+                    showMessage(user.socket, 'Note may not be over 2000 characters', 'info');
+                }
+            }
+        },
+        background : {
+            role : 2,
+            params : ['background'],
+            handler : function (user, params) {
+                updateChannelInfo(user.nick, 'note', params.background);
+            } 
+        },
+        theme : {
+            role : 1,
+            params : ['themecolors'],
+            handler : function (user, params) {
+                updateChannelInfo(user.nick, 'themecolors', params.themecolors);
+            } 
+        },
+        msg : {
+            handler : function (user, params) {
+                if (params.msg.length < 200) {
+                    updateChannelInfo(user.nick, 'msg', params.msg);
+                } else {
+                    showMessage(user.socket, 'Msg may not be over 200 characters', 'info');
+                }
+            }
+        },
+        unlock : {
+            role : 1,
+            handler : function (user) {
+                updateChannelInfo(user.nick, 'lock', false);
+            }
+        },
+        lock : {
+            role : 1,
+            handler : function (user) {
+                updateChannelInfo(user.nick, 'lock', true);
+            }
+        },
+        proxy : {
+            role : 1,
+            handler : function (user) {
+                updateChannelInfo(user.nick, 'proxy', true);
+            }
+        },
+        unblockproxy : {
+            role : 1,
+            handler : function (user) {
+                updateChannelInfo(user.nick, 'proxy', false);
+            }
         }
     };
     
@@ -931,8 +1069,8 @@ function createChannel(io, channelName) {
         function handleCommand(command, params) {
             var valid = true,
                 i;
-            
-            if (command.role === undefined || command.role >= user.role) {
+
+            if (command.channelRole >= user.role || (command.role === undefined || (command.role >= user.role && command.channelRole === undefined))) {
                 if (command.params) {
                     for (i = 0; i < command.params.length; i++) {
                         if (typeof params[command.params[i]] !== 'string' && typeof params[command.params[i]] !== 'undefined') {
@@ -952,11 +1090,13 @@ function createChannel(io, channelName) {
         }
         
         socket.on('command', function (commandName, params) {
-            throttle.on(user.remote_addr + '-command').then(function (notSpam) {
-                if (typeof commandName === 'string' && COMMANDS[commandName]) {
-                    if (!params || typeof params === 'object') {
-                        handleCommand(COMMANDS[commandName], params);
-                    }
+            throttle.on(user.remote_addr + '-command').then(function () {
+                if (findIndex(channel.online, 'id', user.id) !== -1) {
+                    if (typeof commandName === 'string' && COMMANDS[commandName]) {
+                        if (!params || typeof params === 'object') {
+                            handleCommand(COMMANDS[commandName], params);
+                        }
+                    }   
                 }
             }).fail(function (spammer) {
                 if (spammer) {
@@ -969,100 +1109,14 @@ function createChannel(io, channelName) {
                 }
             });
         });
-                
-        socket.on('channelStatus', function (settings) {
-            var validSettings = {
-                lock : {
-                    type : 'boolean',
-                    role : 1
-                },
-                proxy : {
-                    type : 'boolean',
-                    role : 1
-                },
-                topic : {
-                    type : 'string',
-                    role : 3
-                },
-                note : {
-                    type : 'string',
-                    role : 1
-                },
-                background : {
-                    type : 'string',
-                    role : 2
-                },
-                themecolors : {
-                    type : 'object',
-                    role : 2
-                },
-                msg : {
-                    type : 'string',
-                    role : 4
-                }
-            },
-                keys = Object.keys(settings),
-                valid = true,
-                errorMessage,
-                formatSettings = {};
-            
-            if (typeof settings === 'object') {
-                for (var i = 0; i < keys.length; i++) {
-                    if (validSettings[keys[i]]) {
-                        if (typeof settings[keys[i]] === validSettings[keys[i]].type) {
-                            if (user.role <= validSettings[keys[i]].role) {
-                                formatSettings[[keys[i]]] = {
-                                    value : settings[keys[i]],
-                                    updatedBy : user.nick,
-                                    date : new Date().getTime()
-                                };
-                            } else {
-                                valid = false;
-                                errorMessage = 'Don\'t have access for this command';
-                            }
-                        } else {
-                            valid = false;
-                            errorMessage = 'Invalid settings';
-                        }
-                    } else {
-                        valid = false;
-                        errorMessage = 'Invalid settings 2';
-                    }
-                }
-                
-                if (valid) {
-                    dao.setChannelinfo(channelName, formatSettings).then(function () {
-                        roomEmit('channeldata', {
-                            settings : formatSettings
-                        });
-                    }).fail(handleException);     
-                } else {
-                    showMessage(user.socket, errorMessage, 'error');
-                }
-            }
-        });
-        
-        socket.on('claimChannel', function () {
-            dao.getChannelAtt(channelName, 'owner').then(function (owner) {
-                showMessage(user.socket, 'This channel has already been claimed by: ' + owner, 'error');
-            }).fail(function () {
-                dao.find(user.nick).then(function (dbuser) {
-                    dao.setChannelAtt(channelName, 'owner', dbuser.nick).then(function () {
-                        showMessage(user.socket, 'You\'ve claimed this channel, its yours :)', 'info');
-                        updateUserData(user, {role : 1});
-                    });
-                }).fail(function () {
-                    showMessage(user.socket, 'You must have an account to claim a channel, register with /register', 'info');
-                });
-             });
-        });
-        
+                     
         function joinChannel(userData, dbuser, channelData) {
             var i,
                 onlineUsers = [],
                 roleNames = ['God', 'Channel Owner', 'Admin', 'Mod', 'Basic'],
                 channelCursors = dao.getCursors().name,
-                channelHats = dao.getHats().name;
+                channelHats = dao.getHats().name,
+                commandRoles = channel.commandRoles;
             
             if (!userData) userData = {};
             
@@ -1086,7 +1140,8 @@ function createChannel(io, channelName) {
                     users : onlineUsers,
                     settings : channelData,
                     hats : channelHats,
-                    cursors : channelCursors
+                    cursors : channelCursors,
+                    commandRoles : commandRoles
                 });
                 
                 socket.emit('update', {
@@ -1220,7 +1275,6 @@ function createChannel(io, channelName) {
             }
             
             dao.checkBan(channelName, joinData.nick, user.remote_addr).then(function () {
-                console.log(user.remote_addr);
                 throttle.on(user.remote_addr + '-join', 3).then(function (notSpam) {
                     if (totalIPs < 4) {
                         if (findIndex(channel.online, 'id', user.id) === -1) {

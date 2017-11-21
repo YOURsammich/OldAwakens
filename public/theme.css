@@ -18,6 +18,12 @@ main {
     overflow: hidden;
 }
 
+h2 {
+    font-weight: normal;
+    text-align: left;
+    font-size: 1em;
+}
+
 ::-webkit-scrollbar{
     width: 10px;
 }
@@ -206,7 +212,7 @@ main {
     padding: 0px;
 }
 
-#main-container ul li {
+#main-container .selecter {
     padding: 10px 0px 10px 0px;
     border-bottom: 1px solid #333;
     cursor: pointer;
@@ -215,7 +221,7 @@ main {
     max-height: 200px;
 }
 
-#menu-container ul li:hover {
+#menu-container .selecter:hover {
     background-color: #39F;
 }
 
@@ -226,19 +232,8 @@ main {
     font-family: Material Icons;
 }
 
-#menu-container h3 {
-    width: 80%;
-    border-bottom: 1px solid #333;
-    font-weight: normal;
-    text-align: left;
-    font-size: 1.3em;
-}
-
-#menu-container h2 {
+#channelSettings h2 {
     display: inline;
-    font-weight: normal;
-    text-align: left;
-    font-size: 1em;
 }
 
 .mySettings {
@@ -344,37 +339,72 @@ main {
     overflow-x: hidden;
 }
 
-#menu-panels .menuPanel {
+.menuPanel {
+    padding: 15px;
+    overflow: auto;
     display: none;
 }
 
-#stylePanels .menuPanel {
-    padding: 15px;
-    overflow: auto;
-}
-
-#stylePanels #goBack {
+#goBack {
     text-align: left;
     margin-bottom: 10px;
 }
 
-#stylePanels #goBack span {
+#goBack span {
     cursor: pointer;
 }
 
-#stylePanels #goBackArrow:before {
+#goBackArrow:before {
     content: 'arrow_backwards';
     font-family: Material Icons;
     font-size: small;
     vertical-align: middle;
 }
 
-#stylePanels #goBackArrow:after {
+#goBackArrow:after {
     content: 'Go back';
     font-family: Montserrat;
     font-size: small;
     margin-left: -50px;
     vertical-align: bottom;
+}
+
+#owned .menuPanel ul li {
+    list-style-type: none;
+    margin-top: 10px;
+    padding: 0px;
+    text-align: left;
+    text-indent: 20px;
+    cursor: pointer;
+}
+
+#manageRoles h2, #manageCommands h2 {
+    width: 70%;
+    text-indent: 5px;
+    padding-bottom: 5px;
+    display: block;
+    border-bottom: 1px solid #eeeeee;
+}
+
+#cmdOptions {
+    margin-top: 5px;
+    background-color: #111;
+    display: block;
+}
+
+#cmdOptions button {
+    background-color: #111;
+    width: auto;
+    border: none;
+    color: white;
+    font-family: inherit;
+    padding: 5px;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+}
+
+#cmdOptions button:hover {
+    border-bottom: 1px solid #39F;
 }
 
 #stylePanels img {
@@ -398,13 +428,16 @@ main {
     }
 }
 
-#channelSettings {
-    font-family: Montserrat;
+#unowned {
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-#channelSettings button {
+#channelSettings {
+    font-family: Montserrat;
+}
+
+#unowned button {
     border: none;
     background-color: #39F;
     color: white;

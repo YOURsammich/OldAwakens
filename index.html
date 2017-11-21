@@ -38,13 +38,13 @@
                         <div id="userList">
                             <div></div>
                         </div>
-                        <div class="menuPanel" id="mySettings">
+                        <div style="display:none" id="mySettings">
 
                             <div id="stylePanels">
                                 <div id="styleMenu">
                                     <ul>
-                                        <li onclick="$$$.tabber('stylePanels', 'myHats');">Pick a Hat<span>arrow_forward</span></li>
-                                        <li onclick="$$$.tabber('stylePanels', 'myCursors');">Pick a cursor<span>arrow_forward</span></li>
+                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'myHats');">Pick a Hat<span>arrow_forward</span></li>
+                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'myCursors');">Pick a cursor<span>arrow_forward</span></li>
                                     </ul>
                                 </div>
                                 <div class="menuPanel" id="myHats">
@@ -62,12 +62,59 @@
                             </div>
 
                         </div>
-                        <div class="menuPanel" id="directMessages"></div>
-                        <div class="menuPanel" id="activeChannels"></div>
-                        <div class="menuPanel" id="channelSettings">
-                            <h2>Claim this channel as your own</h2>
-                            <br>
-                            <button onclick="socket.emit('claimChannel')">Claim</button>
+                        <div style="display:none" id="directMessages"></div>
+                        <div style="display:none" id="activeChannels"></div>
+                        <div style="display:none" id="channelSettings">
+                            <div style="display:block;" id="unowned">
+                                <h2>Claim this channel as your own</h2>
+                                <br>
+                                <button onclick="clientSubmit.handleInput('/claimchannel');">Claim</button>
+                            </div>
+                            <div style="display:none;" id="owned">
+                                <div id="settingsMenu">
+                                    <ul>
+                                        <li class="selecter" onclick="$$$.tabber('owned', 'manageRoles');"><h2>Manage roles</h2></li>
+                                        <li class="selecter" onclick="$$$.tabber('owned', 'manageCommands');"><h2>Manage commands</h2></li>
+                                    </ul>
+                                </div>
+                                <div class="menuPanel" id="manageRoles">
+                                    <div id="goBack" onclick="$$$.tabber('owned', 'settingsMenu');">
+                                        <span id="goBackArrow"></span>
+                                    </div>
+                                    
+                                    <div id="roleAdmin">
+                                        <h2>Admins</h2>
+                                        <ul id="listAdmins"></ul>
+                                    </div>
+                                    <div id="roleMod">
+                                        <h2>Mods</h2>
+                                        <ul id="listMods"></ul>
+                                    </div>
+                                    
+                                </div>
+                                <div class="menuPanel" id="manageCommands">
+                                    <div id="goBack" onclick="$$$.tabber('owned', 'settingsMenu');">
+                                        <span id="goBackArrow"></span>
+                                    </div>
+                                    
+                                    <div id="cmdChannelOwner">
+                                        <h2>Channel Owner</h2>
+                                        <ul id="listAdmins"></ul>
+                                    </div>
+                                    <div id="cmdAdmin">
+                                        <h2>Admin</h2>
+                                        <ul id="listAdmins"></ul>
+                                    </div>
+                                    <div id="cmdMod">
+                                        <h2>Mod</h2>
+                                        <ul id="listMods"></ul>
+                                    </div>
+                                    <div id="cmdBasic">
+                                        <h2>Basic</h2>
+                                        <ul id="listBasic"></ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

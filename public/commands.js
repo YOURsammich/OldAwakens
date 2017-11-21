@@ -255,77 +255,6 @@ var COMMANDS = {
             Attributes.set('toggle-msg', true);
         }  
     },
-    topic : {
-        params : ['topic'],
-        handler : function (params) {
-            socket.emit('channelStatus', {
-                topic : params.topic
-            });
-        }
-    },
-    note : {
-        params : ['note'],
-        handler : function (params) {
-            socket.emit('channelStatus', {
-                note : params.note
-            });
-        }
-    },
-    theme : {
-        params : ['inputColor', 'buttonColor', 'scrollBarColor'],
-        handler : function (params) {
-            socket.emit('channelStatus', {
-                themecolors : [params.inputColor, params.buttonColor, params.scrollBarColor]
-            });
-        }
-    },
-    background : {
-        params : ['background'],
-        handler : function (params) {
-            socket.emit('channelStatus', {
-                background : params.background
-            });
-        }
-    },
-    msg : {
-        params : ['msg'],
-        handler : function (params) {
-            if (params.msg == 'none') {
-                params.msg = ' ';
-            }
-            socket.emit('channelStatus', {
-                msg : params.msg
-            });
-        }
-    },
-    unlock : {
-        handler : function () {
-            socket.emit('channelStatus', {
-                lock : false
-            });
-        }
-    },
-    lockdown : {
-        handler : function () {
-            socket.emit('channelStatus', {
-                lock : true
-            });
-        }
-    },
-    blockproxy : {
-        handler : function () {
-            socket.emit('channelStatus', {
-                proxy : true
-            });
-        }
-    },
-    unblockproxy : {
-        handler : function () {
-            socket.emit('channelStatus', {
-                proxy : false
-            });
-        }
-    },
     block : {
         params : ['nick'],
         handler : function (params) {
@@ -337,7 +266,7 @@ var COMMANDS = {
             }
             
             blockedUsers.push(params.nick);
-            Attributes.set('blocked', blockedUsers.join(','));
+            Attributes.set('block', blockedUsers.join(','));
             showMessage({
                 message : params.nick + ' is now blocked',
                 messageType : 'info'
@@ -359,7 +288,7 @@ var COMMANDS = {
             index = blockedUsers.indexOf(params.nick);
             if (index !== -1) {
                 blockedUsers.splice(index, 1);
-                Attributes.set('blocked', blockedUsers.join(','));
+                Attributes.set('block', blockedUsers.join(','));
                 showMessage({
                     message : params.nick + ' is now unblocked',
                     messageType : 'info'
@@ -438,37 +367,50 @@ var COMMANDS = {
         params : ['oldpassword', 'newpassword']
     },
     kick : {
+        role : 2,
         params : ['nick|reason']
     },
     ban : {
+        role : 1,
         params : ['nick|reason']
     },
     bannick : {
+        role : 1,
         params : ['nick|reason']  
     },
     banip : {
+        role : 1,
         params : ['ip|reason']  
     },
     unban : {
+        role : 1,
         params : ['nick']  
     },
     whitelist : {
+        role : 1,
         params : ['nick']
     },
     unwhitelist : {
+        role : 1,
         params : ['nick']
     },
     delete : {
+        role : 0,
         params : ['nick']
     },
     global : {
+        role : 0,
         params : ['message']
     },
     find : {
+        role : 0,
         params : ['ip']
     },
-    refresh : {},
+    refresh : {
+        role : 0
+    },
     access : {
+        role : 1,
         params : ['nick', 'role']
     },
     pm : {
@@ -476,9 +418,11 @@ var COMMANDS = {
     },
     banlist : {},
     give_hat : {
+        role : 0,
         params : ['nick', 'hat']
     },
     remove_hat : {
+        role : 0,
         params : ['nick', 'hat']  
     },
     hat : {
@@ -497,6 +441,44 @@ var COMMANDS = {
     hats : {},
     part : {
         params : ['part']
+    },
+    claimchannel : {},
+    giveupchannel : {},
+    lockcommand : {
+        role : 1,
+        params : ['command', 'role']
+    },
+    topic : {
+        role : 3,
+        params : ['topic']
+    },
+    note : {
+        role : 1,
+        params : ['note']
+    },
+    theme : {
+        role : 1,
+        params : ['inputColor', 'buttonColor', 'scrollBarColor']
+    },
+    background : {
+        role : 2,
+        params : ['background']
+    },
+    msg : {
+        role : 4,
+        params : ['msg']
+    },
+    unlock : {
+        role : 1
+    },
+    lockdown : {
+        role : 1
+    },
+    blockproxy : {
+        role : 1
+    },
+    unblockproxy : {
+        role : 1
     }
 };
 COMMANDS.colour = COMMANDS.color;
@@ -504,10 +486,74 @@ COMMANDS.cls = COMMANDS.clear;
 COMMANDS.bg = COMMANDS.background;
 
 (function(){
+    var keys = Object.keys(COMMANDS),
+        i,
+        newSet = {};
+    
+    var buttons = document.createElement('cmdOptions'),
+        ownerbtn = document.createElement('button'),
+        adminbtn = document.createElement('button'),
+        modbtn = document.createElement('button'),
+        basicbtn = document.createElement('button');
+    
+    buttons.id = "cmdOptions";
+    ownerbtn.textContent = 'Owner';
+    adminbtn.textContent = 'Admin';
+    modbtn.textContent = 'Mod';
+    basicbtn.textContent = 'Basic';
+    
+    buttons.appendChild(ownerbtn);
+    buttons.appendChild(adminbtn);
+    buttons.appendChild(modbtn);
+    buttons.appendChild(basicbtn);
+    
+    ownerbtn.addEventListener('click', function (e) {
+        var cmdID = this.parentNode.parentNode.id;
+        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '1');
+    });
+    
+    adminbtn.addEventListener('click', function (e) {
+        var cmdID = this.parentNode.parentNode.id;
+        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '2');
+    });
+    
+    modbtn.addEventListener('click', function (e) {
+        var cmdID = this.parentNode.parentNode.id;
+        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '3');
+    });
+    
+    basicbtn.addEventListener('click', function (e) {
+        var cmdID = this.parentNode.parentNode.id;
+        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '4');
+    });
+    
+    for (i = 0; i < keys.length; i++) {
+        if (COMMANDS[keys[i]].role) {
+            newSet[keys[i]] = COMMANDS[keys[i]].role
+        }
+    }
+    
+    document.getElementById('manageCommands').addEventListener('click', function (e) {
+        var target = e.target,
+            currentMenu = document.getElementById('cmdOptions');
+        
+        if (currentMenu) {
+            currentMenu.parentNode.removeChild(currentMenu);
+        }
+        
+        if (target.nodeName == "LI") {
+            
+            target.appendChild(buttons);
+        }
+    });
+    
+    channelSet.commandRoles(newSet);
+    
     parser.addFont(Attributes.get('font'));
     parser.changeInput('font', Attributes.get('font'));
     parser.changeInput('color', Attributes.get('color'));
     if(!Attributes.get('font')) {
         clientSubmit.command.send('font', {font:'Droid Sans'});
     }
+    
 })();

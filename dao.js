@@ -154,20 +154,54 @@ module.exports = {
         });
         return defer;
     },
+    deleteChannelAtt : function (channelName, att) {
+        var defer = $.Deferred();
+        var sql = "DELETE FROM `channel_info` WHERE `channelName` = ? AND `attribute` = ?";
+        
+        db.query(sql, [channelName, att], function (err, rows, fields) {
+            if (!err) {
+                defer.resolve().promise();
+            }
+        });
+        
+        return defer;
+    },
     checkChannelOwnerShip : function (nick) {
         var defer = $.Deferred();
-        var sql = "SELECT * FROM `channel_info` WHERE "
+        var sql = "SELECT `channelName` FROM `channel_info` WHERE `attribute` = 'owner' AND `value` = ?";
+        
+        console.log(nick);
+        
+        db.query(sql, nick, function (err, rows, fields) {
+            console.log(rows, rows.length);
+            if (rows.length) {
+                defer.resolve(rows[0].channelName);
+            } else {
+                defer.reject().promise();    
+            }
+        });
+        return defer;
     },
     setChannelAtt : function (channelName, att, value) {
         var defer = $.Deferred();
         var sqlUpdate = "UPDATE `channel_info` SET `value` = ? WHERE `channelName` = ? AND `attribute` = ?";
         var sqlInsert = "INSERT INTO `channel_info` (`channelName`, `attribute`, `value`) VALUES (?, ?, ?);";
+        
+        if (typeof value != 'string') {
+            try {
+                value = JSON.stringify(value);
+            } catch (err) {
+                //
+            }
+        }
+        
         this.getChannelAtt(channelName, att).then(function () {
-            db.query(sqlUpdate, [JSON.stringify(value), channelName, att], function (err) {
+            db.query(sqlUpdate, [value, channelName, att], function (err) {
+                console.log(err,'ass');
                 defer.resolve().promise(); 
             });
         }).fail(function () {
-            db.query(sqlInsert, [channelName, att, JSON.stringify(value)], function (err) {
+            db.query(sqlInsert, [channelName, att, value], function (err) {
                 defer.resolve().promise(); 
             });
         });
@@ -189,16 +223,19 @@ module.exports = {
     setChannelRole : function (channelName, nick, role) {
         var defer = $.Deferred(); 
         this.getChannelAtt(channelName, 'roles').then(function (roles) {
-            if (!roles) {
-                roles = {};
-            }
-            
             if (role === 4) {
                 delete roles[nick];
             } else {
                 roles[nick] = role;
             }
 
+            module.exports.setChannelAtt(channelName, 'roles', roles).then(function () {
+                defer.resolve().promise();
+            });
+        }).fail(function () {
+            var roles = {};
+            roles[nick] = role;
+            
             module.exports.setChannelAtt(channelName, 'roles', roles).then(function () {
                 defer.resolve().promise();
             });
@@ -236,11 +273,8 @@ module.exports = {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `awakens`.`channel_banned` WHERE `channelName` = ? AND `nick` = ? OR `remote_addr` = ?";
         
-        console.log(ip, 'check ban');
-        
         db.query(sql, [channelName, nick, ip], function (err, rows, fields) {
             if (!err) {
-                console.log(rows);
                 if (rows.length) {
                     defer.reject(rows[0]);
                 } else {

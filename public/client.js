@@ -28,10 +28,6 @@ channelPanel
         proxy
         private
     
-    
-    
-    
-
 
 */
 
@@ -54,7 +50,7 @@ var ONLINE = {
 var Attributes = {
     notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
     altAtt : {colour : 'color', bg : 'background'},
-    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute', 'lock', 'proxy', 'part', 'msg'],
+    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute', 'lock', 'proxy', 'part', 'msg', 'block'],
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
@@ -451,7 +447,7 @@ var clientSubmit = {
                 if (COMMANDS[commandName].params) {
 
                     formatedParams = this.formatParams(COMMANDS[commandName].params, params);
-
+                    
                     if (COMMANDS[commandName].params.length <= Object.keys(formatedParams).length || COMMANDS[commandName].paramsOptional) {
                         this.send(commandName, formatedParams);
                     } else {
@@ -631,7 +627,44 @@ var channelSet = {
             Attributes.set('proxy', channelData.proxy);
         }
         
-        menuControl.setChannelPanel(channelData);
+        if (channelData.owner) {
+            document.getElementById('unowned').style.display = 'none';
+            document.getElementById('owned').style.display = 'block';
+        }
+        
+        if (channelData.roles) {
+            var keys = Object.keys(channelData.roles),
+                i,
+                element,
+                roles = ['Admin', 'Mod'];
+            
+            for (i = 0; i < keys.length; i++) {
+                element = document.createElement('li');
+                element.textContent = keys[i];
+                document.getElementById('role' + roles[channelData.roles[keys[i]] - 2]).getElementsByTagName('ul')[0].appendChild(element);
+            }
+        }
+    },
+    commandRoles : function (commands) {
+        var keys = Object.keys(commands),
+            i,
+            element,
+            roles = ['ChannelOwner', 'Admin', 'Mod', 'Basic'],
+            currentE;
+        
+        for (i = 0; i < keys.length; i++) {
+            currentE = document.getElementById("command-" + keys[i]);
+            element = document.createElement('li');
+            
+            if (currentE) {
+                currentE.parentNode.removeChild(currentE);
+            }
+            
+            element.id = "command-" + keys[i];
+            element.textContent = keys[i];
+            
+            document.getElementById('cmd' + roles[commands[keys[i]] - 1]).getElementsByTagName('ul')[0].appendChild(element);
+        }
     }
 }
 
@@ -1012,7 +1045,7 @@ socket.on('channeldata', function (channel) {
             menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
         }
     }
-    
+
     if (channel.settings) {
         channelSet.settings(channel.settings);
     }
@@ -1023,6 +1056,10 @@ socket.on('channeldata', function (channel) {
     
     if (channel.cursors) {
         channelSet.cursors(channel.cursors);
+    }
+
+    if (channel.commandRoles) {
+        channelSet.commandRoles(channel.commandRoles);
     }
 });
 

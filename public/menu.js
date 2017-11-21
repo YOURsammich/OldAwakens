@@ -222,52 +222,6 @@ var menuControl = {
             }
         }
     },
-    sendChanges : function () {
-        var menuContainer = document.getElementsByClassName('channelPanel')[0],
-            lis = menuContainer.getElementsByTagName('li'),
-            inputs,
-            settings = {};
-        
-        for (var i = 0; i < lis.length; i++) {
-            inputs = lis[i].getElementsByClassName('inputfield');
-            
-            if (inputs.length > 1) {
-                settings[lis[i].id] = [];
-                for (var n = 0; n < inputs.length; n++) {
-                    settings[lis[i].id].push(inputs[(inputs.length - n) - 1].value || '');
-                }
-            } else if (inputs[0].type == 'checkbox') {
-                settings[lis[i].id] = inputs[0].checked;
-            } else {
-                settings[lis[i].id] = inputs[0].value;
-            }
-            
-        }
-
-        socket.emit('channelStatus', settings);
-    },
-    setChannelPanel : function (channelSettings) {
-        var menuContainer = document.getElementById('channelSettings'),
-            lis = menuContainer.getElementsByTagName('li'),
-            inputs;
-
-        
-        for (var i = 0; i < lis.length; i++) {
-            if (channelSettings[lis[i].id]) {
-                inputs = lis[i].getElementsByClassName('inputfield');
-
-                if (inputs.length > 1) {
-                    for (var n = 0; n < inputs.length; n++) {
-                        inputs[(inputs.length - n) - 1].value = channelSettings[lis[i].id].value[n] || '';
-                    }
-                } else if (inputs[0].type == 'checkbox') {
-                    inputs[0].checked = channelSettings[lis[i].id].value;
-                } else {
-                    inputs[0].value = channelSettings[lis[i].id].value;
-                }
-            }
-        }
-    },
     initMissedMessages : function (socket) {
         var unread = 0;
         
