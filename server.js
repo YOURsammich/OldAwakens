@@ -884,6 +884,7 @@ function createChannel(io, channelName) {
             } 
         },
         msg : {
+            params : ['msg'],
             handler : function (user, params) {
                 if (params.msg.length < 200) {
                     updateChannelInfo(user.nick, 'msg', params.msg);
