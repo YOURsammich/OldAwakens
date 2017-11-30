@@ -48,25 +48,28 @@ var ONLINE = {
 };
 
 var Attributes = {
-    notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
+    showMsg : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
+    notify : ['part'],
     altAtt : {colour : 'color', bg : 'background'},
     nosaveLocal : [],
-    set : function (attribute, newValue, notify) {
+    set : function (attribute, newValue, noNotify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
         
-        if (this.notifierAtt.indexOf(attribute) !== -1 && oldValue !== newValue && oldValue) {
-            messageBuilder.showMessage({
-                nick : this.get('nick'),
-                flair : this.get('flair'),
-                message : clientSubmit.message.decorateText('Now your messages look like this'),
-                messageType : 'chat'
-            });
-        } else if (notify && oldValue !== newValue && attribute !== 'token' && newValue !== undefined) {
-            messageBuilder.showMessage({
-                message : attribute + ' is now set to ' + newValue,
-                messageType : 'info'
-            });
+        if (!noNotify) {
+            if (this.showMsg.indexOf(attribute) !== -1 && oldValue !== newValue && this.get('nick')) {
+                messageBuilder.showMessage({
+                    nick : this.get('nick'),
+                    flair : this.get('flair'),
+                    message : clientSubmit.message.decorateText('Now your messages look like this'),
+                    messageType : 'chat'
+                });
+            } else if (this.notify.indexOf(attribute) !== -1 && oldValue !== newValue && newValue !== undefined) {
+                messageBuilder.showMessage({
+                    message : attribute + ' is now set to ' + newValue,
+                    messageType : 'info'
+                });
+            }   
         }
         
         if (this.nosaveLocal.indexOf(attribute) === -1) {
@@ -935,7 +938,7 @@ socket.on('update', function (allAtt) {
             //console.log(allAtt[keys[i]]);
         } else {
             if (allAtt[keys[i]]) {
-                Attributes.set(keys[i], allAtt[keys[i]], true);
+                Attributes.set(keys[i], allAtt[keys[i]]);
             }
         }
     }
