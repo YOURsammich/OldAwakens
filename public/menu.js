@@ -25,18 +25,25 @@ var menuControl = {
         ONLINE.users[id] = {
             nick : nick,
             li : nickContain,
-            resetStatus : function () {
+            resetStatus : function (idleStatus) {
                 var status = this;
                 if (status.idleStatus) {
                     clearTimeout(status.idleStatus);
-                }
+                }  
                 
-                status.idleStatus = setTimeout(function () {
-                    socket.emit('idleStatus', true);
+                if (idleStatus == 'unavailable') {
+                    nickContain.children[0].classList.add('unavailable');
+                } else if (idleStatus == 'away') {
+                    nickContain.children[0].classList.add('away');
                     status.idleStatus = setTimeout(function () {
-                        socket.emit('idleStatus', false);
+                        status.resetStatus('unavailable');
+                    }, 3600000);
+                } else {
+                    nickContain.children[0].classList.remove('away', 'unavailable');
+                    status.idleStatus = setTimeout(function () {;
+                        status.resetStatus('away');
                     }, 90000);
-                }, 3600000);
+                }
             }
         };
         
@@ -56,6 +63,12 @@ var menuControl = {
         
         if (document.getElementsByClassName('LoginPanel').length !== 0 && nick === Attributes.get('nick')) {
             document.body.removeChild(document.getElementsByClassName('LoginPanel')[0].parentNode);
+        }
+    },
+    idleStatus : function (id, status) {
+        var user = ONLINE.users[id];
+        if (user) {
+            user.resetStatus(status);
         }
     },
     removeUser : function (id, part) {
@@ -102,17 +115,7 @@ var menuControl = {
         var user = ONLINE.users[id];
         if (user) {
             user.li.getElementsByClassName('informer')[0].innerHTML = emojione.toImage(parser.escape(message.replace(/\n/g, ' '), true));
-        }
-    },
-    idleStatus : function (id, status) {
-        var user = ONLINE.users[id];
-        if (user) {
-            user.li.children[0].classList.remove('away', 'unavailable');
-            if (status) {
-                user.li.children[0].classList.add('away');
-            } else {
-                user.li.children[0].classList.add('unavailable');
-            }
+            user.resetStatus('away');
         }
     },
     updateCount : function () {
@@ -324,7 +327,19 @@ var menuControl = {
             if (channel.commandRoles) {
                 menuControl.commandUI(channel.commandRoles);
             }
-        });  
+        });
+        
+        socket.on('idleStatus', menuControl.idleStatus);
+        
+        socket.on('joined', menuControl.addUser);
+
+        socket.on('nick', menuControl.changeNick);
+
+        socket.on('typing', menuControl.typing);
+
+        socket.on('afk', menuControl.afk);
+
+        socket.on('left', menuControl.removeUser);
     },
     typing : function (id, typing) {
         var user = ONLINE.users[id];

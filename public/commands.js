@@ -198,12 +198,12 @@ var COMMANDS = {
     },
     mute : {
         handler : function () {
-            Attributes.set('mute', true, true);
+            Attributes.set('toggle-mute', true);
         }
     },
     unmute : {
         handler : function () {
-            Attributes.set('mute', false, true);
+            Attributes.set('toggle-mute', false);
         }
     },
     clear : {
@@ -249,7 +249,7 @@ var COMMANDS = {
                     }     
                 }
                 
-                Attributes.set('toggle-' + attr, !attValue, true);
+                Attributes.set('toggle-' + attr, !attValue);
             } else {
                 messageBuilder.showMessage({
                     message : 'Not a toggleable attribute'
@@ -455,6 +455,8 @@ var COMMANDS = {
     afk : {
         params : ['message']
     },
+    away : {},
+    snooze : {},
     cursors : {},
     hats : {},
     part : {

@@ -724,6 +724,12 @@ function createChannel(io, channelName) {
                 }
             }
         },
+        away : {
+            
+        },
+        snooze : {
+            
+        },
         cursors : {
             handler : function (user) {
                 var allCursors = dao.getCursors().lowercase;
@@ -1017,7 +1023,7 @@ function createChannel(io, channelName) {
         });
         
         socket.on('idleStatus', function (status) {
-            if (typeof status === 'boolean') {
+            if (status == 'away' || status == 'unavailable') {
                 roomEmit('idleStatus', user.id, status);
             }
         });
@@ -1147,6 +1153,8 @@ function createChannel(io, channelName) {
                     commandRoles : commandRoles
                 });
                 
+                roomEmit('joined', user.id, user.nick);
+                
                 socket.emit('update', {
                     nick : user.nick,
                     role : roleNames[user.role],
@@ -1155,8 +1163,7 @@ function createChannel(io, channelName) {
                     cursor : user.cursor,
                     part : user.part
                 });
-                
-                roomEmit('joined', user.id, user.nick);
+            
                 console.log('USER JOIN', user.nick, user.role, user.remote_addr);
             }
             

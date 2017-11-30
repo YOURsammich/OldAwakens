@@ -48,29 +48,29 @@ var ONLINE = {
 };
 
 var Attributes = {
-    showMsg : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
-    notify : ['part'],
+    showMsg : ['flair', 'color', 'glow', 'bgcolor', 'font', 'style'],
+    notify : ['part', 'nick'],
     altAtt : {colour : 'color', bg : 'background'},
     nosaveLocal : [],
     set : function (attribute, newValue, noNotify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
         
-        if (!noNotify) {
-            if (this.showMsg.indexOf(attribute) !== -1 && oldValue !== newValue && this.get('nick')) {
-                messageBuilder.showMessage({
-                    nick : this.get('nick'),
-                    flair : this.get('flair'),
-                    message : clientSubmit.message.decorateText('Now your messages look like this'),
-                    messageType : 'chat'
-                });
-            } else if (this.notify.indexOf(attribute) !== -1 && oldValue !== newValue && newValue !== undefined) {
-                messageBuilder.showMessage({
-                    message : attribute + ' is now set to ' + newValue,
-                    messageType : 'info'
-                });
-            }   
-        }
+        if (this.showMsg.indexOf(attribute) !== -1 && oldValue !== newValue && this.get('nick')) {
+            messageBuilder.showMessage({
+                nick : this.get('nick'),
+                flair : this.get('flair'),
+                message : clientSubmit.message.decorateText('Now your messages look like this'),
+                messageType : 'chat'
+            });
+        } 
+        
+        if ((this.notify.indexOf(attribute) !== -1 || attribute.substr(0, 6) == 'toggle') && oldValue !== newValue && newValue !== undefined) {
+            messageBuilder.showMessage({
+                message : attribute + ' is now set to ' + newValue,
+                messageType : 'info'
+            });
+        }   
         
         if (this.nosaveLocal.indexOf(attribute) === -1) {
             if (typeof newValue === 'object') {
@@ -182,7 +182,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         }
         
         if (messageData.count) {
-            messageHTML.container.count += ' msg-' + messageData.count;
+            messageHTML.container.className += ' msg-' + messageData.count;
         }
         
         messageHTML.time.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
@@ -873,18 +873,6 @@ socket.on('chat-image', messageBuilder.showMessage, true);
 
 socket.on('pmMessage', handlePrivateMessage);
 
-socket.on('joined', menuControl.addUser);
-
-socket.on('nick', menuControl.changeNick);
-
-socket.on('typing', menuControl.typing);
-
-socket.on('idleStatus', menuControl.idleStatus);
-
-socket.on('afk', menuControl.afk);
-
-socket.on('left', menuControl.removeUser);
-
 socket.on('channelDetails', showChannelDetails)
 
 socket.on('banlist', function (banlist) {
@@ -934,12 +922,8 @@ socket.on('update', function (allAtt) {
         i;
     
     for (i = 0; i < keys.length; i++) {
-        if (keys[i] === 'hats') {
-            //console.log(allAtt[keys[i]]);
-        } else {
-            if (allAtt[keys[i]]) {
-                Attributes.set(keys[i], allAtt[keys[i]]);
-            }
+        if (allAtt[keys[i]]) {
+            Attributes.set(keys[i], allAtt[keys[i]]);
         }
     }
 });
