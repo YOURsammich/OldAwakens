@@ -97,10 +97,8 @@ function createChannel(io, channelName) {
         };
 
         dao.setChannelAtt(channelName, att, formatSettings).then(function () {
-            roomEmit('channeldata', {
-                settings : {
-                    [att] : formatSettings
-                }
+            roomEmit('channelDetails', {
+                [att] : formatSettings
             });
         })
     }
@@ -806,6 +804,9 @@ function createChannel(io, channelName) {
                             dao.setChannelAtt(channelName, 'owner', dbuser.nick).then(function () {
                                 showMessage(user.socket, 'You\'ve claimed "' + channelName + '", its yours :)', 'info');
                                 updateUserData(user, {role : 1});
+                                roomEmit('channelDetails', {
+                                    owner : dbuser.nick
+                                });
                             });
                         });
                     }).fail(function () {
@@ -873,7 +874,7 @@ function createChannel(io, channelName) {
             role : 2,
             params : ['background'],
             handler : function (user, params) {
-                updateChannelInfo(user.nick, 'note', params.background);
+                updateChannelInfo(user.nick, 'background', params.background);
             } 
         },
         theme : {
@@ -951,7 +952,7 @@ function createChannel(io, channelName) {
         });
         
         socket.on('message', function (message, flair) {
-            throttle.on(user.remote_addr + '-message').then(function (notSpam) {
+            throttle.on(user.remote_addr + '-message').then(function () {
                 if (findIndex(channel.online, 'id', user.id) !== -1) {
                     if (typeof message === 'string' && (typeof flair === 'string' || !flair)) {
                         if (message.length < 10000 && ((flair && flair.length < 500) || !flair)) {
@@ -966,7 +967,7 @@ function createChannel(io, channelName) {
                         }
                     }
                 }
-            }).fail(function () {
+            }).fail(function (spammer) {
                 if (spammer) {
                     dao.ban(channelName, user.remote_addr, null, 'Throttle', 'Message spamming');
                     showMessage(user.socket, 'You have been banned for spamming.', 'error');
@@ -1035,7 +1036,7 @@ function createChannel(io, channelName) {
                 }
             }
             
-            user.socket.emit('activeChannels', channelInfo);
+            socket.emit('activeChannels', channelInfo);
         });
         
         socket.on('privateMessage', function (message, flair, userID) {
@@ -1137,9 +1138,10 @@ function createChannel(io, channelName) {
                 
                 socket.join('chat');
                 
+                socket.emit('channelDetails', channelData);
+                
                 socket.emit('channeldata', {
                     users : onlineUsers,
-                    settings : channelData,
                     hats : channelHats,
                     cursors : channelCursors,
                     commandRoles : commandRoles
@@ -1356,12 +1358,19 @@ function intoapp(app, http) {
             res.send("Error: No URL");
         }
     });
+
     app.get(channelRegex, function (req, res) {
         if (!channels[req.url]) {
             channels[req.url] = createChannel(io, req.url);
         }
-        var index = fs.readFileSync('index.html').toString();
-        res.send(index);
+        
+        if (req.url === '/welcome/') {
+            var index = fs.readFileSync('public/welcome/welcome.html').toString();
+            res.send(index); 
+        } else {
+            var index = fs.readFileSync('index.html').toString();
+            res.send(index);   
+        }
     });
 }
 

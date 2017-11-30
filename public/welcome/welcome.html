@@ -1,0 +1,33 @@
+<html>
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/welcome/theme.css" />
+        <link href="https://fonts.googleapis.com/css?family=Montserrat|Droid+Sans" rel="stylesheet">
+    </head>
+    
+    <body>
+        <main>
+            <div style="display:none;" id="joinPage">
+                <div id="logo">Awakens.me</div>
+                <div id="des">Awakens is an online highly customizable web-based chat with multiple different styles, games and features. That is constantly updating and growing over time.</div>
+                <div id="buttonHld">
+                    <button style="background-color: #27ae60" id="join">Join</button>
+                    <button style="background-color: #2980b9" id="create">Create</button>
+                </div>
+            </div>
+            <div id="active">
+                <div class="di" id="sorter"></div>
+                <table>
+                    <th>name</th>
+                    <th>online</th>
+                    <th>tags</th>
+                </table>
+            </div>
+        </main>
+        
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/welcome/client.js"></script>
+    </body>
+    
+</html>

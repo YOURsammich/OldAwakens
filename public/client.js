@@ -50,43 +50,26 @@ var ONLINE = {
 var Attributes = {
     notifierAtt : ['flair', 'color', 'glow', 'bgcolor', 'font', 'filters', 'style'],
     altAtt : {colour : 'color', bg : 'background'},
-    saveLocal : ['flair', 'nick', 'color', 'glow', 'font', 'style', 'filters', 'role', 'token', 'mute', 'lock', 'proxy', 'part', 'msg', 'block'],
+    nosaveLocal : [],
     set : function (attribute, newValue, notify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
         
         if (this.notifierAtt.indexOf(attribute) !== -1 && oldValue !== newValue && oldValue) {
-            showMessage({
+            messageBuilder.showMessage({
                 nick : this.get('nick'),
                 flair : this.get('flair'),
                 message : clientSubmit.message.decorateText('Now your messages look like this'),
                 messageType : 'chat'
             });
         } else if (notify && oldValue !== newValue && attribute !== 'token' && newValue !== undefined) {
-            showMessage({
+            messageBuilder.showMessage({
                 message : attribute + ' is now set to ' + newValue,
                 messageType : 'info'
             });
         }
         
-        if (attribute === 'toggle-cursors') {
-            COMMANDS.clearcursors.handler();
-            socket.emit('removeCursor');
-        } else if (attribute === 'toggle-background') {
-            if (newValue) {
-                document.getElementById('messages-background').style.background = Attributes.get('background').value;
-            } else {
-                document.getElementById('messages-background').style.background = 'black';
-            } 
-        } else if (attribute === 'toggle-msg') {
-            if (newValue) {
-                document.getElementById('center-text').style.display = 'table-cell';
-            } else {
-                document.getElementById('center-text').style.display = 'none';
-            } 
-        }
-        
-        if (this.saveLocal.indexOf(attribute) !== -1 || attribute.slice(0, 6) === 'toggle') {
+        if (this.nosaveLocal.indexOf(attribute) === -1) {
             if (typeof newValue === 'object') {
                 localStorage.setItem('chat-' + attribute, JSON.stringify(newValue));
             } else {
@@ -136,120 +119,107 @@ var Attributes = {
     }())
 };
 
-var messageBuilder = {
-    createMessage : function (message, messageType, nick, flair, count, hat) {
-        var container = document.createElement('div'),
-            time = new Date(),
-            timeDIV = document.createElement('div'),
-            nickDIV = document.createElement('div'),
-            messageDIV = document.createElement('div'),
-            hatSpan,
-            input;
-
-        if (messageType === undefined) {
-            container.className = 'message';
-        } else {
-            container.className = 'message ' + messageType;
-        }
-
-        timeDIV.className = 'time';
-        timeDIV.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
-
-        if (count) {
-            timeDIV.addEventListener('click', function () {
-                input = document.querySelector('#input-bar textarea');
-                if (input.value) {
-                    input.value = input.value + ' >>' + count + ' ';
-                } else {
-                    input.value = '>>' + count + ' ';
-                }
-                input.focus();
-            });
-        }
-
-        container.appendChild(timeDIV);
-        
-        if (nick) {
-            if (hat && hat !== 'none') {
-                hatSpan = document.createElement('div');
-                hatSpan.className = 'hat';
-                hatSpan.style.backgroundImage = "url('/hats/" + hat + "')";
-                hatSpan.style.backgroundPosition = "center";
-                hatSpan.style.backgroundRepeat = "no-repeat";
-                hatSpan.style.backgroundSize = "30px 29px";
-                container.appendChild(hatSpan);
-            }
-
-            nickDIV.className = 'nick';
-
-            if (flair && parser.removeHTML(parser.parse(flair)) === nick) {
-                parser.getAllFonts(flair);
-                nickDIV.innerHTML = parser.parse(flair.replace(/\r?\n|\r/g, '')) + ':';
-            } else {
-                nickDIV.textContent = nick + ':';
-            }
-
-            container.appendChild(nickDIV);
-        }
-        
-        messageDIV.className = 'messageContent';
-
-        if (messageType === 'info') {
-            messageDIV.innerHTML = parser.escape(message);
-        } else if (messageType === 'chat-image') {
-            messageDIV.innerHTML = parser.parseImage(message.img, message.type);
-        } else {
-
-            if (this.alertMessage(message, messageType, nick)) {
-                timeDIV.style.color = 'yellow';
-                if (!Attributes.get('mute')) {
-                    audioPlayer.name.play();
-                }
-                if (window.blurred) {
-                    document.getElementById("icon").href = "images/awakenslogo2.png";
-                }
-            } else if (!Attributes.get('mute')) {
-                audioPlayer.chat.play();
-            }
-
-            while (message.split(/\n/).length > 15) {
-                var index = message.lastIndexOf('\n');
-                message = message.slice(0, index) + message.slice(index + 1);
-            }
-            parser.getAllFonts(message);
-            
-            messageDIV.innerHTML = ' ' + parser.parse(message, messageType === 'chat' && Attributes.get('toggle-filters'));
-        }
-        
-        if (count) {
-            container.classList += ' msg-' + count;
-        }
-
-        container.appendChild(messageDIV);
-
-        return container;
+var messageBuilder = {//message, messageType, nick, flair, count, hat
+    storedMessages : {
+        main : []
     },
     alertMessage : function (message, messageType, nick) {
         var myNick = Attributes.get('nick'),
             quote = message.match(/>>\d+/g),
             quoteAlert = false,
             quotedMessage,
-            quotedNick,
             i;
-
+        
         if (quote) {
             for (i = 0; i < quote.length; i++) {
-                quotedMessage = document.getElementsByClassName('msg-' + quote[i].replace('>>', ''));
-                if (quotedMessage.length) {
-                    quotedNick = quotedMessage[0].getElementsByClassName('nick')[0].textContent;
-                    if (quotedNick.substr(0, quotedNick.length - 1) === myNick) {
-                        quoteAlert = true;
-                    }
+                quotedMessage = messageBuilder.storedMessages.main[quote[i].replace('>>', '')];
+                if (quotedMessage) {
+                    quoteAlert = quotedMessage.nick === myNick
                 }
             }
         }
-
+        
         return messageType === 'chat' && nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert);
+    },
+    messageHTML : function () {
+        var container = document.createElement('div'),
+            time = new Date(),
+            timeDIV = document.createElement('div'),
+            nickDIV = document.createElement('div'),
+            messageDIV = document.createElement('div'),
+            hatDIV = document.createElement('div');
+        
+        container.className = 'message';
+                
+        timeDIV.className = 'time';
+        container.appendChild(timeDIV);
+        
+        hatDIV.className = 'hat';
+        container.append(hatDIV);
+        
+        nickDIV.className = 'nick';
+        container.appendChild(nickDIV);
+        
+        messageDIV.className = 'messageContent';
+        container.appendChild(messageDIV);
+        
+        return {
+            container : container,
+            time : timeDIV,
+            nick : nickDIV,
+            hat : hatDIV,
+            message : messageDIV
+        };
+    },
+    filloutHTML : function (messageHTML, messageData, alertMessage) {
+        var time = new Date();
+        
+        if (messageData.messageType) {
+            messageHTML.container.className += ' ' + messageData.messageType;
+        }
+        
+        if (messageData.count) {
+            messageHTML.container.count += ' msg-' + messageData.count;
+        }
+        
+        messageHTML.time.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
+        
+        if (messageData.count) {
+            messageHTML.time.addEventListener('click', function () {
+                var input = document.querySelector('#input-bar textarea');
+                input.value = input.value + (input.value ? ' ' : '')  + '>>' + messageData.count + ' ';
+                input.focus();
+            });
+        }
+
+        if (messageData.nick) {
+            if (messageData.hat && messageData.hat !== 'none') {
+                messageHTML.hat.style.backgroundImage = "url('/hats/" + messageData.hat + "')";
+            }
+
+            if (messageData.flair) {
+                messageHTML.nick.innerHTML = parser.flair(messageData.flair, messageData.nick) + ': ';
+            } else {
+                messageHTML.nick.textContent = messageData.nick + ': ';
+            }
+        }
+        
+        if (messageData.messageType === 'info') {
+            messageHTML.message.innerHTML = parser.escape(messageData.message);
+        } else if (messageData.messageType === 'chat-image') {
+            messageHTML.message.innerHTML = parser.parseImage(messageData.message.img, messageData.message.type);
+        } else {
+            if (alertMessage) {
+                messageHTML.time.style.color = 'yellow'; 
+                if (window.blurred) {
+                    document.getElementById("icon").href = "images/awakenslogo2.png";
+                }
+            }
+            parser.getAllFonts(messageData.message);
+            messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && Attributes.get('toggle-filters'));
+        }
+        
+        return messageHTML.container;
     },
     appendMessageTo : function (message, el) {
         if (el === undefined) {
@@ -261,8 +231,6 @@ var messageBuilder = {
             this.scrollToBottom(el);
         }
     },
-    autoScrolling : false,
-    scrolledOff : false,
     scrollToBottom : function(element) {
         if (typeof element == "string") {
             element = document.getElementById(element);
@@ -298,72 +266,36 @@ var messageBuilder = {
                 element.scrollTop = value;
             });
         }
-    }
-    /*scrollToBottom : function (parent, el) {
-        function scrollTo(element, to, duration) {
-            var start = element.scrollTop,
-                change = to - start,
-                increment = 20;
-            
-            messageBuilder.autoScrolling = true;
-            
-            var animateScroll = function (elapsedTime) {
-                elapsedTime += increment;
-                var position = easeInOut(elapsedTime, start, change, duration);
-                element.scrollTop = position;
-                if (elapsedTime < duration) {
-                    setTimeout(function () {
-                        animateScroll(elapsedTime);
-                    }, increment);
-                } else {
-                    messageBuilder.autoScrolling = false;
-                }
-            };
-            animateScroll(0);
-        }
-
-        function easeInOut(currentTime, start, change, duration) {
-            currentTime /= duration / 2;
-            if (currentTime < 1) {
-                return change / 2 * currentTime * currentTime + start;
-            }
-            currentTime -= 1;
-            return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
-        }
-
-        if (typeof parent === 'string') {
-            parent = document.getElementById(parent);
-        }
+    },
+    showMessage : function (messageData, panel) {
+        var blockUsers = Attributes.get('block') || [],
+            userID = ONLINE.getId(messageData.nick),
+            messageHTML = messageBuilder.messageHTML(),
+            alertMessage = messageBuilder.alertMessage(messageData.message, messageData.messageType, messageData.nick),
+            messageReady = messageBuilder.filloutHTML(messageHTML, messageData, alertMessage);
         
-        var scrollDelta = parent.scrollHeight - parent.offsetHeight;
-        if (!this.scrolledOff) {
-            if (window.blurred) {
-                parent.scrollTop = scrollDelta;
-            } else {
-                scrollTo(parent, scrollDelta, 200);
+        if (blockUsers.indexOf(messageData.nick) === -1) {
+            if (userID) {//reset idle time
+                ONLINE.users[userID].resetStatus();
             }
+
+            if (messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {//add user to quick reply if quick PM
+                Attributes.set('lastpm', messageData.nick);
+            }
+            
+            if (Attributes.get('mute')) {
+                audioPlayer.play(alertMessage);
+            }
+            
+            messageBuilder.storedMessages.main.push({
+                el : messageHTML.container,
+                nick : messageData.nick
+            });   
+            
+            messageBuilder.appendMessageTo(messageReady, panel);
         }
-    }*/
+    }
 };
-
-function showMessage(messageData, panel) {
-    var blockUsers = Attributes.get('blocked') || [],
-        userID = ONLINE.getId(messageData.nick),
-        messageHTML;
-    
-    if (userID) {
-        ONLINE.users[userID].resetStatus();
-    }
-    
-    if (blockUsers.indexOf(messageData.nick) === -1) {
-        messageHTML = messageBuilder.createMessage(messageData.message, messageData.messageType, messageData.nick, messageData.flair, messageData.count, messageData.hat);
-        
-        if (messageData.messageType && messageData.messageType === 'personal' && messageData.nick !== Attributes.get('nick')) {
-            Attributes.set('lastpm', messageData.nick);
-        }
-        messageBuilder.appendMessageTo(messageHTML, panel);
-    }
-}
 
 function handlePrivateMessage(messageData) {
     var panel = document.getElementById('PmPanel-' + messageData.landOn),
@@ -383,7 +315,7 @@ function handlePrivateMessage(messageData) {
         }
         
         menuControl.contextMenu.placeMenu(messageData.landOn, callBack, true);
-        showMessage(messageData, panel.getElementsByClassName('messages')[0]);
+        messageBuilder.showMessage(messageData, panel.getElementsByClassName('messages')[0]);
     } else if (pmUser) {
         if (!pmUser.pm) {
             pmUser.pm = [];
@@ -451,7 +383,7 @@ var clientSubmit = {
                     if (COMMANDS[commandName].params.length <= Object.keys(formatedParams).length || COMMANDS[commandName].paramsOptional) {
                         this.send(commandName, formatedParams);
                     } else {
-                        showMessage({
+                        messageBuilder.showMessage({
                             message : 'Invalid: /' + commandName + ' <' + COMMANDS[commandName].params.join('> <') + '>',
                             messageType : 'error'
                         });
@@ -460,7 +392,7 @@ var clientSubmit = {
                     this.send(commandName);
                 }
             } else {
-                showMessage({
+                messageBuilder.showMessage({
                     message : 'That isn\'t a command',
                     messageType : 'error'
                 });
@@ -515,158 +447,6 @@ var clientSubmit = {
         }
     }
 };
-
-var channelSet = {
-    hats : function (hats) {
-        var hatNames = hats,
-            i,
-            hatPanel = document.getElementById('displayHats');
-            
-        for (i = 0; i < hatNames.length; i++) {
-            var hatImg = new Image();
-            hatImg.src = '/hats/' + hatNames[i];
-            
-            hatPanel.appendChild(hatImg);
-            
-            hatImg.onclick = function () {
-                var split = this.src.split('/'),
-                    splitUp = split[split.length - 1];
-
-                clientSubmit.handleInput('/hat ' + splitUp.substr(0, splitUp.length - 4));
-            }
-        }
-    },
-    cursors : function (cursors) {
-        var cursorNames = cursors,
-            i,
-            cursorPanel = document.getElementById('displayCursors');
-            
-        for (i = 0; i < cursorNames.length; i++) {
-            var cursorImg = new Image();
-            cursorImg.src = '/cursors/' + cursorNames[i];
-            
-            cursorPanel.appendChild(cursorImg);
-            
-            cursorImg.onclick = function () {
-                var split = this.src.split('/'),
-                    splitUp = split[split.length - 1];
-
-                clientSubmit.handleInput('/cursor ' + splitUp.substr(0, splitUp.length - 4));
-            }
-        }
-    },
-    settings : function (channelData) {
-        if (channelData.note && channelData.note.value && channelData.note.value != Attributes.get('note').value) {
-            showMessage({
-                message : channelData.note.value,
-                messageType : 'note'
-            });
-            Attributes.set('note', channelData.note);
-        }
-
-        if (channelData.topic && channelData.topic.value && channelData.topic.value != Attributes.get('topic').value) {
-            document.title = channelData.topic.value;
-            showMessage({
-                message : 'Topic: ' + channelData.topic.value,
-                messageType : 'general'
-            });
-            Attributes.set('topic', channelData.topic);
-        }
-
-        if (channelData.background && channelData.background.value) {
-            if (Attributes.get('toggle-background')) {
-                document.getElementById('messages-background').style.background = channelData.background.value;
-            }
-            Attributes.set('background', channelData.background);
-        }
-
-        if (channelData.themecolors && channelData.themecolors.value) {
-            document.getElementById('input-bar').style.backgroundColor = channelData.themecolors.value[0];
-            document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors.value[1];
-            if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
-                document.styleSheets[0].deleteRule(4);
-                document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
-            }
-        }
-        
-        if (channelData.msg && channelData.msg.value) {
-            if (!Attributes.get('toggle-msg')) {
-                document.getElementById('center-text').style.display = 'none';
-            }
-            document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value, true, true);
-            Attributes.set('msg', channelData.msg);
-        }
-        
-        if (channelData.lock && (typeof Attributes.get('lock') !== 'object' || Attributes.get('lock').value !== channelData.lock.value)) {
-            var message;
-            if (channelData.lock.value) {
-                message = ' locked this channel';
-            } else {
-                message = ' unlocked this channel';
-            }
-            showMessage({
-                message : channelData.lock.updatedBy + message,
-                messageType : 'general'
-            });
-            
-            Attributes.set('lock', channelData.lock);
-        }
-        
-        if (channelData.proxy && (typeof Attributes.get('proxy') !== 'object' || Attributes.get('proxy').value !== channelData.proxy.value)) {
-            var message;
-            if (channelData.proxy.value) {
-                message = ' blocked proxies';
-            } else {
-                message = ' unblocked proxies';
-            }
-            showMessage({
-                message : channelData.proxy.updatedBy + message,
-                messageType : 'general'
-            });
-            
-            Attributes.set('proxy', channelData.proxy);
-        }
-        
-        if (channelData.owner) {
-            document.getElementById('unowned').style.display = 'none';
-            document.getElementById('owned').style.display = 'block';
-        }
-        
-        if (channelData.roles) {
-            var keys = Object.keys(channelData.roles),
-                i,
-                element,
-                roles = ['Admin', 'Mod'];
-            
-            for (i = 0; i < keys.length; i++) {
-                element = document.createElement('li');
-                element.textContent = keys[i];
-                document.getElementById('role' + roles[channelData.roles[keys[i]] - 2]).getElementsByTagName('ul')[0].appendChild(element);
-            }
-        }
-    },
-    commandRoles : function (commands) {
-        var keys = Object.keys(commands),
-            i,
-            element,
-            roles = ['ChannelOwner', 'Admin', 'Mod', 'Basic'],
-            currentE;
-        
-        for (i = 0; i < keys.length; i++) {
-            currentE = document.getElementById("command-" + keys[i]);
-            element = document.createElement('li');
-            
-            if (currentE) {
-                currentE.parentNode.removeChild(currentE);
-            }
-            
-            element.id = "command-" + keys[i];
-            element.textContent = keys[i];
-            
-            document.getElementById('cmd' + roles[commands[keys[i]] - 1]).getElementsByTagName('ul')[0].appendChild(element);
-        }
-    }
-}
 
 function createPanel(title, html, func) {
     var panel = document.getElementsByClassName(title + 'Panel'),
@@ -771,7 +551,7 @@ function createPmPanel(id) {
 
         if (ONLINE.users[id].pm) {
             for (i = 0; i < ONLINE.users[id].pm.length; i++) {
-                showMessage(ONLINE.users[id].pm[i], messages);
+                messageBuilder.showMessage(ONLINE.users[id].pm[i], messages);
             }
             ONLINE.users[id].pm = [];
         }
@@ -849,6 +629,82 @@ var AutoComplete = {
         }
     }
 };
+
+function showChannelDetails(channelData) {
+    if (channelData.note && channelData.note.value) {
+        messageBuilder.showMessage({
+            message : channelData.note.value,
+            messageType : 'note'
+        });
+        Attributes.set('note', channelData.note);
+    }
+
+    if (channelData.topic && channelData.topic.value) {
+        document.title = channelData.topic.value;
+        messageBuilder.showMessage({
+            message : 'Topic: ' + channelData.topic.value,
+            messageType : 'general'
+        });
+        Attributes.set('topic', channelData.topic);
+    }
+
+    if (channelData.background && channelData.background.value) {
+        if (Attributes.get('toggle-background')) {
+            document.getElementById('messages-background').style.background = channelData.background.value;
+        }
+        Attributes.set('background', channelData.background);
+    }
+
+    if (channelData.themecolors && channelData.themecolors.value) {
+        document.getElementById('input-bar').style.backgroundColor = channelData.themecolors.value[0];
+        document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors.value[1];
+        if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
+            document.styleSheets[0].deleteRule(4);
+            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
+        }
+    }
+    
+    if (channelData.msg && channelData.msg.value) {
+        if (!Attributes.get('toggle-msg')) {
+            document.getElementById('center-text').style.display = 'none';
+        }
+        document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value, true, true);
+        Attributes.set('msg', channelData.msg);
+    }
+    
+    if (channelData.lock && Attributes.get('lock').value !== channelData.lock.value) {
+        var message;
+        if (channelData.lock.value) {
+            message = ' locked this channel';
+        } else {
+            message = ' unlocked this channel';
+        }
+        messageBuilder.showMessage({
+            message : channelData.lock.updatedBy + message,
+            messageType : 'general'
+        });
+        
+        Attributes.set('lock', channelData.lock);
+    }
+    
+    if (channelData.proxy && Attributes.get('proxy').value !== channelData.proxy.value) {
+        var message;
+        if (channelData.proxy.value) {
+            message = ' blocked proxies';
+        } else {
+            message = ' unblocked proxies';
+        }
+        messageBuilder.showMessage({
+            message : channelData.proxy.updatedBy + message,
+            messageType : 'general'
+        });
+        
+        Attributes.set('proxy', channelData.proxy);
+    }
+    
+    menuControl.ownerUI(channelData.owner);
+    menuControl.roleUI(channelData.roles);
+}
 
 (function () {
     var history = [],
@@ -944,13 +800,13 @@ var AutoComplete = {
                     }
                     reader.readAsBinaryString(file);
                 } else {
-                    showMessage({
+                    messageBuilder.showMessage({
                         "message" : "Not an image.",
                         "messageType" : "error"
                     });
                 }
             } else {
-                showMessage({
+                messageBuilder.showMessage({
                     "message" : "Image too large.",
                     "messageType" : "error"
                 });
@@ -981,13 +837,13 @@ var AutoComplete = {
                         }
                         reader.readAsBinaryString(file);
                     } else {
-                        showMessage({
+                        messageBuilder.showMessage({
                             "message" : "Not an acceptable image.",
                             "messageType" : "error"
                         });
                     }
                 } else {
-                    showMessage({
+                    messageBuilder.showMessage({
                         "message" : "Image too large.",
                         "messageType" : "error"
                     });
@@ -1006,20 +862,11 @@ var AutoComplete = {
     emojione.imageType = 'svg';
     emojione.sprites = true;
     emojione.imagePathSVGSprites = 'images/emojione.sprites.svg';
-    
-    document.getElementById('messages').addEventListener('scroll', function (e) {
-        if (this.scrollTop + this.offsetHeight == this.scrollHeight) {
-            messageBuilder.scrolledOff = false;
-        } else if (!messageBuilder.autoScrolling) {
-            messageBuilder.scrolledOff = true;
-        }
-        
-    });
 })();
 
-socket.on('message', showMessage);
+socket.on('message', messageBuilder.showMessage);
 
-socket.on('chat-image', showMessage, true);
+socket.on('chat-image', messageBuilder.showMessage, true);
 
 socket.on('pmMessage', handlePrivateMessage);
 
@@ -1035,33 +882,7 @@ socket.on('afk', menuControl.afk);
 
 socket.on('left', menuControl.removeUser);
 
-socket.on('channeldata', function (channel) {
-    var i;
-
-    if (channel.users) {
-        document.getElementById('userList').innerHTML = '';
-        ONLINE.users = {};
-        for (i = 0; i < channel.users.length; i++) {            
-            menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
-        }
-    }
-
-    if (channel.settings) {
-        channelSet.settings(channel.settings);
-    }
-    
-    if (channel.hats) {
-        channelSet.hats(channel.hats); 
-    }
-    
-    if (channel.cursors) {
-        channelSet.cursors(channel.cursors);
-    }
-
-    if (channel.commandRoles) {
-        channelSet.commandRoles(channel.commandRoles);
-    }
-});
+socket.on('channelDetails', showChannelDetails)
 
 socket.on('banlist', function (banlist) {
     var border = document.createElement('div'),
@@ -1147,7 +968,7 @@ socket.on('disconnect', function () {
         }
     };
     
-    showMessage({
+    messageBuilder.showMessage({
         message : 'disconnected',
         messageType : 'error'
     });
@@ -1162,31 +983,8 @@ socket.on('connect', function () {
         window.top.location = window.self.location;
     } else {
         socket.emit('requestJoin', Attributes.storedAttributes);
-        menuControl.updateValues();
     }
 });
 
-socket.on('activeChannels', function (channels) {
-    /*var channelPanel = document.getElementsByClassName('channelPanel')[0],
-        activeChannels =channelPanel.getElementsByClassName('activeChannel'),
-        div,
-        i; 
-    
-    while (activeChannels.length) {
-        channelPanel.removeChild(activeChannels[0]);
-    }
-    
-    channels.sort(function (a, b) {
-        return  b.online - a.online;
-    });
-    
-    for (i = 0; i < channels.length; i++) {
-        div = document.createElement('div');
-        div.className = 'activeChannel';
-        div.textContent = channels[i].name;
-        channelPanel.appendChild(div);   
-    }*/
-});
-socket.emit('activeChannels');
-
-menuControl.initMissedMessages(socket)
+menuControl.initMissedMessages(socket);
+menuControl.initMenuUI(socket);

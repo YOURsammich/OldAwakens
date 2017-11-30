@@ -182,9 +182,14 @@ var parser = {
         return str;
     },
     parse : function (str, wordReplace, noFormat) {
+        while (str.split(/\n/).length > 15) {
+            var index = str.lastIndexOf('\n');
+            str = str.slice(0, index) + str.slice(index + 1);
+        }
+        
         // Convert chars to html codes
         str = this.escape(str, noFormat);
-
+        
         //match user escaping
         var escs = str.match(/\\./g);
         str = str.replace(/\\./g, this.repslsh);
@@ -318,5 +323,16 @@ var parser = {
                 $$$.query('#input-bar textarea').style.color = value;
             }
         } 
+    },
+    flair : function (flair, plainNick) {
+        var nickHTML = this.parse(flair),
+            parsedFlair;
+
+        if (this.removeHTML(nickHTML) === plainNick) {
+            this.getAllFonts(flair);
+            parsedFlair = nickHTML;
+        }
+        
+        return parsedFlair || plainNick;
     }
 };

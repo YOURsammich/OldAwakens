@@ -1,6 +1,13 @@
 var audioPlayer = {
     chat : new Audio('audio/Bing.mp3'),
-    name : new Audio('audio/Bwoop.wav')
+    name : new Audio('audio/Bwoop.wav'),
+    play : function (alertSound) {
+        if (alertSound) {
+            this.name.play();
+        } else {
+            this.chat.play();
+        }
+    }
 }
 
 function buildVideoOverlay(url) {

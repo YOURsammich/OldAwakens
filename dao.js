@@ -169,11 +169,8 @@ module.exports = {
     checkChannelOwnerShip : function (nick) {
         var defer = $.Deferred();
         var sql = "SELECT `channelName` FROM `channel_info` WHERE `attribute` = 'owner' AND `value` = ?";
-        
-        console.log(nick);
-        
+
         db.query(sql, nick, function (err, rows, fields) {
-            console.log(rows, rows.length);
             if (rows.length) {
                 defer.resolve(rows[0].channelName);
             } else {
@@ -197,7 +194,6 @@ module.exports = {
         
         this.getChannelAtt(channelName, att).then(function () {
             db.query(sqlUpdate, [value, channelName, att], function (err) {
-                console.log(err,'ass');
                 defer.resolve().promise(); 
             });
         }).fail(function () {
@@ -271,7 +267,7 @@ module.exports = {
     },
     checkBan : function (channelName, nick, ip) {
         var defer = $.Deferred();
-        var sql = "SELECT * FROM `awakens`.`channel_banned` WHERE `channelName` = ? AND `nick` = ? OR `remote_addr` = ?";
+        var sql = "SELECT * FROM `awakens`.`channel_banned` WHERE `channelName` = ? AND (`nick` = ? OR `remote_addr` = ?)";
         
         db.query(sql, [channelName, nick, ip], function (err, rows, fields) {
             if (!err) {

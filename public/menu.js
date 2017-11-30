@@ -48,7 +48,7 @@ var menuControl = {
         }
         
         if (noShow === undefined) {
-            showMessage({
+            messageBuilder.showMessage({
                 message : nick + ' has joined',
                 messageType : 'general'
             });
@@ -63,7 +63,7 @@ var menuControl = {
             pmPanel = document.getElementById('PmPanel-' + id);
         
         if (pmPanel) {
-            showMessage({
+            messageBuilder.showMessage({
                 message : user.nick + ' disconnected',
                 messageType : 'error'
             }, pmPanel.getElementsByClassName('messages')[0]);
@@ -78,7 +78,7 @@ var menuControl = {
         
         menuControl.updateCount();
 
-        showMessage({
+        messageBuilder.showMessage({
             message : user.nick + ' has left' + (part ? ': ' + part : ''),
             messageType : 'general'
         });
@@ -87,7 +87,7 @@ var menuControl = {
         var User = ONLINE.users[id],
             nickContain = User.li.getElementsByClassName('nickText')[0];
         
-        showMessage({
+        messageBuilder.showMessage({
             message : User.nick + ' is now known as ' + newNick,
             messageType : 'general'
         });
@@ -119,25 +119,6 @@ var menuControl = {
         var length = Object.keys(ONLINE.users).length;
         $$$.query('.toggle-menu span').textContent = length;
         //$$$.query('#userList').textContent = 'User list (' + length + ')';
-    },
-    updateValues : function () {
-        var allBars = document.getElementsByClassName('bar'),
-            i,
-            color;
-        
-        for (i = 0; i < allBars.length; i++) {
-            color = Attributes.get(allBars[i].classList[1]);
-            if (color) {
-                allBars[i].getElementsByTagName('input')[0].value = color;
-                allBars[i].getElementsByClassName('label')[0].style.backgroundColor = color;
-                allBars[i].getElementsByClassName('label')[0].classList.remove('transparent');
-            } else {
-                allBars[i].getElementsByTagName('input')[0].value = '';
-                allBars[i].getElementsByClassName('label')[0].style.backgroundColor = '';
-                allBars[i].getElementsByClassName('label')[0].classList.add('transparent');
-            }
-        }
-        
     },
     contextMenu : {
         defaultOptions : {
@@ -222,6 +203,85 @@ var menuControl = {
             }
         }
     },
+    HatUI : function (hats) {
+        var hatNames = hats,
+            i,
+            hatPanel = document.getElementById('displayHats');
+            
+        for (i = 0; i < hatNames.length; i++) {
+            var hatImg = new Image();
+            hatImg.src = '/hats/' + hatNames[i];
+            
+            hatPanel.appendChild(hatImg);
+            
+            hatImg.onclick = function () {
+                var split = this.src.split('/'),
+                    splitUp = split[split.length - 1];
+
+                clientSubmit.handleInput('/hat ' + splitUp.substr(0, splitUp.length - 4));
+            }
+        }
+    },
+    cursorUI : function (cursors) {
+        var cursorNames = cursors,
+            i,
+            cursorPanel = document.getElementById('displayCursors');
+            
+        for (i = 0; i < cursorNames.length; i++) {
+            var cursorImg = new Image();
+            cursorImg.src = '/cursors/' + cursorNames[i];
+            
+            cursorPanel.appendChild(cursorImg);
+            
+            cursorImg.onclick = function () {
+                var split = this.src.split('/'),
+                    splitUp = split[split.length - 1];
+
+                clientSubmit.handleInput('/cursor ' + splitUp.substr(0, splitUp.length - 4));
+            }
+        }
+    },
+    commandUI : function (commands) {
+        var keys = Object.keys(commands),
+            i,
+            element,
+            roles = ['ChannelOwner', 'Admin', 'Mod', 'Basic'],
+            currentE;
+        
+        for (i = 0; i < keys.length; i++) {
+            currentE = document.getElementById("command-" + keys[i]);
+            element = document.createElement('li');
+            
+            if (currentE) {
+                currentE.parentNode.removeChild(currentE);
+            }
+            
+            element.id = "command-" + keys[i];
+            element.textContent = keys[i];
+            
+            document.getElementById('cmd' + roles[commands[keys[i]] - 1]).getElementsByTagName('ul')[0].appendChild(element);
+        }
+    },
+    ownerUI : function (owned) {
+        if (owned) {
+            document.getElementById('unowned').style.display = 'none';
+            document.getElementById('owned').style.display = 'block';
+        }
+    },
+    roleUI : function (channelRoles) {
+        if (channelRoles) {
+            var keys = Object.keys(channelRoles),
+                i,
+                element,
+                roles = ['Admin', 'Mod'];
+
+            for (i = 0; i < keys.length; i++) {
+                element = document.createElement('li');
+                element.textContent = keys[i];
+                document.getElementById('role' + roles[channelRoles[keys[i]] - 2]).getElementsByTagName('ul')[0].appendChild(element);
+            }   
+        }
+    },
     initMissedMessages : function (socket) {
         var unread = 0;
         
@@ -241,6 +301,31 @@ var menuControl = {
             window.blurred = true;
         });
     },
+    initMenuUI : function (socket) {
+        socket.on('channeldata', function (channel) {
+            var i;
+
+            if (channel.users) {
+                document.getElementById('userList').innerHTML = '';
+                ONLINE.users = {};
+                for (i = 0; i < channel.users.length; i++) {            
+                    menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
+                }
+            }
+
+            if (channel.hats) {
+                menuControl.HatUI(channel.hats); 
+            }
+
+            if (channel.cursors) {
+                menuControl.cursorUI(channel.cursors);
+            }
+
+            if (channel.commandRoles) {
+                menuControl.commandUI(channel.commandRoles);
+            }
+        });  
+    },
     typing : function (id, typing) {
         var user = ONLINE.users[id];
         if (user) {
@@ -252,6 +337,59 @@ var menuControl = {
         }
     }
 };
+
+(function () {
+    var buttons = document.createElement('cmdOptions'),
+        ownerbtn = document.createElement('button'),
+        adminbtn = document.createElement('button'),
+        modbtn = document.createElement('button'),
+        basicbtn = document.createElement('button');
+    
+    buttons.id = "cmdOptions";
+    ownerbtn.textContent = 'Owner';
+    adminbtn.textContent = 'Admin';
+    modbtn.textContent = 'Mod';
+    basicbtn.textContent = 'Basic';
+    
+    buttons.appendChild(ownerbtn);
+    buttons.appendChild(adminbtn);
+    buttons.appendChild(modbtn);
+    buttons.appendChild(basicbtn);
+    
+    ownerbtn.addEventListener('click', function (e) {
+        var cmdID = this.parentNode.parentNode.id;
+        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '1');
+    });
+    
+    adminbtn.addEventListener('click', function (e) {
+        var cmdID = this.parentNode.parentNode.id;
+        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '2');
+    });
+    
+    modbtn.addEventListener('click', function (e) {
+        var cmdID = this.parentNode.parentNode.id;
+        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '3');
+    });
+    
+    basicbtn.addEventListener('click', function (e) {
+        var cmdID = this.parentNode.parentNode.id;
+        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '4');
+    });
+    
+    document.getElementById('manageCommands').addEventListener('click', function (e) {
+        var target = e.target,
+            currentMenu = document.getElementById('cmdOptions');
+        
+        if (currentMenu) {
+            currentMenu.parentNode.removeChild(currentMenu);
+        }
+        
+        if (target.nodeName == "LI") {
+            
+            target.appendChild(buttons);
+        }
+    });
+})();
 
 (function () {
     var i,

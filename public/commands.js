@@ -13,7 +13,7 @@ var COMMANDS = {
                     ava.push(key);
                 }
             });
-            showMessage({
+            messageBuilder.showMessage({
                 message : 'Available Commands: /' + ava.join(', /'),
                 messageType : 'info'
             });
@@ -29,7 +29,6 @@ var COMMANDS = {
                 Attributes.set('color', params.color.replace(/#/g,''));
                 parser.changeInput('color', params.color);
             }
-            menuControl.updateValues();
         }
     },
     bgcolor : {
@@ -121,25 +120,25 @@ var COMMANDS = {
                 }
                 return Math.floor(seconds) + " seconds";
             };
-            
+            console.log(attData);
             if (attData) {
                 
                 if (attData.value !== undefined) {
                     formatTime = new Date();
                     formatTime.setTime(attData.date);
-                    showMessage({
+                    messageBuilder.showMessage({
                         message : params.attribute + ' was set to "' + attData.value + '" by "' + attData.updatedBy + '" ' + timeSince(formatTime.getTime()) + ' ago',
                         messageType : 'info'
                     });
                 } else {
-                    showMessage({
+                    messageBuilder.showMessage({
                         message : params.attribute + ': ' + attData,
                         messageType : 'info'
                     });
                 }
                 
             } else {
-                showMessage({
+                messageBuilder.showMessage({
                     message : params.attribute + ' isn\'t set',
                     messageType : 'info'
                 });
@@ -169,7 +168,7 @@ var COMMANDS = {
                             password : password.value
                         });
                     } else {
-                        showMessage({
+                        messageBuilder.showMessage({
                             message : 'Please choose a password that is at least 5 characters long',
                             messageType : 'info'
                         });
@@ -181,7 +180,7 @@ var COMMANDS = {
     echo : {
         params : ['message'],
         handler : function (params) {
-            showMessage({
+            messageBuilder.showMessage({
                 message : clientSubmit.message.decorateText(params.message),
                 nick : Attributes.get('nick'),
                 flair : Attributes.get('flair')
@@ -228,12 +227,31 @@ var COMMANDS = {
         params : ['attr'],
         handler : function (params) {
             var validAtts = ['background', 'images', '12h', 'filters', 'cursors', 'msg'],
-                attValue = Attributes.get('toggle-' + params.attr);
+                attr = params.attr,
+                attValue = Attributes.get('toggle-' + attr);
             
-            if (validAtts.indexOf(params.attr) !== -1) {
-                Attributes.set('toggle-' + params.attr, !attValue, true);
+            if (validAtts.indexOf(attr) !== -1) {
+                
+                if (attr === 'cursors') {
+                    socket.emit('removeCursor');
+                    COMMANDS.clearcursors.handler();
+                } else if (attr === 'background') {
+                    if (attValue) {
+                        document.getElementById('messages-background').style.background = 'black';
+                    } else {
+                        document.getElementById('messages-background').style.background = Attributes.get('background').value;
+                    }      
+                } else if (attr === 'msg') {
+                    if (attValue) {
+                        document.getElementById('center-text').style.display = 'none';
+                    } else {
+                        document.getElementById('center-text').style.display = 'table-cell';
+                    }     
+                }
+                
+                Attributes.set('toggle-' + attr, !attValue, true);
             } else {
-                showMessage({
+                messageBuilder.showMessage({
                     message : 'Not a toggleable attribute'
                 });
             }
@@ -267,7 +285,7 @@ var COMMANDS = {
             
             blockedUsers.push(params.nick);
             Attributes.set('block', blockedUsers.join(','));
-            showMessage({
+            messageBuilder.showMessage({
                 message : params.nick + ' is now blocked',
                 messageType : 'info'
             });
@@ -289,12 +307,12 @@ var COMMANDS = {
             if (index !== -1) {
                 blockedUsers.splice(index, 1);
                 Attributes.set('block', blockedUsers.join(','));
-                showMessage({
+                messageBuilder.showMessage({
                     message : params.nick + ' is now unblocked',
                     messageType : 'info'
                 });
             } else {
-                showMessage({
+                messageBuilder.showMessage({
                     message : params.nick + ' isn\'t now unblocked',
                     messageType : 'info'
                 });
@@ -490,64 +508,13 @@ COMMANDS.bg = COMMANDS.background;
         i,
         newSet = {};
     
-    var buttons = document.createElement('cmdOptions'),
-        ownerbtn = document.createElement('button'),
-        adminbtn = document.createElement('button'),
-        modbtn = document.createElement('button'),
-        basicbtn = document.createElement('button');
-    
-    buttons.id = "cmdOptions";
-    ownerbtn.textContent = 'Owner';
-    adminbtn.textContent = 'Admin';
-    modbtn.textContent = 'Mod';
-    basicbtn.textContent = 'Basic';
-    
-    buttons.appendChild(ownerbtn);
-    buttons.appendChild(adminbtn);
-    buttons.appendChild(modbtn);
-    buttons.appendChild(basicbtn);
-    
-    ownerbtn.addEventListener('click', function (e) {
-        var cmdID = this.parentNode.parentNode.id;
-        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '1');
-    });
-    
-    adminbtn.addEventListener('click', function (e) {
-        var cmdID = this.parentNode.parentNode.id;
-        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '2');
-    });
-    
-    modbtn.addEventListener('click', function (e) {
-        var cmdID = this.parentNode.parentNode.id;
-        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '3');
-    });
-    
-    basicbtn.addEventListener('click', function (e) {
-        var cmdID = this.parentNode.parentNode.id;
-        clientSubmit.handleInput('/lockcommand ' + cmdID.substr(8, cmdID.length) + ' ' + '4');
-    });
-    
     for (i = 0; i < keys.length; i++) {
         if (COMMANDS[keys[i]].role) {
             newSet[keys[i]] = COMMANDS[keys[i]].role
         }
     }
     
-    document.getElementById('manageCommands').addEventListener('click', function (e) {
-        var target = e.target,
-            currentMenu = document.getElementById('cmdOptions');
-        
-        if (currentMenu) {
-            currentMenu.parentNode.removeChild(currentMenu);
-        }
-        
-        if (target.nodeName == "LI") {
-            
-            target.appendChild(buttons);
-        }
-    });
-    
-    channelSet.commandRoles(newSet);
+    menuControl.commandUI(newSet);
     
     parser.addFont(Attributes.get('font'));
     parser.changeInput('font', Attributes.get('font'));
