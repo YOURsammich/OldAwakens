@@ -265,6 +265,76 @@ var menuControl = {
             document.getElementById('cmd' + roles[commands[keys[i]] - 1]).getElementsByTagName('ul')[0].appendChild(element);
         }
     },
+    styleUI : function (profiles) {
+        var stylePanel = document.getElementById('dislayStyles'),
+            saveButton = document.createElement('button'),
+            profile,
+            flair,
+            hat,
+            message,
+            i;
+        
+        stylePanel.innerHTML = '';
+        
+        for (i = 0; i < profiles.length; i++) {
+            profile = document.createElement('div'),
+            flair = document.createElement('div'),
+            hat = document.createElement('div'),
+            message = document.createElement('div'),
+            
+            hat.className = 'hat';
+
+            flair.className = 'nick';
+            profile.className = 'message';
+
+            profile.appendChild(hat);
+            profile.appendChild(flair);
+            profile.appendChild(message);
+            
+            messageBuilder.filloutHTML({
+                hat : hat,
+                nick : flair,
+                message : message,
+                container : profile
+            }, {
+                hat : profiles[i].hat,
+                nick : 'sammich',
+                flair : profiles[i].flair,
+                message : clientSubmit.message.decorateText('Example Text', profiles[i].styles)
+            });
+            
+            stylePanel.appendChild(profile);
+        }
+        
+        
+        saveButton.addEventListener('click', function () {
+            menuControl.styleUI([{
+                hat : Attributes.get('hats'),
+                flair : Attributes.get('flair'),
+                styles : {
+                    font : Attributes.get('font'),
+                    glow : Attributes.get('glow'),
+                    bgcolor : Attributes.get('bgcolor'),
+                    color : Attributes.get('color'),
+                    style : Attributes.get('style')
+                }
+            }]);
+            
+            socket.emit('saveProfile', {
+                hat : Attributes.get('hats'),
+                flair : Attributes.get('flair'),
+                font : Attributes.get('font'),
+                glow : Attributes.get('glow'),
+                bgcolor : Attributes.get('bgcolor'),
+                color : Attributes.get('color'),
+                style : Attributes.get('style'),
+                cursor : Attributes.get('cursor')
+            });
+        });
+        
+        saveButton.textContent = 'Save current style to profile';
+        stylePanel.appendChild(saveButton);
+    },
     ownerUI : function (owned) {
         if (owned) {
             document.getElementById('unowned').style.display = 'none';
@@ -327,6 +397,8 @@ var menuControl = {
             if (channel.commandRoles) {
                 menuControl.commandUI(channel.commandRoles);
             }
+            
+            //menuControl.styleUI([]);
         });
         
         socket.on('idleStatus', menuControl.idleStatus);

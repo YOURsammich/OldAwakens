@@ -10,6 +10,7 @@ var url = require("url");
 
 var channels = {};
 var tokens = {};
+var privateconvo = {};
 
 function handleException(err) {
     // handle the error safely and verbosely
@@ -725,10 +726,16 @@ function createChannel(io, channelName) {
             }
         },
         away : {
-            
+            handler : function (user) {
+                showMessage(user.socket, 'status set to away', 'info');
+                roomEmit('idleStatus', user.id, 'away');
+            }
         },
         snooze : {
-            
+            handler : function (user) {
+                showMessage(user.socket, 'status set to unavailable', 'info');
+                roomEmit('idleStatus', user.id, 'unavailable');
+            }
         },
         cursors : {
             handler : function (user) {
@@ -938,6 +945,20 @@ function createChannel(io, channelName) {
         if (socket.request.headers['cf-connecting-ip']) {//if header is present replace clients ip with header
             user.remote_addr = socket.request.headers['cf-connecting-ip'];
         }
+        
+        /*socket.on('saveProfile', function (profile) {
+            dao.find(user.nick).then(function (dbuser) {
+                dao.getStyleProfile(user.nick).then(function (profiles) {
+                    if (profiles.length < 6) {
+                        dao.saveStyleProfile(user.nick, profile.flair, profile.cursor, profile.part, profile.font, profile.color, profile.style, profile.hat).then(function () {
+                            showMessage(socket, 'Profile saved', 'info');
+                        });
+                    }
+                });  
+            }).fail(function () {
+                showMessage(socket, 'Must be registered to make style profiles', 'error');
+            });
+        });*/
         
         socket.on('updateCursor', function (cursorData) {
             if (findIndex(channel.online, 'id', user.id) !== -1 && typeof cursorData === 'object') {
@@ -1163,7 +1184,9 @@ function createChannel(io, channelName) {
                     cursor : user.cursor,
                     part : user.part
                 });
-            
+                
+                
+                
                 console.log('USER JOIN', user.nick, user.role, user.remote_addr);
             }
             

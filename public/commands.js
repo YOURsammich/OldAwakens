@@ -276,7 +276,7 @@ var COMMANDS = {
     block : {
         params : ['nick'],
         handler : function (params) {
-            var blockedUsers = Attributes.get('blocked');
+            var blockedUsers = Attributes.get('block');
             if (!blockedUsers) {
                 blockedUsers = [];
             } else {
@@ -294,7 +294,7 @@ var COMMANDS = {
     unblock : {
         params : ['nick'],
         handler : function (params) {
-            var blockedUsers = Attributes.get('blocked'),
+            var blockedUsers = Attributes.get('block'),
                 index;
             
             if (!blockedUsers) {
@@ -504,6 +504,7 @@ var COMMANDS = {
 COMMANDS.colour = COMMANDS.color;
 COMMANDS.cls = COMMANDS.clear;
 COMMANDS.bg = COMMANDS.background;
+COMMANDS.snz = COMMANDS.snooze;
 
 (function(){
     var keys = Object.keys(COMMANDS),

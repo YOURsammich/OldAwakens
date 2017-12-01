@@ -394,19 +394,8 @@ h2 {
     display: block;
 }
 
-#cmdOptions button {
-    background-color: #111;
-    width: auto;
-    border: none;
-    color: white;
-    font-family: inherit;
-    padding: 5px;
-    border-bottom: 1px solid #222;
-    cursor: pointer;
-}
-
-#cmdOptions button:hover {
-    border-bottom: 1px solid #39F;
+#dislayStyles {
+    margin-top: 30px;
 }
 
 #stylePanels img {
@@ -449,18 +438,19 @@ h2 {
     margin-top: 10px;
 }
 
-#more-tabs {
-    width: 150px;
-    background-color: white;
-    color: black;
-    border-radius: 5px 0px 0px 5px;
-    font-size: small;
-    position: absolute;
-    right: 0px;
+#menu-panels button {
+    background-color: #111;
+    width: auto;
+    border: none;
+    color: white;
+    font-family: Montserrat;
+    padding: 5px;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
 }
 
-#more-tabs span {
-    color: black;
+#menu-panels button:hover {
+    border-bottom: 1px solid #39F;
 }
 
 .toggle-menu {

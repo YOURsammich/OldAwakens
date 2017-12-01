@@ -136,6 +136,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         if (quote) {
             for (i = 0; i < quote.length; i++) {
                 quotedMessage = messageBuilder.storedMessages.main[quote[i].replace('>>', '')];
+                console.log(quotedMessage);
                 if (quotedMessage) {
                     quoteAlert = quotedMessage.nick === myNick
                 }
@@ -183,9 +184,15 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         
         if (messageData.count) {
             messageHTML.container.className += ' msg-' + messageData.count;
+            messageBuilder.storedMessages.main[messageData.count] = {
+                el : messageHTML.container,
+                nick : messageData.nick
+            };
         }
         
-        messageHTML.time.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
+        if (messageHTML.time) {
+            messageHTML.time.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
+        }
         
         if (messageData.count) {
             messageHTML.time.addEventListener('click', function () {
@@ -290,20 +297,32 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
                 audioPlayer.play(alertMessage);
             }
             
-            messageBuilder.storedMessages.main.push({
-                el : messageHTML.container,
-                nick : messageData.nick
-            });   
-            
             messageBuilder.appendMessageTo(messageReady, panel);
         }
     }
 };
 
+var privateMessages = {
+    storedconvo : {},
+    handlePM : function (messageData) {
+        var panel = document.getElementById('PmPanel-' + messageData.landOn),
+            pmUser = ONLINE.users[messageData.landOn];
+        
+        if (panel) {
+            
+        }
+        
+        //privateMessages.storedconvo
+        console.log(messageData);
+    }
+}
+
 function handlePrivateMessage(messageData) {
     var panel = document.getElementById('PmPanel-' + messageData.landOn),
         pmUser = ONLINE.users[messageData.landOn],
         callBack = {};
+    
+    privateMessages.handlePM(messageData);
     
     if (panel) {
         if (!pmUser.pm) {
@@ -403,32 +422,31 @@ var clientSubmit = {
         }
     },
     message : {
-        decorateText : function (text) {
-            var decorativeModifiers = '',
-                font = Attributes.get('font'),
-                color = Attributes.get('color'),
-                bgcolor = Attributes.get('bgcolor'),
-                glow = Attributes.get('glow'),
-                style = Attributes.get('style');
-
-            if (font) {
-                decorativeModifiers += '$' + font + '|';
+        decorateText : function (text, styles) {
+            var decorativeModifiers = '';
+            
+            if (!styles) {
+                styles = Attributes.storedAttributes;
             }
 
-            if (glow) {
-                decorativeModifiers += '###' + glow;
+            if (styles.font) {
+                decorativeModifiers += '$' + styles.font + '|';
             }
 
-            if (bgcolor) {
-                decorativeModifiers += '##' + bgcolor;
+            if (styles.glow) {
+                decorativeModifiers += '###' + styles.glow;
             }
 
-            if (color) {
-                decorativeModifiers += '#' + color;
+            if (styles.bgcolor) {
+                decorativeModifiers += '##' + styles.bgcolor;
             }
 
-            if (style) {
-                decorativeModifiers += style;
+            if (styles.color) {
+                decorativeModifiers += '#' + styles.color;
+            }
+
+            if (styles.style) {
+                decorativeModifiers += styles.style;
             }
 
             return decorativeModifiers + text;
