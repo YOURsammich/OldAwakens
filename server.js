@@ -1098,8 +1098,12 @@ function createChannel(io, channelName) {
         function handleCommand(command, params) {
             var valid = true,
                 i;
-
-            if (command.channelRole >= user.role || (command.role === undefined || (command.role >= user.role && command.channelRole === undefined))) {
+            
+            if (command.role === undefined) {
+                command.role = 4    
+            }
+            
+            if (command.channelRole >= user.role || (command.role >= user.role && command.channelRole === undefined)) {
                 if (command.params) {
                     for (i = 0; i < command.params.length; i++) {
                         if (typeof params[command.params[i]] !== 'string' && typeof params[command.params[i]] !== 'undefined') {
