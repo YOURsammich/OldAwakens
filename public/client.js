@@ -56,23 +56,25 @@ var Attributes = {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
         
-        if (this.showMsg.indexOf(attribute) !== -1 && oldValue !== newValue && this.get('nick')) {
-            messageBuilder.showMessage({
-                nick : this.get('nick'),
-                flair : this.get('flair'),
-                message : clientSubmit.message.decorateText('Now your messages look like this'),
-                messageType : 'chat'
-            });
-        } 
+        if (noNotify === undefined) {
+            if (this.showMsg.indexOf(attribute) !== -1 && oldValue !== newValue && this.get('nick')) {
+                messageBuilder.showMessage({
+                    nick : this.get('nick'),
+                    flair : this.get('flair'),
+                    message : clientSubmit.message.decorateText('Now your messages look like this'),
+                    messageType : 'chat'
+                });
+            }
+
+            if ((this.notify.indexOf(attribute) !== -1 || attribute.substr(0, 6) == 'toggle') && oldValue !== newValue && newValue !== undefined) {
+                messageBuilder.showMessage({
+                    message : attribute + ' is now set to ' + newValue,
+                    messageType : 'info'
+                });
+            }
+        }
         
-        if ((this.notify.indexOf(attribute) !== -1 || attribute.substr(0, 6) == 'toggle') && oldValue !== newValue && newValue !== undefined) {
-            messageBuilder.showMessage({
-                message : attribute + ' is now set to ' + newValue,
-                messageType : 'info'
-            });
-        }   
-        
-        if (this.nosaveLocal.indexOf(attribute) === -1) {
+        if (this.nosaveLocal.indexOf(attribute) === -1 && attribute !== undefined) {
             if (typeof newValue === 'object') {
                 localStorage.setItem('chat-' + attribute, JSON.stringify(newValue));
             } else {
@@ -126,7 +128,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
     storedMessages : {
         main : []
     },
-    alertMessage : function (message, messageType, nick) {
+    alertMessage : function (message, nick) {
         var myNick = Attributes.get('nick'),
             quote = message.match(/>>\d+/g),
             quoteAlert = false,
@@ -136,14 +138,13 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         if (quote) {
             for (i = 0; i < quote.length; i++) {
                 quotedMessage = messageBuilder.storedMessages.main[quote[i].replace('>>', '')];
-                console.log(quotedMessage);
                 if (quotedMessage) {
                     quoteAlert = quotedMessage.nick === myNick
                 }
             }
         }
         
-        return messageType === 'chat' && nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert);
+        return nick !== myNick && (message.indexOf(myNick) !== -1 || quoteAlert);
     },
     messageHTML : function () {
         var container = document.createElement('div'),
@@ -281,10 +282,16 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         var blockUsers = Attributes.get('block') || [],
             userID = ONLINE.getId(messageData.nick),
             messageHTML = messageBuilder.messageHTML(),
-            alertMessage = messageBuilder.alertMessage(messageData.message, messageData.messageType, messageData.nick),
-            messageReady = messageBuilder.filloutHTML(messageHTML, messageData, alertMessage);
+            alertMessage,
+            messageReady;
         
         if (blockUsers.indexOf(messageData.nick) === -1) {
+            if (messageData.messageType == 'chat') {
+                alertMessage = messageBuilder.alertMessage(messageData.message, messageData.nick)
+            }
+
+            messageReady = messageBuilder.filloutHTML(messageHTML, messageData, alertMessage);
+            
             if (userID) {//reset idle time
                 ONLINE.users[userID].resetStatus();
             }

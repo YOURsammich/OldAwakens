@@ -43,9 +43,22 @@
                             <div id="stylePanels">
                                 <div id="styleMenu">
                                     <ul>
-                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'myHats');">Pick a Hat<span>arrow_forward</span></li>
-                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'myCursors');">Pick a cursor<span>arrow_forward</span></li>
+                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'stylePro');">Style Profiles<span>arrow_forward</span></li>
+                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'myHats');">Hat<span>arrow_forward</span></li>
+                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'myCursors');">cursor<span>arrow_forward</span></li>
                                     </ul>
+                                </div>
+                                <div class="menuPanel" id="stylePro">
+                                    <div id="goBack" onclick="$$$.tabber('stylePanels', 'styleMenu');">
+                                        <span id="goBackArrow"></span>
+                                    </div>
+                                    <div id="dislayStyles">
+                                        <div id="0button" class="savedStyle">Save style to profile 1</div>
+                                        <div id="1button" class="savedStyle">Save style to profile 2</div>
+                                        <div id="2button" class="savedStyle">Save style to profile 3</div>
+                                        <div id="3button" class="savedStyle">Save style to profile 4</div>
+                                        <div id="4button" class="savedStyle">Save style to profile 5</div>
+                                    </div>
                                 </div>
                                 <div class="menuPanel" id="myHats">
                                     <div id="goBack" onclick="$$$.tabber('stylePanels', 'styleMenu');">

@@ -29,7 +29,7 @@ var menuControl = {
                 var status = this;
                 if (status.idleStatus) {
                     clearTimeout(status.idleStatus);
-                }  
+                }
                 
                 if (idleStatus == 'unavailable') {
                     nickContain.children[0].classList.add('unavailable');
@@ -40,7 +40,7 @@ var menuControl = {
                     }, 3600000);
                 } else {
                     nickContain.children[0].classList.remove('away', 'unavailable');
-                    status.idleStatus = setTimeout(function () {;
+                    status.idleStatus = setTimeout(function () {
                         status.resetStatus('away');
                     }, 90000);
                 }
@@ -128,7 +128,7 @@ var menuControl = {
             PM : {
                 callback : function (nick) {
                     createPmPanel(ONLINE.getId(nick));
-                }  
+                }
             },
             whois : {
                 callback : function (nick) {
@@ -144,18 +144,18 @@ var menuControl = {
             ban : {
                 callback : function (nick) {
                     clientSubmit.handleInput('/ban ' + nick);
-                }  
+                }
             },
             banip : {
                 callback : function (nick) {
                     clientSubmit.handleInput('/banip ' + nick);
-                }  
+                }
             },
             find : {
                 callback : function (nick) {
                     clientSubmit.handleInput('/find ' + nick);
                 }
-            }  
+            }
         },
         placeMenu : function (id, options, stayOpen) {
             var options = options || this.defaultOptions,
@@ -163,8 +163,9 @@ var menuControl = {
                 menu,
                 userLi;
             
-            function makeMenu () {
-                var menuContainer = document.createElement('div');
+            function makeMenu() {
+                var menuContainer = document.createElement('div'),
+                    i;
                 
                 if (!stayOpen) {
                     menuContainer.id = 'tempMenu';
@@ -173,15 +174,15 @@ var menuControl = {
                 menuContainer.className = 'menuOptions';
                 
                 var keys = Object.keys(options);
-                for(var i = 0; i < keys.length; i++){
-                    var li = document.createElement('li');
-                    var att = keys[i];
+                for (i = 0; i < keys.length; i++) {
+                    var li = document.createElement('li'),
+                        att = keys[i];
                     if (att !== 'divider') {
                         li.textContent = att;
-                        li.onclick = function(e){
+                        li.onclick = function (e) {
                             userLi.removeChild(menuContainer);
                             options[this.textContent].callback(validUser.nick);
-                        }
+                        };
                     } else {
                         li.style.borderBottom = '1px solid black';
                         li.style.height = '0px';
@@ -222,7 +223,7 @@ var menuControl = {
                     splitUp = split[split.length - 1];
 
                 clientSubmit.handleInput('/hat ' + splitUp.substr(0, splitUp.length - 4));
-            }
+            };
         }
     },
     cursorUI : function (cursors) {
@@ -265,25 +266,22 @@ var menuControl = {
             document.getElementById('cmd' + roles[commands[keys[i]] - 1]).getElementsByTagName('ul')[0].appendChild(element);
         }
     },
-    styleUI : function (profiles) {
-        var stylePanel = document.getElementById('dislayStyles'),
-            saveButton = document.createElement('button'),
+    styleUI : function (allProfiles) {
+        var stylePanel = document.getElementById('dislayStyles').getElementsByClassName('savedStyle'),
             profile,
             flair,
             hat,
             message,
-            i;
+            i,
+            trashcan;
         
-        stylePanel.innerHTML = '';
-        
-        for (i = 0; i < profiles.length; i++) {
+        for (i = 0; i < stylePanel.length; i++) {
             profile = document.createElement('div'),
             flair = document.createElement('div'),
             hat = document.createElement('div'),
             message = document.createElement('div'),
             
             hat.className = 'hat';
-
             flair.className = 'nick';
             profile.className = 'message';
 
@@ -291,49 +289,47 @@ var menuControl = {
             profile.appendChild(flair);
             profile.appendChild(message);
             
-            messageBuilder.filloutHTML({
-                hat : hat,
-                nick : flair,
-                message : message,
-                container : profile
-            }, {
-                hat : profiles[i].hat,
-                nick : 'sammich',
-                flair : profiles[i].flair,
-                message : clientSubmit.message.decorateText('Example Text', profiles[i].styles)
-            });
-            
-            stylePanel.appendChild(profile);
+            if (allProfiles && allProfiles[i]) {
+                messageBuilder.filloutHTML({
+                    hat : hat,
+                    nick : flair,
+                    message : message,
+                    container : profile
+                }, {
+                    hat : allProfiles[i].hat,
+                    nick : Attributes.get('nick'),
+                    flair : allProfiles[i].flair,
+                    message : clientSubmit.message.decorateText('Example Text', {
+                        font : allProfiles[i].font,
+                        color : allProfiles[i].color,
+                        bgcolor : allProfiles[i].bgcolor,
+                        glow : allProfiles[i].glow,
+                        style : allProfiles[i].style
+                    })
+                });
+                profile.addEventListener('click', function () {
+                    var thisProfile = allProfiles[this.parentNode.id[0]],
+                        keys = Object.keys(thisProfile);
+                    for (var i = 0; i < keys.length; i++) {
+                        Attributes.set(keys[i], thisProfile[keys[i]], true);
+                    }
+                    clientSubmit.handleInput('/echo Now your messages look like this');
+                });
+                stylePanel[allProfiles[i].num].innerHTML = '';
+                stylePanel[allProfiles[i].num].className += ' flair';
+                stylePanel[allProfiles[i].num].appendChild(profile);
+                trashcan = document.createElement('span');
+                trashcan.textContent = 'delete_forever';
+                trashcan.className = 'trash';
+                trashcan.addEventListener('click', function () {
+                    var id = parseInt(this.parentNode.id[0] + 1);
+                    this.parentNode.className = 'savedStyle';
+                    this.parentNode.innerHTML = 'Save style to profile ' + id;
+                    socket.emit('deleteProfile', id - 1);
+                });
+                stylePanel[allProfiles[i].num].appendChild(trashcan);
+            }
         }
-        
-        
-        saveButton.addEventListener('click', function () {
-            menuControl.styleUI([{
-                hat : Attributes.get('hats'),
-                flair : Attributes.get('flair'),
-                styles : {
-                    font : Attributes.get('font'),
-                    glow : Attributes.get('glow'),
-                    bgcolor : Attributes.get('bgcolor'),
-                    color : Attributes.get('color'),
-                    style : Attributes.get('style')
-                }
-            }]);
-            
-            socket.emit('saveProfile', {
-                hat : Attributes.get('hats'),
-                flair : Attributes.get('flair'),
-                font : Attributes.get('font'),
-                glow : Attributes.get('glow'),
-                bgcolor : Attributes.get('bgcolor'),
-                color : Attributes.get('color'),
-                style : Attributes.get('style'),
-                cursor : Attributes.get('cursor')
-            });
-        });
-        
-        saveButton.textContent = 'Save current style to profile';
-        stylePanel.appendChild(saveButton);
     },
     ownerUI : function (owned) {
         if (owned) {
@@ -398,7 +394,9 @@ var menuControl = {
                 menuControl.commandUI(channel.commandRoles);
             }
             
-            //menuControl.styleUI([]);
+            if (channel.styles) {
+                menuControl.styleUI(channel.styles);
+            }
         });
         
         socket.on('idleStatus', menuControl.idleStatus);
@@ -472,8 +470,29 @@ var menuControl = {
         }
         
         if (target.nodeName == "LI") {
-            
             target.appendChild(buttons);
+        }
+    });
+    
+    document.getElementById('dislayStyles').addEventListener('click', function (e) {
+        var target = e.target,
+            ary = [];
+
+        if (target.className == "savedStyle") {
+            ary[target.id[0]] = {
+                num : target.id[0],
+                flair : Attributes.get('flair') || '',
+                cursor : Attributes.get('cursor') || '',
+                part : Attributes.get('part') || '',
+                font : Attributes.get('font') || '',
+                color : Attributes.get('color') || '',
+                bgcolor : Attributes.get('bgcolor') || '',
+                glow : Attributes.get('glow') || '',
+                style : Attributes.get('style') || '',
+                hat : Attributes.get('hats') || ''
+            }
+            menuControl.styleUI(ary);
+            socket.emit('saveProfile', ary[target.id[0]]);
         }
     });
 })();

@@ -255,6 +255,40 @@ module.exports = {
         });
         return defer;
     },
+    deleteStyleProfile : function (nick, num) {
+        var defer = $.Deferred();
+        var sql = "DELETE FROM `customize_profiles` WHERE `nick` = ? AND `num` = ?";
+        db.query(sql, [nick, num], function (err, rows, fields) {
+            defer.resolve(rows).promise();
+        });
+        
+        return defer;
+    },
+    saveStyleProfile : function (nick, profile) {
+        var defer = $.Deferred();
+        var sql = "INSERT INTO `customize_profiles` (`nick`, `num`, `flair`, `cursor`, `part`, `font`, `color`, `bgcolor`, `glow`, `style`, `hats`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+        
+        profile.unshift(nick);
+        
+        this.deleteStyleProfile(nick, profile[1]).then(function () {
+            db.query(sql, profile, function (err, rows, fields) {
+                if (!err) {
+                    defer.resolve().promise();   
+                }
+            }); 
+        });
+        
+        return defer;
+    },
+    getUsersStyleProfile : function (nick) {
+        var defer = $.Deferred();
+        var sql = "SELECT * FROM `customize_profiles` WHERE `nick` = ? ORDER BY `num` ASC";
+        
+        db.query(sql, nick, function (err, rows, fields) {
+            defer.resolve(rows).promise();
+        });
+        return defer;
+    },
     banlist : function(channelName) {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `channel_banned` WHERE `channelName` = ?;"

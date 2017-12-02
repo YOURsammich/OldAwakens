@@ -159,6 +159,12 @@ function createChannel(io, channelName) {
                                         user.hat = JSON.parse(dbuser.hat).current;
                                     }
                                     
+                                    dao.getUsersStyleProfile(dbuser.nick).then(function (profiles) {
+                                        user.socket.emit('channeldata', {
+                                            styles : profiles
+                                        });
+                                    });
+                                    
                                     updateUserData(user, {
                                         nick : dbuser.nick,
                                         token : dao.makeId(),
@@ -946,19 +952,50 @@ function createChannel(io, channelName) {
             user.remote_addr = socket.request.headers['cf-connecting-ip'];
         }
         
-        /*socket.on('saveProfile', function (profile) {
+        socket.on('saveProfile', function (profile) {
+            var valid = true;
             dao.find(user.nick).then(function (dbuser) {
-                dao.getStyleProfile(user.nick).then(function (profiles) {
-                    if (profiles.length < 6) {
-                        dao.saveStyleProfile(user.nick, profile.flair, profile.cursor, profile.part, profile.font, profile.color, profile.style, profile.hat).then(function () {
-                            showMessage(socket, 'Profile saved', 'info');
-                        });
+                dao.getUsersStyleProfile(dbuser.nick).then(function (allProfiles) {
+                    if (allProfiles.length < 6) {
+                        profile = [
+                            profile.num, profile.flair,
+                            profile.cursor, profile.part,
+                            profile.font, profile.color,
+                            profile.bgcolor, profile.glow,
+                            profile.style, profile.hat,
+                        ];
+                        if (profile.length == 10 && profile[0] >= 0 && profile[0] <= 5) {
+                            for (var i = 0; i < profile.length; i++) {
+                                if (typeof profile[i] !== 'string') {
+                                    valid = false;
+                                }
+                            }
+                            if (valid) {
+                                dao.saveStyleProfile(dbuser.nick, profile).then(function () {
+                                    showMessage(socket, 'Profile saved', 'info');
+                                });   
+                            } else {
+                                showMessage(socket, 'Invalid styles', 'error');
+                            } 
+                        } else {
+                            showMessage(socket, 'invalid number', 'error');
+                        }
+                    } else {
+                        showMessage(socket, 'You are limited to 5 profiles', 'error');
                     }
                 });  
             }).fail(function () {
-                showMessage(socket, 'Must be registered to make style profiles', 'error');
+                showMessage(socket, 'Register to save profiles so you can have it next time you join', 'info');
             });
-        });*/
+        });
+        
+        socket.on('deleteProfile', function (num) {
+            dao.find(user.nick).then(function (dbuser) {
+                dao.deleteStyleProfile(dbuser.nick, num).then(function () {
+                    showMessage(socket, 'Style profile deleted', 'info'); 
+                });
+            });
+        });
         
         socket.on('updateCursor', function (cursorData) {
             if (findIndex(channel.online, 'id', user.id) !== -1 && typeof cursorData === 'object') {
@@ -1189,7 +1226,13 @@ function createChannel(io, channelName) {
                     part : user.part
                 });
                 
-                
+                if (dbuser) {
+                    dao.getUsersStyleProfile(dbuser.nick).then(function (profiles) {
+                        socket.emit('channeldata', {
+                            styles : profiles
+                        });
+                    });
+                }
                 
                 console.log('USER JOIN', user.nick, user.role, user.remote_addr);
             }
