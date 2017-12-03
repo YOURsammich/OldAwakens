@@ -90,7 +90,7 @@ var Attributes = {
         }
 
         if (this.storedAttributes[attribute] === undefined && attribute.substr(0, 6) === 'toggle') {
-            value = true;
+            value = false;
         } else if (this.storedAttributes[attribute] === undefined) {
             value = false;
         } else {
@@ -192,7 +192,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         }
         
         if (messageHTML.time) {
-            messageHTML.time.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
+            messageHTML.time.textContent = (!Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
         }
         
         if (messageData.count) {
@@ -227,7 +227,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
                 }
             }
             parser.getAllFonts(messageData.message);
-            messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && Attributes.get('toggle-filters'));
+            messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && !Attributes.get('toggle-filters'));
         }
         
         return messageHTML.container;
@@ -300,7 +300,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
                 Attributes.set('lastpm', messageData.nick);
             }
             
-            if (Attributes.get('mute')) {
+            if (!Attributes.get('toggle-mute')) {
                 audioPlayer.play(alertMessage);
             }
             
@@ -677,7 +677,7 @@ function showChannelDetails(channelData) {
     }
 
     if (channelData.background && channelData.background.value) {
-        if (Attributes.get('toggle-background')) {
+        if (!Attributes.get('toggle-background')) {
             document.getElementById('messages-background').style.background = channelData.background.value;
         }
         Attributes.set('background', channelData.background);
@@ -693,7 +693,7 @@ function showChannelDetails(channelData) {
     }
     
     if (channelData.msg && channelData.msg.value) {
-        if (!Attributes.get('toggle-msg')) {
+        if (Attributes.get('toggle-msg')) {
             document.getElementById('center-text').style.display = 'none';
         }
         document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value, true, true);

@@ -237,15 +237,15 @@ var COMMANDS = {
                     COMMANDS.clearcursors.handler();
                 } else if (attr === 'background') {
                     if (attValue) {
-                        document.getElementById('messages-background').style.background = 'black';
-                    } else {
                         document.getElementById('messages-background').style.background = Attributes.get('background').value;
+                    } else {
+                        document.getElementById('messages-background').style.background = 'black';
                     }      
                 } else if (attr === 'msg') {
                     if (attValue) {
-                        document.getElementById('center-text').style.display = 'none';
-                    } else {
                         document.getElementById('center-text').style.display = 'table-cell';
+                    } else {
+                        document.getElementById('center-text').style.display = 'none';
                     }     
                 }
                 

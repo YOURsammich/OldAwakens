@@ -5,7 +5,7 @@ var _ = require('underscore');
 var $ = require('jquery-deferred');
 var express = require('express');
 var fs = require('fs');
-var minify = require('express-minify');
+//var minify = require('express-minify');
 var url = require("url");
 
 var channels = {};
@@ -991,10 +991,10 @@ function createChannel(io, channelName) {
         
         socket.on('uploadCursor', function (base64) {
             dao.find(user.nick).then(function () {
-                if (!/^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/.test(base64)) {
+                if (!/^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/.test(base64) && base64) {
                     if (base64.length < 6000) {
                         user.cursor = base64;
-                        dao.setUserinfo('cursor', base64);
+                        dao.setUserinfo(user.nick, 'cursor', base64);
                         roomEmit('changeCursor', user.id, user.cursor);
                     } else {
                         showMessage(socket, 'Image is too big', 'error');
@@ -1424,6 +1424,7 @@ function intoapp(app, http) {
     var channelRegex = /^\/(\w*\/?)$/;
     var io = require('socket.io')(http);
     //app.use(minify());
+
     app.use(express.static(__dirname + '/public'));
     app.get("/img/*", function (req, res) {
         if (req.query.url) {
@@ -1441,7 +1442,7 @@ function intoapp(app, http) {
             res.send("Error: No URL");
         }
     });
-
+    
     app.get(channelRegex, function (req, res) {
         if (!channels[req.url]) {
             channels[req.url] = createChannel(io, req.url);

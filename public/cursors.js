@@ -34,11 +34,16 @@
             cursorImage.onload = function () {
                 cursor.style.width = cursorImage.width + 'px';
                 cursor.style.height = cursorImage.height + 'px';
-                cursor.appendChild(cursorImage);
             };
             
+            cursorImage.onerror = function () {
+                cursorImage.src = 'cursors/default.png';
+            }
+            
+            cursor.appendChild(cursorImage);
+
             if (cursorType) {
-                if (cursorType.length > 2000) {
+                if (cursorType.length > 200) {
                     cursorImage.src = cursorType;
                 } else {
                     cursorImage.src = 'cursors/' + cursorType
@@ -73,6 +78,16 @@
                 cuser.cursor.style.width = cursorImage.width + 'px';
                 cuser.cursor.style.height = cursorImage.height + 'px';
             };
+            
+            cursorImage.onerror = function () {
+                cursorImage.src = 'cursors/default.png';
+                if (user.nick == cuser.nick) {
+                    messageBuilder.showMessage({
+                        message : 'Error loading custom cursor',
+                        messageType : 'error'
+                    });
+                }
+            }
             
             if (newCursor.length > 200) {
                 cursorImage.src = newCursor;
