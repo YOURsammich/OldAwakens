@@ -74,7 +74,7 @@
                 cuser.cursor.style.height = cursorImage.height + 'px';
             };
             
-            if (newCursor.length > 2000) {
+            if (newCursor.length > 200) {
                 cursorImage.src = newCursor;
             } else {
                 cursorImage.src = 'cursors/' + newCursor;
