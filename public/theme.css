@@ -463,7 +463,7 @@ h2 {
     margin-top: 10px;
 }
 
-#manageCommands button {
+.customButton {
     background-color: #111;
     width: auto;
     border: none;
@@ -474,7 +474,7 @@ h2 {
     cursor: pointer;
 }
 
-#manageCommands button:hover {
+.customButton:hover {
     border-bottom: 1px solid #39F;
 }
 

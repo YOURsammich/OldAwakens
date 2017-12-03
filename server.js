@@ -753,19 +753,14 @@ function createChannel(io, channelName) {
         cursor : {
             params : ['cursor'],
             handler : function (user, params) {
-                var usersCursors,
-                    userCursorIndex,
-                    cursorIndex,
+                var cursorIndex,
                     allCursors;
                     
                 dao.find(user.nick).then(function (dbuser) {
                     var allCursors = dao.getCursors();
                     var cursorIndex = allCursors.lowercase.indexOf(params.cursor.toLowerCase());
                     if (cursorIndex !== -1) {
-                        var userCursor = {
-                            name : allCursors.name[cursorIndex]
-                        };
-                        dao.setUserinfo(dbuser.nick, 'cursor', userCursor).then(function () {
+                        dao.setUserinfo(dbuser.nick, 'cursor', allCursors.name[cursorIndex]).then(function () {
                             user.cursor = allCursors.name[cursorIndex];
                             roomEmit('changeCursor', user.id, user.cursor);
                             showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
@@ -777,9 +772,6 @@ function createChannel(io, channelName) {
                     var allCursors = dao.getCursors();
                     var cursorIndex = allCursors.lowercase.indexOf(params.cursor.toLowerCase());
                     if (cursorIndex !== -1) {
-                        var userCursor = {
-                            name : allCursors.name[cursorIndex]
-                        };
                         user.cursor = allCursors.name[cursorIndex];
                         roomEmit('changeCursor', user.id, user.cursor);
                         showMessage(user.socket, 'You are now using cursor: ' + allCursors.lowercase[cursorIndex], 'info');
@@ -994,6 +986,24 @@ function createChannel(io, channelName) {
                 dao.deleteStyleProfile(dbuser.nick, num).then(function () {
                     showMessage(socket, 'Style profile deleted', 'info'); 
                 });
+            });
+        });
+        
+        socket.on('uploadCursor', function (base64) {
+            dao.find(user.nick).then(function () {
+                if (!/^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/.test(base64)) {
+                    if (base64.length < 6000) {
+                        user.cursor = base64;
+                        dao.setUserinfo('cursor', base64);
+                        roomEmit('changeCursor', user.id, user.cursor);
+                    } else {
+                        showMessage(socket, 'Image is too big', 'error');
+                    }
+                } else {
+                    showMessage(socket, 'That is\'t base64', 'error');
+                }
+            }).fail(function () {
+                showMessage(socket, 'Must be registered to upload a cursor', 'error'); 
             });
         });
         
@@ -1262,11 +1272,7 @@ function createChannel(io, channelName) {
                     }
                     
                     if (dbuser.cursor) {
-                        try {
-                            user.cursor = JSON.parse(dbuser.cursor).name;
-                        } catch (err) {
-                            user.cursor = '';
-                        }
+                        user.cursor = dbuser.cursor;
                     }
                     
                     if (dbuser.part) {

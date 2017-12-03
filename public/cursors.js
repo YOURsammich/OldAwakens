@@ -10,7 +10,7 @@
         if (!user) {
             user = ONLINE.users[ONLINE.getId(Attributes.get('nick'))];
         }
-        
+
         if (!cursor) {
             cursorImage = new Image();
             cursor = document.createElement('div');
@@ -36,8 +36,16 @@
                 cursor.style.height = cursorImage.height + 'px';
                 cursor.appendChild(cursorImage);
             };
-
-            cursorImage.src = 'cursors/' + (cursorType || 'default.png');
+            
+            if (cursorType) {
+                if (cursorType.length > 2000) {
+                    cursorImage.src = cursorType;
+                } else {
+                    cursorImage.src = 'cursors/' + cursorType
+                }
+            } else {
+                cursorImage.src = 'cursors/default.png';
+            }
         } else {
             cursor.style.left = (position.x * window.innerWidth) + 'px';
             cursor.style.top = (position.y * window.innerHeight) + 'px';
@@ -65,8 +73,12 @@
                 cuser.cursor.style.width = cursorImage.width + 'px';
                 cuser.cursor.style.height = cursorImage.height + 'px';
             };
-
-            cursorImage.src = 'cursors/' + newCursor;
+            
+            if (newCursor.length > 2000) {
+                cursorImage.src = newCursor;
+            } else {
+                cursorImage.src = 'cursors/' + newCursor;
+            }
         }
     }
     

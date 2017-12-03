@@ -436,6 +436,11 @@ var menuControl = {
     modbtn.textContent = 'Mod';
     basicbtn.textContent = 'Basic';
     
+    ownerbtn.className = 'customButton';
+    adminbtn.className = 'customButton';
+    modbtn.className = 'customButton';
+    basicbtn.className = 'customButton';
+    
     buttons.appendChild(ownerbtn);
     buttons.appendChild(adminbtn);
     buttons.appendChild(modbtn);
@@ -495,6 +500,17 @@ var menuControl = {
             socket.emit('saveProfile', ary[target.id[0]]);
         }
     });
+    
+    document.getElementById('customCursor').getElementsByTagName('button')[0].addEventListener('click', function () {
+        var uploadPanel = document.getElementById('uploadTextarea');
+        if (uploadPanel.style.display == 'none') {
+            uploadPanel.style.display = 'block';
+            this.textContent = 'Click here to upload';
+        } else {
+            socket.emit('uploadCursor', uploadPanel.getElementsByTagName('textarea')[0].value);
+        }
+    });
+    
 })();
 
 (function () {
