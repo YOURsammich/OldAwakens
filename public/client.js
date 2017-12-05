@@ -52,6 +52,13 @@ var Attributes = {
     notify : ['part', 'nick'],
     altAtt : {colour : 'color', bg : 'background'},
     nosaveLocal : [],
+    default : {
+        cursors : true,
+        mute : false,
+        background : true,
+        msg : true
+        
+    },
     set : function (attribute, newValue, noNotify) {
         var oldValue = this.storedAttributes[attribute];
         this.storedAttributes[attribute] = newValue;
@@ -84,19 +91,17 @@ var Attributes = {
     },
     get : function (attribute) {
         var value = '';
-
+        
         if (this.altAtt[attribute]) {
             attribute = this.altAtt[attribute];
         }
 
-        if (this.storedAttributes[attribute] === undefined && attribute.substr(0, 6) === 'toggle') {
-            value = false;
-        } else if (this.storedAttributes[attribute] === undefined) {
-            value = false;
+        if (attribute.substr(0, 6) == 'toggle' && this.default[attribute.substr(7)]) {
+            value = this.default[attribute.substr(7)]
         } else {
             value = this.storedAttributes[attribute];
         }
-
+        
         return value;
     },
     remove : function (attribute) {
@@ -207,12 +212,8 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
             if (messageData.hat && messageData.hat !== 'none') {
                 messageHTML.hat.style.backgroundImage = "url('/hats/" + messageData.hat + "')";
             }
-
-            if (messageData.flair) {
-                messageHTML.nick.innerHTML = parser.flair(messageData.flair, messageData.nick) + ': ';
-            } else {
-                messageHTML.nick.textContent = messageData.nick + ': ';
-            }
+            
+            messageHTML.nick.innerHTML = parser.flair(messageData.flair, messageData.nick) + ': ';
         }
         
         if (messageData.messageType === 'info') {
@@ -311,53 +312,101 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
 
 var privateMessages = {
     storedconvo : {},
+    toggleHTML : function (msgdata) {
+        var panel = document.getElementById('PmPanel-' + msgdata.landOn),
+            container = document.createElement('div'),
+            nick = document.createElement('div'),
+            numsg = document.createElement('span'),
+            btm = document.createElement('div'),
+            lastmsg = document.createElement('span');
+        
+        container.id = 'pmtoggle-' + msgdata.landOn;
+        container.className = 'pmtoggle';
+        nick.innerHTML = parser.flair(privateMessages.storedconvo[msgdata.landOn].toflair, ONLINE.users[privateMessages.storedconvo[msgdata.landOn].to].nick);
+        nick.className = 'pnick nick';
+        numsg.classList = 'misnum';
+        
+        if (privateMessages.storedconvo[msgdata.landOn].unread) {
+            numsg.textContent = 'unread: ' + privateMessages.storedconvo[msgdata.landOn].unread;
+        }
+        
+        if (msgdata.message.length < 50) {
+            lastmsg.innerHTML = parser.parse(msgdata.message);
+        } else {
+            lastmsg.innerHTML = parser.parse(msgdata.message.substr(0, 50));    
+        }
+        
+        lastmsg.className = 'pmsg message';
+        
+        container.addEventListener('click', function () {
+            if (panel) {
+                panel.style.display = 'block';
+            } else {
+                createPmPanel(msgdata.landOn);
+            }
+            container.parentNode.removeChild(container);
+        });
+        
+        nick.appendChild(numsg);
+        btm.appendChild(lastmsg);
+        
+        container.appendChild(nick);
+        container.appendChild(btm);
+        
+        return container;
+    },
+    mini : function (landOn) {
+        var panel = document.getElementById('PmPanel-' + landOn),
+            pmtoggle = document.getElementById('pmtoggle-' + landOn),
+            pmUser = ONLINE.users[landOn],
+            messageData;
+        
+        if (privateMessages.storedconvo[landOn]) {
+            messageData = privateMessages.storedconvo[landOn].messages[privateMessages.storedconvo[landOn].messages.length - 1];
+            if (pmtoggle) {
+                pmtoggle.getElementsByClassName('pmsg')[0].innerHTML = parser.parse(messageData.message);
+                if (this.storedconvo[messageData.landOn].unread) {
+                    pmtoggle.getElementsByClassName('misnum')[0].textContent = 'unread: ' + this.storedconvo[messageData.landOn].unread;
+                } else {
+                    pmtoggle.getElementsByClassName('misnum')[0].textContent = '';
+                }
+            } else {
+                pmtoggle = this.toggleHTML(messageData);
+                document.getElementById('directMessages').appendChild(pmtoggle);
+            }
+        }
+    },
     handlePM : function (messageData) {
         var panel = document.getElementById('PmPanel-' + messageData.landOn),
             pmUser = ONLINE.users[messageData.landOn];
         
-        if (panel) {
-            
+        if (!privateMessages.storedconvo[messageData.landOn]) {
+            privateMessages.storedconvo[messageData.landOn] = {
+                messages : [],
+                unread : 0,
+                to : messageData.landOn,
+                toflair : messageData.flair
+            };
+        } else if (privateMessages.storedconvo[messageData.landOn].to == messageData.landOn) {
+            privateMessages.storedconvo[messageData.landOn].toflair = messageData.flair;
         }
         
-        //privateMessages.storedconvo
-        console.log(messageData);
-    }
-}
-
-function handlePrivateMessage(messageData) {
-    var panel = document.getElementById('PmPanel-' + messageData.landOn),
-        pmUser = ONLINE.users[messageData.landOn],
-        callBack = {};
-    
-    privateMessages.handlePM(messageData);
-    
-    if (panel) {
-        if (!pmUser.pm) {
-            pmUser.pm = 0;
-        }
-        if (window.getComputedStyle(panel).display != 'block') {
-            callBack['unread PM(s) - ' +  ++pmUser.pm] = {
-                callback : function (nick) {
-                    panel.style.display = 'block';
-                }
-            }; 
-        }
+        privateMessages.storedconvo[messageData.landOn].messages.push(messageData);
+        privateMessages.storedconvo[messageData.landOn].unread++;
         
-        menuControl.contextMenu.placeMenu(messageData.landOn, callBack, true);
-        messageBuilder.showMessage(messageData, panel.getElementsByClassName('messages')[0]);
-    } else if (pmUser) {
-        if (!pmUser.pm) {
-            pmUser.pm = [];
-        }
-        pmUser.pm.push(messageData);
-        
-        callBack['unread PM(s) - ' +  pmUser.pm.length] = {
-            callback : function (nick) {
-                createPmPanel(ONLINE.getId(nick));
+        if (pmUser) {
+            if (panel) {
+                messageBuilder.showMessage(messageData, panel.getElementsByClassName('messages')[0]);
+                messageBuilder.scrollToBottom(panel.getElementsByClassName('messages')[0]);
             }
-        };   
-        
-        menuControl.contextMenu.placeMenu(messageData.landOn, callBack, true);
+            
+            if (!panel || panel.style.display == 'none') {
+                if (document.getElementById('directMessages').style.display != 'block') {
+                    document.getElementById('chatTab').className = 'highlightTab';   
+                }
+                privateMessages.mini(messageData.landOn);
+            }
+        }
     }
 }
 
@@ -557,13 +606,8 @@ function createPmPanel(id) {
         
         minimize.addEventListener('click', function () {
             panelContainer.style.display = 'none';
-            menuControl.contextMenu.placeMenu(id, {
-                showPMwindow : {
-                    callback : function () {
-                        panelContainer.style.display = 'block';
-                    }  
-                }
-            }, true);
+            privateMessages.storedconvo[id].unread = 0;
+            privateMessages.mini(id);
         });
         
         cancel.addEventListener('click', function () {
@@ -576,12 +620,11 @@ function createPmPanel(id) {
                 this.value = '';
             }
         });
-
-        if (ONLINE.users[id].pm) {
-            for (i = 0; i < ONLINE.users[id].pm.length; i++) {
-                messageBuilder.showMessage(ONLINE.users[id].pm[i], messages);
+ 
+        if (privateMessages.storedconvo[id]) {
+            for (i = 0; i < privateMessages.storedconvo[id].messages.length; i++) {
+                messageBuilder.showMessage(privateMessages.storedconvo[id].messages[i], messages);
             }
-            ONLINE.users[id].pm = [];
         }
 
         controls.appendChild(minimize);
@@ -677,7 +720,7 @@ function showChannelDetails(channelData) {
     }
 
     if (channelData.background && channelData.background.value) {
-        if (!Attributes.get('toggle-background')) {
+        if (Attributes.get('toggle-background')) {
             document.getElementById('messages-background').style.background = channelData.background.value;
         }
         Attributes.set('background', channelData.background);
@@ -693,7 +736,7 @@ function showChannelDetails(channelData) {
     }
     
     if (channelData.msg && channelData.msg.value) {
-        if (Attributes.get('toggle-msg')) {
+        if (!Attributes.get('toggle-msg')) {
             document.getElementById('center-text').style.display = 'none';
         }
         document.getElementById('center-text').innerHTML = parser.parse(channelData.msg.value, true, true);
@@ -896,7 +939,7 @@ socket.on('message', messageBuilder.showMessage);
 
 socket.on('chat-image', messageBuilder.showMessage, true);
 
-socket.on('pmMessage', handlePrivateMessage);
+socket.on('pmMessage', privateMessages.handlePM);
 
 socket.on('channelDetails', showChannelDetails)
 

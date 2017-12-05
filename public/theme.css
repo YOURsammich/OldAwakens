@@ -311,6 +311,10 @@ h2 {
     font-style: italic;
 }
 
+.highlightTab {
+    color: orange !important;
+}
+
 #menu-tabs {
     padding: 0px;
     padding-top: 15px;
@@ -635,6 +639,49 @@ h2 {
     border: 1px solid #0C0E0E;
     border-radius: 5px;
     outline: none;
+}
+
+.pmtoggle {
+    text-align: left;
+    padding: 10px;
+    height: 50px;
+    border-bottom: 1px solid #222;
+    font-family: Montserrat;
+    cursor: pointer;
+}
+
+.pmtoggle:hover {
+    background-color: #39f;
+}
+
+.pnick {
+    font-size: 15px;
+}
+
+.pnick .misnum {
+    float: right;
+    color: white;
+    font-family: inherit;
+    font-size: 10px;
+}
+
+.pmsg {
+    line-height: 35px;
+    font-size: 10px;
+    font-family: Droid Sans;
+}
+
+.pmsg big {
+    font-size: 10px;
+}
+
+.controls {
+    float: right;
+    line-height: 35px;
+}
+
+.controls button {
+    font-size: 10px !important;
 }
 
 /* userOptions */

@@ -325,7 +325,7 @@ var parser = {
         } 
     },
     flair : function (flair, plainNick) {
-        var nickHTML = this.parse(flair),
+        var nickHTML = this.parse(flair || ''),
             parsedFlair;
 
         if (this.removeHTML(nickHTML) === plainNick) {
