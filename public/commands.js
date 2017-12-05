@@ -226,7 +226,7 @@ var COMMANDS = {
         handler : function (params) {
             var validAtts = ['background', 'images', '12h', 'filters', 'cursors', 'msg'],
                 attr = params.attr,
-                attValue = Attributes.get('toggle-' + attr);
+                attValue = !Attributes.get('toggle-' + attr);
             
             if (validAtts.indexOf(attr) !== -1) {
                 
@@ -247,7 +247,7 @@ var COMMANDS = {
                     }     
                 }
                 
-                Attributes.set('toggle-' + attr, !attValue);
+                Attributes.set('toggle-' + attr, attValue);
             } else {
                 messageBuilder.showMessage({
                     message : 'Not a toggleable attribute'
