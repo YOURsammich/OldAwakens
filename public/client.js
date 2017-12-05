@@ -318,8 +318,7 @@ var privateMessages = {
             nick = document.createElement('div'),
             numsg = document.createElement('span'),
             btm = document.createElement('div'),
-            lastmsg = document.createElement('span'),
-            pmuser = ONLINE.users[msgdata.landOn];
+            lastmsg = document.createElement('span');
         
         container.id = 'pmtoggle-' + msgdata.landOn;
         container.className = 'pmtoggle';
@@ -359,7 +358,6 @@ var privateMessages = {
     mini : function (landOn) {
         var panel = document.getElementById('PmPanel-' + landOn),
             pmtoggle = document.getElementById('pmtoggle-' + landOn),
-            pmUser = ONLINE.users[landOn],
             messageData;
         
         if (privateMessages.storedconvo[landOn]) {
@@ -378,8 +376,7 @@ var privateMessages = {
         }
     },
     handlePM : function (messageData) {
-        var panel = document.getElementById('PmPanel-' + messageData.landOn),
-            pmUser = ONLINE.users[messageData.landOn];
+        var panel = document.getElementById('PmPanel-' + messageData.landOn);
         
         if (!privateMessages.storedconvo[messageData.landOn]) {
             privateMessages.storedconvo[messageData.landOn] = {
@@ -389,25 +386,23 @@ var privateMessages = {
                 nick : ONLINE.users[messageData.landOn].nick,
                 toflair : messageData.flair
             };
-        } else if (privateMessages.storedconvo[messageData.landOn].id == messageData.landOn) {
+        } else if (privateMessages.storedconvo[messageData.landOn].id == ONLINE.getId(messageData.nick)) {
             privateMessages.storedconvo[messageData.landOn].toflair = messageData.flair;
         }
         
         privateMessages.storedconvo[messageData.landOn].messages.push(messageData);
         privateMessages.storedconvo[messageData.landOn].unread++;
         
-        if (pmUser) {
-            if (panel) {
-                messageBuilder.showMessage(messageData, panel.getElementsByClassName('messages')[0]);
-                messageBuilder.scrollToBottom(panel.getElementsByClassName('messages')[0]);
+        if (panel) {
+            messageBuilder.showMessage(messageData, panel.getElementsByClassName('messages')[0]);
+            messageBuilder.scrollToBottom(panel.getElementsByClassName('messages')[0]);
+        }
+        
+        if (!panel || panel.style.display == 'none') {
+            if (document.getElementById('directMessages').style.display != 'block') {
+                document.getElementById('chatTab').className = 'highlightTab';   
             }
-            
-            if (!panel || panel.style.display == 'none') {
-                if (document.getElementById('directMessages').style.display != 'block') {
-                    document.getElementById('chatTab').className = 'highlightTab';   
-                }
-                privateMessages.mini(messageData.landOn);
-            }
+            privateMessages.mini(messageData.landOn);
         }
     }
 }
