@@ -110,11 +110,13 @@
     });
 
     socket.on('removeCursor', function(id) {
-        if (ONLINE.users[id].cursor) {
+        if (ONLINE.users[id].cursor && ONLINE.users[id].cursor.parentNode) {
             if (ONLINE.getId(Attributes.get('nick')) == id) {
                 document.getElementById('messages').style.cursor = 'default';
             };
             ONLINE.users[id].cursor.parentNode.removeChild(ONLINE.users[id].cursor);
+        } else {
+            console.error(ONLINE.users[id].cursor, 'Cursor but no parentNode?');
         }
     });
     

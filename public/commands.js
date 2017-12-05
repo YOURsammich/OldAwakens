@@ -120,9 +120,8 @@ var COMMANDS = {
                 }
                 return Math.floor(seconds) + " seconds";
             };
-            console.log(attData);
-            if (attData) {
-                
+ 
+            if (attData !== undefined) {
                 if (attData.value !== undefined) {
                     formatTime = new Date();
                     formatTime.setTime(attData.date);
@@ -136,7 +135,6 @@ var COMMANDS = {
                         messageType : 'info'
                     });
                 }
-                
             } else {
                 messageBuilder.showMessage({
                     message : params.attribute + ' isn\'t set',

@@ -221,6 +221,7 @@ h2 {
     text-align: left;
     text-indent: 20px;
     max-height: 200px;
+    font-family: Montserrat;
 }
 
 #menu-container .selecter:hover {
@@ -390,6 +391,25 @@ h2 {
     padding-bottom: 5px;
     display: block;
     border-bottom: 1px solid #eeeeee;
+}
+
+#chnldefaults table {
+    text-align: left;
+    width: 100%;
+}
+
+#chnldefaults input {
+    color: #fff;
+    padding: 10px;
+    background-color: #111;
+    border: none;
+    float: right;
+    border: 1px solid #222;
+    outline: none;
+}
+
+#chnldefaults input:focus {
+    border: 1px solid #39f;
 }
 
 #cmdOptions {

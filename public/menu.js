@@ -82,8 +82,10 @@ var menuControl = {
             }, pmPanel.getElementsByClassName('messages')[0]);
         }
         
-        if (user.cursor) {
+        if (user.cursor && user.cursor.parentNode) {
             user.cursor.parentNode.removeChild(user.cursor);
+        } else if (user.cursor) {
+            console.error(user.cursor, 'cursor but no parentNode?');
         }
         
         document.getElementById('userList').removeChild(user.li);

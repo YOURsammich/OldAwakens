@@ -95,8 +95,8 @@ var Attributes = {
         if (this.altAtt[attribute]) {
             attribute = this.altAtt[attribute];
         }
-
-        if (attribute.substr(0, 6) == 'toggle' && this.default[attribute.substr(7)]) {
+        
+        if (attribute.substr(0, 6) == 'toggle' && this.storedAttributes[attribute] === undefined) {
             value = this.default[attribute.substr(7)]
         } else {
             value = this.storedAttributes[attribute];
@@ -317,7 +317,6 @@ var privateMessages = {
             container = document.createElement('div'),
             nick = document.createElement('div'),
             numsg = document.createElement('span'),
-            btm = document.createElement('div'),
             lastmsg = document.createElement('span');
         
         container.id = 'pmtoggle-' + msgdata.landOn;
@@ -348,10 +347,8 @@ var privateMessages = {
         });
         
         nick.appendChild(numsg);
-        btm.appendChild(lastmsg);
-        
         container.appendChild(nick);
-        container.appendChild(btm);
+        container.appendChild(lastmsg);
         
         return container;
     },
