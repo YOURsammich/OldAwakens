@@ -318,11 +318,12 @@ var privateMessages = {
             nick = document.createElement('div'),
             numsg = document.createElement('span'),
             btm = document.createElement('div'),
-            lastmsg = document.createElement('span');
+            lastmsg = document.createElement('span'),
+            pmuser = ONLINE.users[msgdata.landOn];
         
         container.id = 'pmtoggle-' + msgdata.landOn;
         container.className = 'pmtoggle';
-        nick.innerHTML = parser.flair(privateMessages.storedconvo[msgdata.landOn].toflair, ONLINE.users[privateMessages.storedconvo[msgdata.landOn].to].nick);
+        nick.innerHTML = parser.flair(privateMessages.storedconvo[msgdata.landOn].toflair, privateMessages.storedconvo[msgdata.landOn].nick);
         nick.className = 'pnick nick';
         numsg.classList = 'misnum';
         
@@ -384,10 +385,11 @@ var privateMessages = {
             privateMessages.storedconvo[messageData.landOn] = {
                 messages : [],
                 unread : 0,
-                to : messageData.landOn,
+                id : messageData.landOn,
+                nick : ONLINE.users[messageData.landOn].nick,
                 toflair : messageData.flair
             };
-        } else if (privateMessages.storedconvo[messageData.landOn].to == messageData.landOn) {
+        } else if (privateMessages.storedconvo[messageData.landOn].id == messageData.landOn) {
             privateMessages.storedconvo[messageData.landOn].toflair = messageData.flair;
         }
         
