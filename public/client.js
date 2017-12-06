@@ -737,7 +737,7 @@ function showChannelDetails(channelData) {
         Attributes.set('msg', channelData.msg);
     }
     
-    if (channelData.lock && Attributes.get('lock').value !== channelData.lock.value) {
+    if (channelData.lock && (!Attributes.get('lock') || Attributes.get('lock').value !== channelData.lock.value)) {
         var message;
         if (channelData.lock.value) {
             message = ' locked this channel';
@@ -752,7 +752,7 @@ function showChannelDetails(channelData) {
         Attributes.set('lock', channelData.lock);
     }
     
-    if (channelData.proxy && Attributes.get('proxy').value !== channelData.proxy.value) {
+    if (channelData.proxy && (!Attributes.get('proxy') || Attributes.get('proxy').value !== channelData.proxy.value)) {
         var message;
         if (channelData.proxy.value) {
             message = ' blocked proxies';
