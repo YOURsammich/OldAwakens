@@ -928,6 +928,25 @@ function createChannel(io, channelName) {
             handler : function (user) {
                 updateChannelInfo(user.nick, 'proxy', false);
             }
+        },
+        channelfont : {
+            role : 1,
+            params : ['font'],
+            handler : function (user, params) {
+                updateChannelInfo(user.nick, 'font', params.font);
+            }
+        },
+        wordfilteron : {
+            role : 1,
+            handler : function (user) {
+                updateChannelInfo(user.nick, 'wordfilter', true);
+            }
+        },
+        wordfilteroff : {
+            role : 1,
+            handler : function (user) {
+                updateChannelInfo(user.nick, 'wordfilter', false);
+            }
         }
     };
     

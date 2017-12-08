@@ -324,7 +324,7 @@ var menuControl = {
                 trashcan.textContent = 'delete_forever';
                 trashcan.className = 'trash';
                 trashcan.addEventListener('click', function () {
-                    var id = parseInt(this.parentNode.id[0] + 1);
+                    var id = parseInt(this.parentNode.id[0]) + 1;
                     this.parentNode.className = 'savedStyle';
                     this.parentNode.innerHTML = 'Save style to profile ' + id;
                     socket.emit('deleteProfile', id - 1);
@@ -351,6 +351,22 @@ var menuControl = {
                 element.textContent = keys[i];
                 document.getElementById('role' + roles[channelRoles[keys[i]] - 2]).getElementsByTagName('ul')[0].appendChild(element);
             }   
+        }
+    },
+    channelfont : function (font) {
+        if (font && font.value) {
+            parser.addFont(font.value);
+            document.body.style.fontFamily = font.value;
+            document.getElementById('chnlfont').value = font.value;
+            if (!Attributes.get('font')) {
+                parser.changeInput('font', font.value);
+            }
+        }
+    },
+    wordfilter : function (filter) {
+        if (filter && filter.value != undefined) {
+            Attributes.set('channel-filters', filter);
+            document.getElementById('tglfilter').checked = filter.value;
         }
     },
     initMissedMessages : function (socket) {
@@ -481,6 +497,7 @@ var menuControl = {
         }
     });
     
+    //style profiles
     document.getElementById('dislayStyles').addEventListener('click', function (e) {
         var target = e.target,
             ary = [];
@@ -503,6 +520,7 @@ var menuControl = {
         }
     });
     
+    //custom cursors
     document.getElementById('customCursor').getElementsByTagName('button')[0].addEventListener('click', function () {
         var uploadPanel = document.getElementById('uploadTextarea');
         if (uploadPanel.style.display == 'none') {
@@ -510,6 +528,26 @@ var menuControl = {
             this.textContent = 'Click here to upload';
         } else {
             socket.emit('uploadCursor', uploadPanel.getElementsByTagName('textarea')[0].value);
+        }
+    });
+    
+    //channel fonts
+    document.getElementById('chnlfont').addEventListener('keydown', function () {
+        var btn = document.getElementById('loadfont');
+        btn.style.display = 'block';
+    });
+    
+    document.getElementById('loadfont').addEventListener('click', function () {
+        clientSubmit.handleInput('/channelfont ' + document.getElementById('chnlfont').value);
+        this.style.block = 'hidden';
+    });
+    
+    //fitlers toggle
+    document.getElementById('tglfilter').addEventListener('click', function () {
+        if (this.checked) {
+            clientSubmit.handleInput('/wordfilteron')
+        } else {
+            clientSubmit.handleInput('/wordfilteroff')
         }
     });
     

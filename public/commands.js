@@ -1,4 +1,10 @@
 var COMMANDS = {
+    shortCuts : {
+        colour : 'color',
+        cls : 'clear',
+        bg : 'background',
+        snz : 'snooze'
+    },
     help : {
         handler : function () {
             embed('embed', '/help/')
@@ -10,7 +16,9 @@ var COMMANDS = {
             var ava = [];
             keys.forEach(function(key){
                 if(Attributes.get('role') <= COMMANDS[key].role || COMMANDS[key].role === undefined){
-                    ava.push(key);
+                    if (key != 'shortCuts') {
+                        ava.push(key);   
+                    }
                 }
             });
             messageBuilder.showMessage({
@@ -229,7 +237,6 @@ var COMMANDS = {
                 attValue = !Attributes.get('toggle-' + attr);
             
             if (validAtts.indexOf(attr) !== -1) {
-                
                 if (attr === 'cursors') {
                     socket.emit('removeCursor');
                     COMMANDS.clearcursors.handler();
@@ -497,12 +504,18 @@ var COMMANDS = {
     },
     unblockproxy : {
         role : 1
+    },
+    channelfont : {
+        role : 1,
+        params : ['font']
+    },
+    wordfilteron : {
+        role : 1
+    },
+    wordfilteroff : {
+        role : 1
     }
 };
-COMMANDS.colour = COMMANDS.color;
-COMMANDS.cls = COMMANDS.clear;
-COMMANDS.bg = COMMANDS.background;
-COMMANDS.snz = COMMANDS.snooze;
 
 (function(){
     var keys = Object.keys(COMMANDS),
@@ -520,8 +533,4 @@ COMMANDS.snz = COMMANDS.snooze;
     parser.addFont(Attributes.get('font'));
     parser.changeInput('font', Attributes.get('font'));
     parser.changeInput('color', Attributes.get('color'));
-    if(!Attributes.get('font')) {
-        clientSubmit.command.send('font', {font:'Droid Sans'});
-    }
-    
 })();

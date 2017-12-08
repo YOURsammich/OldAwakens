@@ -95,6 +95,7 @@
                                     <ul>
                                         <li class="selecter" onclick="$$$.tabber('owned', 'manageRoles');"><h2>Manage roles</h2></li>
                                         <li class="selecter" onclick="$$$.tabber('owned', 'manageCommands');"><h2>Manage commands</h2></li>
+                                        <li class="selecter" onclick="$$$.tabber('owned', 'chnldefaults');"><h2>Channel defaults</h2></li>
                                     </ul>
                                 </div>
                                 <div class="menuPanel" id="manageRoles">
@@ -133,6 +134,26 @@
                                         <h2>Basic</h2>
                                         <ul id="listBasic"></ul>
                                     </div>
+                                </div>
+                                <div class="menuPanel" id="chnldefaults">
+                                    <div id="goBack" onclick="$$$.tabber('owned', 'settingsMenu');">
+                                        <span id="goBackArrow"></span>
+                                    </div>
+                                    
+                                    <ul>
+                                        <li>
+                                            <h2>Channel Font</h2>
+                                            <input id="chnlfont" placeholder="Droid Sans" />
+                                            <button id="loadfont" style="display: none;width:100%;margin-top: 10px;" class="customButton">Load channel font</button>
+                                        </li>
+                                        <li>
+                                            <h2>Filters</h2>
+                                            <label>
+                                                <input id="tglfilter" type="checkbox"/>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>

@@ -3,6 +3,10 @@ body {
     font-family: "Droid Sans", sans-serif;
 }
 
+:read-write {
+    font-family: 'Droid Sans';
+}
+
 a {
     text-decoration: underline;
     color: lightblue;
@@ -393,23 +397,87 @@ h2 {
     border-bottom: 1px solid #eeeeee;
 }
 
-#chnldefaults table {
+#chnldefaults {
     text-align: left;
-    width: 100%;
+}
+
+#chnldefaults label {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+#chnldefaults label input {
+    display: none;
+}
+
+#chnldefaults label .slider {
+    cursor: pointer;
+    background-color: #454545;
+    -webkit-transition: .4s;
+    transition: .4s;
+    display: block;
+    float: none;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+#chnldefaults label .slider:before {
+    content: "";
+    height: 10px;
+    width: 10px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    display: block;
+    border-radius: 100%;
+}
+
+#chnldefaults label input:checked + .slider {
+  background-color: #39f;
+}
+
+#chnldefaults label input:focus + .slider {
+  box-shadow: 0 0 1px #39f;
+}
+
+#chnldefaults label input:checked + .slider:before {
+  -webkit-transform: translateX(30px);
+  -ms-transform: translateX(30px);
+  transform: translateX(30px);
+}
+
+#chnldefaults ul {
+    margin-top: 30px;
+}
+
+#chnldefaults ul li {
+    text-indent: 0px !important;
+}
+
+#chnldefaults h2 {
+    display: block;
+    font-size: small;
+    font-weight: bold;
 }
 
 #chnldefaults input {
     color: #fff;
-    padding: 10px;
-    background-color: #111;
-    border: none;
-    float: right;
-    border: 1px solid #222;
+    padding: 10px 0px 10px 0px;
+    text-indent: 10px;
     outline: none;
+    width: 100%;
+    font-family: inherit;
+    background-color: #454545;
+    border-radius: 5px;
+    border: none;
 }
 
-#chnldefaults input:focus {
-    border: 1px solid #39f;
+#chnldefaults input::placeholder {
+    color: #fff;
 }
 
 #cmdOptions {
@@ -687,7 +755,7 @@ h2 {
 .pmsg {
     line-height: 35px;
     font-size: 10px;
-    font-family: Droid Sans;
+    font-family: inherit;
 }
 
 .pmsg big {
@@ -1054,10 +1122,6 @@ h2 {
 
 .myCursor::after {
     display: none !important;
-}
-
-:read-write {
-    font-family: 'Droid Sans';
 }
 
 #qoute {

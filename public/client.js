@@ -51,7 +51,7 @@ var Attributes = {
     showMsg : ['flair', 'color', 'glow', 'bgcolor', 'font', 'style'],
     notify : ['part', 'nick'],
     altAtt : {colour : 'color', bg : 'background'},
-    nosaveLocal : [],
+    nosaveLocal : ['channel-filters', 'background', 'msg', 'note', 'topic'],
     default : {
         cursors : true,
         mute : false,
@@ -228,7 +228,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
                 }
             }
             parser.getAllFonts(messageData.message);
-            messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && !Attributes.get('toggle-filters'));
+            messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && (Attributes.get('channel-filters') && Attributes.get('channel-filters').value) && !Attributes.get('toggle-filters'));
         }
         
         return messageHTML.container;
@@ -407,6 +407,10 @@ var privateMessages = {
 var clientSubmit = {
     command : {
         send : function (commandName, params) {
+            if (COMMANDS.shortCuts[commandName]) {
+                commandName = COMMANDS.shortCuts[commandName];
+            }
+            
             if (COMMANDS[commandName].handler) {
                 COMMANDS[commandName].handler(params);
             } else {
@@ -767,6 +771,8 @@ function showChannelDetails(channelData) {
         Attributes.set('proxy', channelData.proxy);
     }
     
+    menuControl.wordfilter(channelData.wordfilter);
+    menuControl.channelfont(channelData.font);
     menuControl.ownerUI(channelData.owner);
     menuControl.roleUI(channelData.roles);
 }
