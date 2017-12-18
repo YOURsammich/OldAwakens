@@ -843,7 +843,8 @@ h2 {
 .video-overlay {
     position: absolute;
     z-index: 5;
-    display: flex;
+    width: 528px;
+    height: 322px;
 }
 
 /* flair panel */
