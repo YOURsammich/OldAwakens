@@ -610,18 +610,20 @@ function showFlairMakerPanel() {
                 keys = Object.keys(currentStyling[i]);
                 for (var s = 0; s < keys.length; s++) {
                     if (currentStyling[i] && currentStyling[i][keys[s]]) {
-                        flairEditInput.value += rl[keys[s]].value;
-                        if (typeof currentStyling[i][keys[s]] == 'object') {
-                            pipes[currentStyling[i][keys[s]][1]] = true
-                        }
-                        if (rl[keys[s]].add) {
-                            rgb = currentStyling[i][keys[s]].match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
-                            if (rgb) {
-                                flairEditInput.value += rgbToHex(parseInt(rgb[1]), parseInt(rgb[2]), parseInt(rgb[3]));
-                            } else {
-                                flairEditInput.value += currentStyling[i][keys[s]];
+                        if (rl[keys[s]]) {
+                            flairEditInput.value += rl[keys[s]].value;
+                            if (typeof currentStyling[i][keys[s]] == 'object') {
+                                pipes[currentStyling[i][keys[s]][1]] = true
+                            }
+                            if (rl[keys[s]].add) {
+                                rgb = currentStyling[i][keys[s]].match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
+                                if (rgb) {
+                                    flairEditInput.value += rgbToHex(parseInt(rgb[1]), parseInt(rgb[2]), parseInt(rgb[3]));
+                                } else {
+                                    flairEditInput.value += currentStyling[i][keys[s]];
+                                }   
                             }   
-                        }   
+                        }
                     }
                 }
             }
