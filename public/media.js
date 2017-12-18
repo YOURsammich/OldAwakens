@@ -10,6 +10,46 @@ var audioPlayer = {
     }
 }
 
+function buildAdvancedVideoOverlay(url) {
+    var videoOverlay = document.getElementById('a-video-overlay'),
+        mainContain,
+        videoList,
+        container,
+        header;
+    
+    if (!videoOverlay) {
+        videoOverlay = document.createElement('div');
+        videoOverlay.id = 'a-video-overlay';
+        videoOverlay.className = 'video-overlay';
+        videoOverlay.style.left = ((window.innerWidth / 2) - 264) + 'px';
+        videoOverlay.style.top = ((window.innerHeight / 2) - 161) + 'px';
+        
+        mainContain = document.createElement('div');
+        mainContain.id = 'mainContain';
+        
+        header = document.createElement('div');
+        header.id = 'videoHeader';
+        mainContain.appendChild(header);
+        
+        container = document.createElement('div');
+        container.style.cssText = "height: calc(100% - 15px);width: 100%;";
+        container.innerHTML = url;
+        mainContain.appendChild(container);
+        
+        videoOverlay.append(mainContain);
+        
+        videoList = document.createElement('div');
+        videoList.style.cssText = "width: 50px; background-color: grey;";
+        videoOverlay.appendChild(videoList);
+        
+        $$$.draggable(videoOverlay);
+        
+        document.body.appendChild(videoOverlay);
+    } else {
+        
+    }
+}
+
 function buildVideoOverlay(url) {
     var videoOverlay = document.getElementsByClassName('video-overlay'),
         header,
@@ -45,7 +85,7 @@ function buildVideoOverlay(url) {
     }
 }
 
-function embed(type, input) {
+function embed(type, input, advan) {
     var url;
     switch (type) {
     case 'youtube':
@@ -73,8 +113,12 @@ function embed(type, input) {
         url = '<object width="100%" height="100%" data="' + input + '" type="application/x-shockwave-flash">\n<param name="movie" value="' + input + '" />\n</object>'
         break;
     }
-
-    buildVideoOverlay(url);
+    
+    if (advan) {
+        buildAdvancedVideoOverlay(url);
+    } else {
+        buildVideoOverlay(url);   
+    }
 }
 
 function soundCloud(url) {

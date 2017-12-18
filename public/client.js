@@ -49,14 +49,15 @@ var ONLINE = {
 
 var Attributes = {
     showMsg : ['flair', 'color', 'glow', 'bgcolor', 'font', 'style'],
-    notify : ['part', 'nick'],
+    notify : ['part', 'nick', 'role'],
     altAtt : {colour : 'color', bg : 'background'},
     nosaveLocal : ['channel-filters', 'background', 'msg', 'note', 'topic'],
     default : {
         cursors : true,
         mute : false,
         background : true,
-        msg : true
+        msg : true,
+        images : true
         
     },
     set : function (attribute, newValue, noNotify) {
@@ -228,6 +229,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
                 }
             }
             parser.getAllFonts(messageData.message);
+            //messageHTML.message.innerHTML = parser.convert(parser.escape(messageData.message));
             messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && (Attributes.get('channel-filters') && Attributes.get('channel-filters').value) && !Attributes.get('toggle-filters'));
         }
         
@@ -501,6 +503,10 @@ var clientSubmit = {
 
             if (styles.style) {
                 decorativeModifiers += styles.style;
+            }
+            
+            if (styles.greg && styles.color) {
+                text = parser.mix([styles.color, styles.greg], text);
             }
 
             return decorativeModifiers + text;

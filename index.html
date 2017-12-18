@@ -32,6 +32,7 @@
                         <span onclick="$$$.tabber('menu-panels', 'mySettings');">palette</span>
                         <span id="chatTab" onclick="$$$.tabber('menu-panels', 'directMessages');this.className = '';">chat</span>
                         <span onclick="$$$.tabber('menu-panels', 'channelSettings');">settings</span>
+                        <span id="showActiveChannels">list</span>
                     </div>
                     
                     <div id="menu-panels">
@@ -45,7 +46,8 @@
                                     <ul>
                                         <li class="selecter" onclick="$$$.tabber('stylePanels', 'stylePro');">Style Profiles<span>arrow_forward</span></li>
                                         <li class="selecter" onclick="$$$.tabber('stylePanels', 'myHats');">Hat<span>arrow_forward</span></li>
-                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'myCursors');">cursor<span>arrow_forward</span></li>
+                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'myCursors');">Cursor<span>arrow_forward</span></li>
+                                        <li class="selecter" id="showFlairMaker">Flair Maker<span>arrow_forward</span></li>
                                     </ul>
                                 </div>
                                 <div class="menuPanel" id="stylePro">
@@ -83,7 +85,6 @@
 
                         </div>
                         <div style="display:none" id="directMessages"></div>
-                        <div style="display:none" id="activeChannels"></div>
                         <div style="display:none" id="channelSettings">
                             <div style="display:block;" id="unowned">
                                 <h2>Claim this channel as your own</h2>
@@ -156,6 +157,13 @@
                                     </ul>
                                 </div>
                             </div>
+                        </div>
+                        <div style="display:none" id="activeChannels">
+                            <table>
+                                <th>name</th>
+                                <th>online</th>
+                                <th>tags</th>
+                            </table>
                         </div>
                     </div>
                 </div>

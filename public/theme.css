@@ -605,6 +605,31 @@ h2 {
     position: absolute;
 }
 
+#activeChannels {
+    padding: 10px;
+}
+
+#activeChannels table {
+    order: 2;
+    flex: 1;
+    color: white;
+    font-family: Montserrat;
+    border-collapse: collapse;
+    margin-top: 10px;
+    width: 100%;
+}
+
+#activeChannels table th {
+    font-weight: normal;
+    padding: 5px 10px 5px 10px;
+    border-bottom: 1px solid white;
+}
+
+#activeChannels table td {
+    padding: 10px;
+    border-bottom: 1px solid white;
+}
+
 /*register panel*/
 
 .overlay{
@@ -790,13 +815,102 @@ h2 {
     background-color: #39F;
 }
 
+/* video mode embed */
+
+#videoList {
+    position: relative;
+    right: -150px;
+    float: right;
+    background-color: blue;
+    height: 100%; 
+    width: 150px
+}
+
+#mainContain {
+    display: flex;
+    flex-direction: column;
+    width: 528px;
+    height: 322px;
+}
+
+#videoHeader {
+    background-color: grey;
+    height: 25px;
+}
+
 /* embed */
 
 .video-overlay {
-    position: fixed;
-    width: 528px;
-    height: 322px;
+    position: absolute;
     z-index: 5;
+    display: flex;
+}
+
+/* flair panel */
+
+.flairpanellabel {
+    font-size: small;
+    text-align: left;
+    color: white;
+}
+
+#flairPanel {
+    position: absolute;
+    background-color: #111;
+    width: 400px;
+    height: 300px;
+    text-align: center;
+    padding: 10px;
+    z-index: 10;
+}
+
+#flairView {
+    padding: 10px;
+    margin-top: 10px;
+    border-bottom: 1px solid #39f;
+    background-color: #212121;
+}
+
+#closeFlairPanel {
+    float: right;
+    cursor: pointer;
+}
+
+#flairView span {
+    display: inline-block;
+}
+
+#flairView span::-moz-selection, #flairView div::-moz-selection { background: white; }
+#flairView span::selection, #flairView div::selection { background: white; }
+
+#flairEditContain {
+    width: 100%;
+    margin-top: 10px;
+    display: none;
+}
+
+#flairEditInput {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.colorHoldContainer {
+    margin-top: 10px;
+    background-color: #212121;
+    padding: 5px;
+}
+
+.colorHolder {
+    margin-top: 5px;
+}
+
+.colorHolder span {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    display: inline-block;
+    border-radius: 5px;
+    margin-right: 5px;
 }
 
 /* chat styles */

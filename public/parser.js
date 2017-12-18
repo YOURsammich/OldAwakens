@@ -156,8 +156,8 @@ var parser = {
     },
     stylize : function(str) {
         // Replace styles
-        str = this.multiple(str, /\/\%%([^\|]+)\|?/g, '<span class="style wave">$1</span>', this.matches);
-        str = this.multiple(str, /\/\%%([^\%%]+)\%%/g, '<div>$1</div>', this.matches);
+        //str = this.multiple(str, /\/\%%([^\|]+)\|?/g, '<span class="style wave">$1</span>', this.matches);
+        str = this.multiple(str, /\/\%%([^]+)\%%/g, '<div>$1</div>', this.matches);
         str = this.multiple(str, /\/\^([^\|]+)\|?/g, '<big>$1</big>', this.matches);
         str = this.multiple(str, /\/\*([^\|]+)\|?/g, '<b>$1</b>', this.matches);
         str = this.multiple(str, /\/\%([^\|]+)\|?/g, '<span class="style italic">$1</span>', this.matches);
@@ -323,6 +323,57 @@ var parser = {
                 $$$.query('#input-bar textarea').style.color = value;
             }
         } 
+    },
+    mix : function (hexColors, text) {    
+        function hexToRgb(hex) {
+            var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+                return r + r + g + g + b + b;
+            });
+
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        function blend(start, finish, amount){
+            var mix = [];
+            amount--;
+            for(var i = 0; i <= amount; i++){
+                var r = Math.round(start[0] + (finish[0] - start[0]) / (amount / i));
+                var g = Math.round(start[1] + (finish[1] - start[1]) / (amount / i));
+                var b = Math.round(start[2] + (finish[2] - start[2]) / (amount / i));
+                mix.push(rgbToHex(r,g,b));
+            }
+            return mix;
+        }
+        
+        function shade(start, finish, amount){
+            var startRGB = hexToRgb(start);
+            var finishRGB = hexToRgb(finish);
+            return blend([startRGB.r, startRGB.g, startRGB.b], [finishRGB.r, finishRGB.g, finishRGB.b], amount);
+        }
+
+        function mixLetters(start, finish, text) {
+            var hexColors = shade(start, finish, text.length),
+                splitText = text.split(''),
+                newText = '';
+            
+            for (var i = 0; i < splitText.length; i++) {
+                newText += hexColors[i] + splitText[i];
+            }
+            
+            return newText;
+        }
+        console.log(hexColors);
+        return mixLetters(hexColors[0], hexColors[1], text);
     },
     flair : function (flair, plainNick) {
         var nickHTML = this.parse(flair || ''),

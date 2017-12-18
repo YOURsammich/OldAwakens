@@ -230,11 +230,14 @@ module.exports = {
             });
         }).fail(function () {
             var roles = {};
-            roles[nick] = role;
-            
-            module.exports.setChannelAtt(channelName, 'roles', roles).then(function () {
+            if (role !== 4) {
+                roles[nick] = role;
+                module.exports.setChannelAtt(channelName, 'roles', roles).then(function () {
+                    defer.resolve().promise();
+                });
+            } else {
                 defer.resolve().promise();
-            });
+            }
         });
         return defer;
     },

@@ -35,13 +35,21 @@ window.$$$ = {
         }
         
         el.addEventListener('mousedown', function (e) {
-            var target = e.target || e.srcElement;
+            var target = e.target || e.srcElement,
+                valid = true;
             if (!target.classList.contains('resizable-handle') && target.className !== stopOn) {
-                clickX = e.clientX - parseInt(el.style.left, 10);
-                clickY = e.clientY - parseInt(el.style.top, 10);
-                el.addEventListener('mousemove', drag);
-                container.addEventListener('mousemove', drag);
-                document.body.classList.add('noselect');
+                for (var i = 0; i < e.path.length; i++) {
+                    if (e.path[i].className == stopOn) {
+                        valid = false;
+                    }
+                }
+                if (valid) {
+                    clickX = e.clientX - parseInt(el.style.left, 10);
+                    clickY = e.clientY - parseInt(el.style.top, 10);
+                    el.addEventListener('mousemove', drag);
+                    container.addEventListener('mousemove', drag);
+                    document.body.classList.add('noselect');   
+                }
             }
         });
         

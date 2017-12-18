@@ -514,6 +514,22 @@ var COMMANDS = {
     },
     wordfilteroff : {
         role : 1
+    },
+    /*yt : {
+        handler : function () {
+            embed('youtube', '9p88Rh3C_rQ', true)
+        }
+    },*/
+    fe : {
+        handler : function () {
+            showFlairMakerPanel();
+        }
+    },
+    greg : {
+        params : ['colors'],
+        handler : function (params) {
+            Attributes.set('greg', params.colors);
+        }
     }
 };
 

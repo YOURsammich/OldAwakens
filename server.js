@@ -109,7 +109,7 @@ function createChannel(io, channelName) {
             params : ['nick'],
             handler : function (user, params) {
                 var index;
-                if (params.nick.length > 0 && params.nick.length < 50 && /^[\x21-\x7E]*$/i.test(params.nick)) {
+                if (params.nick.length > 0 && params.nick.length < 35 && /^[\x21-\x7E]*$/i.test(params.nick)) {
                     index = findIndex(channel.online, 'nick', params.nick);
                     if (index === -1) {
                         dao.find(params.nick).then(function () {
@@ -145,8 +145,10 @@ function createChannel(io, channelName) {
                                 dao.getChannelinfo(channelName).then(function (channelData) {//check for channel roles
                                     if (dbuser.role === 0) {// check if god role
                                         userRole = 0;
+                                    } else if (channelData.owner == dbuser.nick) {
+                                        userRole = 1;
                                     } else if (channelData.roles && channelData.roles[dbuser.nick]) {
-                                        if (channelData.roles[dbuser.nick] !== 0) {
+                                        if (channelData.roles[dbuser.nick] > 1) {
                                             userRole = channelData.roles[dbuser.nick];
                                         } else {
                                             userRole = 4;
@@ -189,7 +191,7 @@ function createChannel(io, channelName) {
         register : {
             params : ['nick', 'password'],
             handler : function (user, params) {
-                if (params.nick.length < 50 && /^[\x21-\x7E]*$/i.test(params.nick)) {
+                if (params.nick.length < 35 && /^[\x21-\x7E]*$/i.test(params.nick)) {
                     if (params.password.length > 4) {
                         dao.findip(user.remote_addr).then(function (accounts) {
                             if (accounts.length < 5) {
@@ -892,7 +894,8 @@ function createChannel(io, channelName) {
             role : 1,
             params : ['themecolors'],
             handler : function (user, params) {
-                updateChannelInfo(user.nick, 'themecolors', params.themecolors);
+                //updateChannelInfo(user.nick, 'themecolors', params.themecolors);
+                showMessage(user.socket, 'This command is disabled for now', 'error');
             } 
         },
         msg : {
@@ -1343,7 +1346,7 @@ function createChannel(io, channelName) {
         
         function checkUserStatus (joinData) {
             if (joinData.nick) {
-                if (joinData.nick && joinData.nick.length > 0 && joinData.nick.length < 50 && /^[\x21-\x7E]*$/i.test(joinData.nick)) {
+                if (joinData.nick && joinData.nick.length > 0 && joinData.nick.length < 35 && /^[\x21-\x7E]*$/i.test(joinData.nick)) {
                     dao.find(joinData.nick).then(function (dbuser) {//find if user exist
                         if (joinData.token && joinData.token === tokens[joinData.nick]) {//tokens match? good to go
                             checkChannelStatus(joinData, dbuser);

@@ -313,6 +313,9 @@ var menuControl = {
                     var thisProfile = allProfiles[this.parentNode.id[0]],
                         keys = Object.keys(thisProfile);
                     for (var i = 0; i < keys.length; i++) {
+                        if (keys[i] == 'font' || keys[i] == 'color') {
+                            parser.changeInput(keys[i], thisProfile[keys[i]]);
+                        }
                         Attributes.set(keys[i], thisProfile[keys[i]], true);
                     }
                     clientSubmit.handleInput('/echo Now your messages look like this');
@@ -367,6 +370,39 @@ var menuControl = {
         if (filter && filter.value != undefined) {
             Attributes.set('channel-filters', filter);
             document.getElementById('tglfilter').checked = filter.value;
+        }
+    },
+    channels : function (active) {
+        var keys = Object.keys(active),
+            table = document.getElementById('activeChannels').getElementsByTagName('tbody')[0],
+            pan,
+            channelName,
+            channelinfo,
+            channelTags,
+            i;
+        
+        while (table.getElementsByTagName('td').length) {
+            table.getElementsByTagName('td')[0].parentNode.removeChild(table.getElementsByTagName('td')[0]);
+        }
+        
+        for (i = 0; i < keys.length; i++) {
+            tr = document.createElement('tr');
+            tr.className = 'pan';
+            
+            channelName = document.createElement('td');
+            channelName.textContent = active[keys[i]].name;
+            
+            channelonline = document.createElement('td');
+            channelonline.textContent = active[keys[i]].online;
+            
+            channelTags = document.createElement('td');
+            channelTags.textContent = 'none';
+            
+            tr.appendChild(channelName);
+            tr.appendChild(channelonline);
+            tr.appendChild(channelTags);
+            
+            table.appendChild(tr);
         }
     },
     initMissedMessages : function (socket) {
@@ -428,6 +464,9 @@ var menuControl = {
         socket.on('afk', menuControl.afk);
 
         socket.on('left', menuControl.removeUser);
+        
+        socket.on('activeChannels', menuControl.channels);
+        socket.emit('activeChannels');
     },
     typing : function (id, typing) {
         var user = ONLINE.users[id];
@@ -440,6 +479,292 @@ var menuControl = {
         }
     }
 };
+
+function showFlairMakerPanel() {
+    var StylingNick = Attributes.get('nick'),
+        container = document.createElement('div'),
+        flairViewContainer = document.createElement('div'),
+        flairView = document.createElement('div'),
+        flairEditContain = document.createElement('div'),
+        flairEditInput = document.createElement('input'),
+        flairLabel = document.createElement('div'),
+        cancel = document.createElement('span'),
+        
+        colorPickerLabel = document.createElement('div'),
+        colorPickerContainer = document.createElement('div'),
+        colorstyleholder = document.createElement('div'),
+        
+        bgcolorPickerLabel = document.createElement('div'),
+        bgcolorPickerContainer = document.createElement('div'),
+        bgcolorstyleholder = document.createElement('div'),
+        
+        styleLabel = document.createElement('div'),
+        styleContainer = document.createElement('div'),
+        
+        startContainer,
+        endContainer,
+
+        styleButtons = {
+            B : {
+                name : 'font-weight',
+                value : 'bold'
+            },
+            I : {
+                name : 'transform',
+                value : 'skewX(-15deg)'
+            }
+        },
+        styleButtonKeys = Object.keys(styleButtons),
+        
+        rl = {
+            color : {
+                add : true,
+                value : '#'
+            },
+            'background-color' : {
+                add : true,
+                value : '##'
+            },
+            'font-weight' : {
+                value : '/*'
+            },
+            'transform' : {
+                value : '/%'
+            }
+        },
+        
+        currentStyling = [],
+        colors = ['#1abc9c', '#f1c40f', '#2ecc71', '#e67e22', '#3498db', '#e74c3c', '#9b59b6', '#ecf0f1', '#34495e', '#95a5a6'];
+    
+    function indexOfStyleEl(el) {
+        var children = flairView.children;
+        for (var i = 0; i < children.length; i++) {
+            if (children[i] == el) {
+                return i;
+            }
+        }
+    }
+    
+    function breakIntoSpans(el) {
+        var index = 0,
+            newBufflo = document.createElement('div'),
+            keys;
+        
+        function breakUpText(text) {
+            var i = 0,
+                s = 0,
+                span;
+            for (i = 0; i < text.nodeValue.length; i++) {
+                span = document.createElement('span');
+                if (currentStyling[index]) {
+                    keys = Object.keys(currentStyling[index]);
+                    for (s = 0; s < keys.length; s++) {
+                        span.style.cssText += keys[s] + ': ' + currentStyling[index][keys[s]] + ';';
+                    }
+                }
+                span.textContent = text.nodeValue[i];
+                newBufflo.appendChild(span);
+            }
+            index += text.nodeValue.length;
+        }
+        
+        function breakUpSpan(chl) {
+            var children = chl.childNodes,
+                styles = [],
+                i,
+                s;
+            
+            for (i = 0; i < children.length; i++) {
+                if (children[i].nodeName == '#text') {
+                    breakUpText(children[i]);
+                } else {
+                    for (s = 0; s < children[i].style.length; s++) {
+                        if (!currentStyling[index]) {
+                            currentStyling[index] = {};
+                        }
+                        currentStyling[index][children[i].style[s]] = children[i].style[children[i].style[s]];
+                    }
+                    breakUpSpan(children[i]);
+                }
+            }
+        }
+        
+        breakUpSpan(el);
+        console.log(currentStyling);
+        flairView.innerHTML = newBufflo.innerHTML;
+        getFlair();
+    }
+    
+    function getFlair() {
+        var pipes = {};
+        flairEditInput.value = '';
+        
+        function rgbToHex(r, g, b) {
+            return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+        
+        for (var i = 0; i < StylingNick.length; i++) {
+            var rgb,
+                keys;
+            if (currentStyling[i]) {
+                keys = Object.keys(currentStyling[i]);
+                for (var s = 0; s < keys.length; s++) {
+                    if (currentStyling[i] && currentStyling[i][keys[s]]) {
+                        flairEditInput.value += rl[keys[s]].value;
+                        if (typeof currentStyling[i][keys[s]] == 'object') {
+                            pipes[currentStyling[i][keys[s]][1]] = true
+                        }
+                        if (rl[keys[s]].add) {
+                            rgb = currentStyling[i][keys[s]].match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
+                            if (rgb) {
+                                flairEditInput.value += rgbToHex(parseInt(rgb[1]), parseInt(rgb[2]), parseInt(rgb[3]));
+                            } else {
+                                flairEditInput.value += currentStyling[i][keys[s]];
+                            }   
+                        }   
+                    }
+                }
+            }
+            flairEditInput.value += StylingNick[i];
+            
+            if (pipes[i]) {
+                flairEditInput.value += '|';
+            }
+        }
+
+        Attributes.set('flair', flairEditInput.value, true);
+    }
+
+    function styleize(start, end, value, type) {
+        var startIndex = indexOfStyleEl(start),
+            endIndex = indexOfStyleEl(end),
+            needToMove;
+        
+        if (!currentStyling[startIndex]) {
+            currentStyling[startIndex] = {};
+        }
+        
+        for (var index = startIndex; index <= endIndex; index++) {
+            if (!currentStyling[index]) {
+                currentStyling[index] = {};
+            }
+ 
+            if (currentStyling[index][type]) {
+                needToMove = {
+                    type : type,
+                    value : currentStyling[index][type]
+                }
+                delete currentStyling[index][type];
+            }
+            
+            flairView.children[index].style[type] = value;
+        }
+
+        if (!rl[type].add) {
+            currentStyling[startIndex][type] = [value, endIndex];
+        } else {
+            currentStyling[startIndex][type] = value;
+        }
+        
+        if (needToMove && currentStyling[++endIndex] && !currentStyling[endIndex][needToMove.type]) {
+            currentStyling[endIndex][needToMove.type] = needToMove.value;
+        }
+
+        getFlair();
+    }
+    
+    container.id = 'flairPanel';
+    
+    flairViewContainer.id = 'flairView';
+    flairViewContainer.className = 'nick';
+    flairView.innerHTML = parser.flair(Attributes.get('flair'), Attributes.get('nick'));
+    flairViewContainer.appendChild(flairView);
+    breakIntoSpans(flairView);
+    flairLabel.textContent = 'Flair View';
+    flairLabel.className = 'flairpanellabel';
+    cancel.textContent = 'X';
+    cancel.id = 'closeFlairPanel';
+    flairLabel.appendChild(cancel);
+    container.appendChild(flairLabel);
+    container.appendChild(flairViewContainer);
+    
+    cancel.addEventListener('click', function () {
+        document.body.removeChild(container);
+    });
+    
+    flairView.addEventListener('mouseup', function (e) {
+        var range = window.getSelection().getRangeAt(0);
+        startContainer = range.startContainer.parentNode;
+        endContainer = range.endContainer.parentNode;
+        console.log(startContainer, endContainer);
+    });
+    
+    flairEditInput.id = 'flairEditInput';
+    flairEditContain.id = 'flairEditContain';
+    flairEditContain.appendChild(flairEditInput);
+    container.appendChild(flairEditContain);
+    
+    //color picker
+    colorPickerLabel.textContent = 'Text Color';
+    colorPickerLabel.className = 'flairpanellabel';
+    colorPickerContainer.className = 'colorHoldContainer';
+    colorPickerContainer.appendChild(colorPickerLabel);
+    colorPickerContainer.appendChild(colorstyleholder);
+    container.appendChild(colorPickerContainer);
+    colorstyleholder.className = 'colorHolder';
+    
+    for (var i = 0; i < colors.length; i++) {
+        var colorPick = document.createElement('span');
+        colorPick.style.backgroundColor = colors[i];
+        colorstyleholder.appendChild(colorPick);
+        colorPick.addEventListener('click', function () {
+            styleize(startContainer, endContainer, this.style.backgroundColor, 'color');
+        });
+    }
+    
+    //background picker
+    bgcolorPickerLabel.textContent = 'Background Color';
+    bgcolorPickerLabel.className = 'flairpanellabel';
+    bgcolorPickerContainer.className = 'colorHoldContainer';
+    bgcolorPickerContainer.appendChild(bgcolorPickerLabel);
+    bgcolorPickerContainer.appendChild(bgcolorstyleholder);
+    container.appendChild(bgcolorPickerContainer);
+    bgcolorstyleholder.className = 'colorHolder';
+    
+    
+    for (var i = 0; i < colors.length; i++) {
+        var colorPick = document.createElement('span');
+        colorPick.style.backgroundColor = colors[i];
+        bgcolorstyleholder.appendChild(colorPick);
+        colorPick.addEventListener('click', function () {
+            styleize(startContainer, endContainer, this.style.backgroundColor, 'background-color');
+        });
+    }
+    
+    /*styleLabel.textContent = 'Styles';
+    styleLabel.className = 'flairpanellabel';
+    styleContainer.appendChild(styleLabel);
+    container.appendChild(styleContainer);
+    
+    for (var i = 0; i < styleButtonKeys.length; i++) {
+        var button = document.createElement('button');
+        button.id = styleButtonKeys[i];
+        button.textContent = styleButtonKeys[i];
+        button.addEventListener('click', function () {
+            styleize(startContainer, endContainer, styleButtons[this.id].value, styleButtons[this.id].name);
+        });
+        styleContainer.appendChild(button);
+    }*/
+    
+    
+    $$$.draggable(container, 'nick');
+    
+    if (document.getElementById('flairPanel')) {
+        document.body.removeChild(document.getElementById('flairPanel'));
+    }
+    document.body.appendChild(container);
+}
+
 
 (function () {
     var buttons = document.createElement('cmdOptions'),
@@ -551,6 +876,13 @@ var menuControl = {
         }
     });
     
+    //show flair maker button
+    document.getElementById('showFlairMaker').addEventListener('click', showFlairMakerPanel);
+    
+    document.getElementById('showActiveChannels').addEventListener('click', function () {
+        socket.emit('activeChannels');
+        $$$.tabber('menu-panels', 'activeChannels');
+    });
 })();
 
 (function () {
