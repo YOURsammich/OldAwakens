@@ -131,9 +131,3 @@ function soundCloud(url) {
     oReq.open("GET", "//soundcloud.com/oembed?format=json&url=" + url + "&iframe=true");
     oReq.send();
 }
-
-var loading = pleaseWait({
-  logo: "/images/awakenslogo.png",
-  backgroundColor: '#111',
-  loadingHtml: '<div class="sk-folding-cube"> <div class="sk-cube1 sk-cube"></div><div class="sk-cube2 sk-cube"></div><div class="sk-cube4 sk-cube"></div><div class="sk-cube3 sk-cube"></div></div><br/><div id="loading">Welcome to awakens.me - the chat that never sleeps!</div>'
-});

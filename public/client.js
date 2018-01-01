@@ -1044,7 +1044,6 @@ socket.on('connect', function () {
         window.top.location = window.self.location;
     } else {
         socket.emit('requestJoin', Attributes.storedAttributes);
-        loading.finish();
     }
 });
 
