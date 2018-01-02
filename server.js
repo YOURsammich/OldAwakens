@@ -977,8 +977,11 @@ function createChannel(io, channelName) {
             dao.find(user.nick).then(function (dbuser) {
                 dao.getUsersStyleProfile(dbuser.nick).then(function (allProfiles) {
                     if (allProfiles.length < 6) {
+                        if (profile.num !== undefined) {
+                            profile.num = profile.num.toString();
+                        }
                         profile = [
-                            profile.num.toString(), profile.flair,
+                            profile.num, profile.flair,
                             profile.cursor, profile.part,
                             profile.font, profile.color,
                             profile.bgcolor, profile.glow,

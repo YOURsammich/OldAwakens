@@ -77,6 +77,9 @@ var COMMANDS = {
                 Attributes.remove('flair');
             } else {
                 Attributes.set('flair', params.flair);
+                menuControl.style.storedProfiles[0].flair = params.flair;
+                menuControl.style.UI(0);
+                socket.emit('saveProfile', menuControl.style.storedProfiles[0]);
                 socket.emit('command', 'flair', {//save flair on server
                     flair : params.flair
                 });
