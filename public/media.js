@@ -20,7 +20,6 @@ function buildAdvancedVideoOverlay(url) {
     if (!videoOverlay) {
         videoOverlay = document.createElement('div');
         videoOverlay.id = 'a-video-overlay';
-        videoOverlay.className = 'video-overlay';
         videoOverlay.style.left = ((window.innerWidth / 2) - 264) + 'px';
         videoOverlay.style.top = ((window.innerHeight / 2) - 161) + 'px';
         
@@ -58,7 +57,7 @@ function buildVideoOverlay(url) {
 
     if (videoOverlay.length === 0) {
         videoOverlay = document.createElement('div');
-        videoOverlay.className = 'video-overlay';
+        videoOverlay.id = 'video-overlay';
         videoOverlay.style.left = ((window.innerWidth / 2) - 264) + 'px';
         videoOverlay.style.top = ((window.innerHeight / 2) - 161) + 'px';
         header = document.createElement('div');

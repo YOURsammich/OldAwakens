@@ -268,7 +268,62 @@ var menuControl = {
             document.getElementById('cmd' + roles[commands[keys[i]] - 1]).getElementsByTagName('ul')[0].appendChild(element);
         }
     },
-    styleUI : function (allProfiles) {
+    style : {
+        storedProfiles : [],
+        UI : function (profileNum) {
+            var textStyle = document.getElementById('textStyle').children,
+                keys,
+                r,
+                att,
+                i;
+            
+            profile = document.createElement('div'),
+            flair = document.createElement('div'),
+            hat = document.createElement('div'),
+            message = document.createElement('div'),
+            
+            hat.className = 'hat';
+            flair.className = 'nick';
+            profile.className = 'message';
+
+            profile.appendChild(hat);
+            profile.appendChild(flair);
+            profile.appendChild(message);
+
+            messageBuilder.filloutHTML({
+                hat : hat,
+                nick : flair,
+                message : message,
+                container : profile
+            }, {
+                hat : false,
+                nick : Attributes.get('nick'),
+                flair : Attributes.get('flair'),
+                message : clientSubmit.message.decorateText('Example Text', menuControl.style.storedProfiles[profileNum])
+            });
+            
+            if (menuControl.style.storedProfiles[profileNum]) {
+                keys = Object.keys(menuControl.style.storedProfiles[profileNum]);
+                for (r = 0; r < keys.length; r++) {
+                    if (menuControl.style.storedProfiles[profileNum][keys[r]]) {
+                        Attributes.set(keys[r], menuControl.style.storedProfiles[profileNum][keys[r]], true);   
+                    } else {
+                        Attributes.remove(keys[r]);
+                    }
+                }
+            }
+
+            for (i = 0; i < textStyle.length; i++) {
+                att = textStyle[i].id.substr(5);
+                textStyle[i].lastChild.style.backgroundColor = Attributes.get(att) ? '#' + Attributes.get(att) : '#FFFFFF';
+            }
+            
+            document.getElementById('styleFlairView').innerHTML = '';
+            document.getElementById('styleFlairView').appendChild(profile);
+            document.getElementById('stylecolor').value = Attributes.get('color') || '#000000';
+        }
+    },
+    styleUI2 : function (allProfiles) {
         var stylePanel = document.getElementById('dislayStyles').getElementsByClassName('savedStyle'),
             profile,
             flair,
@@ -300,7 +355,7 @@ var menuControl = {
                 }, {
                     hat : allProfiles[i].hat,
                     nick : Attributes.get('nick'),
-                    flair : allProfiles[i].flair,
+                    flair : parser.flair(allProfiles[i].flair, Attributes.get('nick')),
                     message : clientSubmit.message.decorateText('Example Text', {
                         font : allProfiles[i].font,
                         color : allProfiles[i].color,
@@ -313,9 +368,6 @@ var menuControl = {
                     var thisProfile = allProfiles[this.parentNode.id[0]],
                         keys = Object.keys(thisProfile);
                     for (var i = 0; i < keys.length; i++) {
-                        if (keys[i] == 'font' || keys[i] == 'color') {
-                            parser.changeInput(keys[i], thisProfile[keys[i]]);
-                        }
                         Attributes.set(keys[i], thisProfile[keys[i]], true);
                     }
                     clientSubmit.handleInput('/echo Now your messages look like this');
@@ -405,6 +457,26 @@ var menuControl = {
             table.appendChild(tr);
         }
     },
+    toggles : function () {
+        var toggleList = document.getElementById('toggles').getElementsByTagName('li'),
+            selectedButton,
+            att,
+            i;
+        
+        for (i = 0; i < toggleList.length; i++) {
+            att = toggleList[i].id.split('-')[1];
+            selectedButton = toggleList[i].getElementsByClassName('selectedButton')[0];
+            if (selectedButton) {
+                selectedButton.className = ''
+            }
+            if (Attributes.get('toggle-' + att)) {
+                toggleList[i].children[1].className = 'selectedButton';
+            } else {
+                toggleList[i].children[2].className = 'selectedButton'
+            }
+        }
+        
+    },
     initMissedMessages : function (socket) {
         var unread = 0;
         
@@ -417,7 +489,7 @@ var menuControl = {
         window.addEventListener('focus', function () {
             unread = 0;
             window.blurred = false;
-            document.title = Attributes.get('topic').value || 'Awakens - The chat that never sleeps';
+            document.title = (Attributes.get('topic') && Attributes.get('topic').value) || 'Awakens - The chat that never sleeps';
         });
         
         window.addEventListener('blur', function () {
@@ -449,8 +521,19 @@ var menuControl = {
             }
             
             if (channel.styles) {
-                menuControl.styleUI(channel.styles);
+                menuControl.style.storedProfiles = channel.styles;
+            } else if (!menuControl.style.storedProfiles.length) {
+                menuControl.style.storedProfiles[0] = Attributes.storedAttributes;
             }
+            menuControl.style.UI(0);
+            
+            menuControl.toggles();
+            socket.on('update', function (data)  {
+                if (data.nick) {
+                    menuControl.style.storedProfiles[0] = Attributes.storedAttributes;
+                    menuControl.style.UI(0);
+                }
+            });
         });
         
         socket.on('idleStatus', menuControl.idleStatus);
@@ -489,6 +572,14 @@ function showFlairMakerPanel() {
         flairEditInput = document.createElement('input'),
         flairLabel = document.createElement('div'),
         cancel = document.createElement('span'),
+        
+        fontPickerLabel = document.createElement('div'),
+        fontPickerContainer = document.createElement('div'),
+        fontInput = document.createElement('input'),
+        loadFont = document.createElement('button'),
+        fontMsg = document.createElement('span'),
+        useableFonts = document.createElement('a'),
+        
         
         colorPickerLabel = document.createElement('div'),
         colorPickerContainer = document.createElement('div'),
@@ -548,6 +639,7 @@ function showFlairMakerPanel() {
     function breakIntoSpans(el) {
         var index = 0,
             newBufflo = document.createElement('div'),
+            currentStyle = {},
             keys;
         
         function breakUpText(text) {
@@ -557,9 +649,14 @@ function showFlairMakerPanel() {
             for (i = 0; i < text.nodeValue.length; i++) {
                 span = document.createElement('span');
                 if (currentStyling[index]) {
-                    keys = Object.keys(currentStyling[index]);
+                    keys = Object.keys(currentStyle);
                     for (s = 0; s < keys.length; s++) {
-                        span.style.cssText += keys[s] + ': ' + currentStyling[index][keys[s]] + ';';
+                        if (keys[s] == 'font-family') {
+                            flairView.style.fontFamily = currentStyle[keys[s]];
+                            fontInput.value = currentStyle[keys[s]].replace(/"/g, '');
+                        } else {
+                            span.style.cssText += keys[s] + ': ' + currentStyle[keys[s]] + ';';
+                        }
                     }
                 }
                 span.textContent = text.nodeValue[i];
@@ -583,6 +680,7 @@ function showFlairMakerPanel() {
                             currentStyling[index] = {};
                         }
                         currentStyling[index][children[i].style[s]] = children[i].style[children[i].style[s]];
+                        currentStyle[children[i].style[s]] = children[i].style[children[i].style[s]];
                     }
                     breakUpSpan(children[i]);
                 }
@@ -590,7 +688,6 @@ function showFlairMakerPanel() {
         }
         
         breakUpSpan(el);
-        console.log(currentStyling);
         flairView.innerHTML = newBufflo.innerHTML;
         getFlair();
     }
@@ -610,19 +707,25 @@ function showFlairMakerPanel() {
                 keys = Object.keys(currentStyling[i]);
                 for (var s = 0; s < keys.length; s++) {
                     if (currentStyling[i] && currentStyling[i][keys[s]]) {
-                        if (rl[keys[s]]) {
-                            flairEditInput.value += rl[keys[s]].value;
-                            if (typeof currentStyling[i][keys[s]] == 'object') {
-                                pipes[currentStyling[i][keys[s]][1]] = true
-                            }
-                            if (rl[keys[s]].add) {
-                                rgb = currentStyling[i][keys[s]].match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
-                                if (rgb) {
-                                    flairEditInput.value += rgbToHex(parseInt(rgb[1]), parseInt(rgb[2]), parseInt(rgb[3]));
-                                } else {
-                                    flairEditInput.value += currentStyling[i][keys[s]];
+                        if (keys[s] == 'font-family') {
+                            flairEditInput.value += '$' + currentStyling[i][keys[s]] + '|';
+                            flairView.style.fontFamily = currentStyling[i][keys[s]];
+                            parser.addFont(currentStyling[i][keys[s]]);
+                        } else {
+                            if (rl[keys[s]]) {
+                                flairEditInput.value += rl[keys[s]].value;
+                                if (typeof currentStyling[i][keys[s]] == 'object') {
+                                    pipes[currentStyling[i][keys[s]][1]] = true
+                                }
+                                if (rl[keys[s]].add) {
+                                    rgb = currentStyling[i][keys[s]].match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
+                                    if (rgb) {
+                                        flairEditInput.value += rgbToHex(parseInt(rgb[1]), parseInt(rgb[2]), parseInt(rgb[3]));
+                                    } else {
+                                        flairEditInput.value += currentStyling[i][keys[s]];
+                                    }   
                                 }   
-                            }   
+                            }                                                   
                         }
                     }
                 }
@@ -636,7 +739,7 @@ function showFlairMakerPanel() {
 
         Attributes.set('flair', flairEditInput.value, true);
     }
-
+    
     function styleize(start, end, value, type) {
         var startIndex = indexOfStyleEl(start),
             endIndex = indexOfStyleEl(end),
@@ -705,6 +808,34 @@ function showFlairMakerPanel() {
     flairEditContain.id = 'flairEditContain';
     flairEditContain.appendChild(flairEditInput);
     container.appendChild(flairEditContain);
+    
+    //font picker
+    fontPickerLabel.textContent = 'Font';
+    fontPickerLabel.className = 'flairpanellabel';
+    fontPickerContainer.id = 'flairFont';
+    fontPickerContainer.className = 'colorHoldContainer';
+    fontInput.placeholder = 'Font name here';
+    fontMsg.textContent = 'case-sensitive';
+    fontMsg.id = 'fontMsg';
+    useableFonts.textContent = 'Fonts here';
+    useableFonts.target = '_blank';
+    useableFonts.href = 'https://fonts.google.com/';
+    loadFont.textContent = 'Load';
+    fontPickerContainer.appendChild(fontPickerLabel);
+    fontPickerContainer.appendChild(fontInput);
+    fontPickerContainer.appendChild(loadFont);
+    fontPickerContainer.appendChild(document.createElement('br'));
+    fontPickerContainer.appendChild(fontMsg);
+    fontPickerContainer.appendChild(useableFonts);
+    container.appendChild(fontPickerContainer);
+    
+    loadFont.addEventListener('click', function () {
+        if (!currentStyling[0]) {
+            currentStyling[0] = {};
+        }
+        currentStyling[0]['font-family'] = parser.findFontName(fontInput.value);
+        getFlair();
+    });
     
     //color picker
     colorPickerLabel.textContent = 'Text Color';
@@ -825,7 +956,32 @@ function showFlairMakerPanel() {
     });
     
     //style profiles
-    document.getElementById('dislayStyles').addEventListener('click', function (e) {
+    
+    document.getElementById('stylePro').addEventListener('click', function (e) {
+        var target = e.target;
+
+        if (target.className == 'trash') {
+            menuControl.style.storedProfiles[0][target.parentNode.parentNode.id.slice(5)] = undefined;
+            socket.emit('saveProfile', menuControl.style.storedProfiles[0]);
+            menuControl.style.UI(0);
+        } else if (target.parentNode.className == 'colorpicker') {
+            target = target.parentNode;
+        }
+        
+        if (target.className == 'colorpicker') {
+            if (!menuControl.style.storedProfiles[0]) {
+                menuControl.style.storedProfiles[0] = {};
+            }
+            $$$.palette(target, function (color) {
+                menuControl.style.storedProfiles[0][target.parentNode.id.slice(5)] = color;
+                menuControl.style.UI(0);
+            }, function () {
+                socket.emit('saveProfile', menuControl.style.storedProfiles[0]);
+            });
+        }
+    });
+    
+    /*document.getElementById('dislayStyles').addEventListener('click', function (e) {
         var target = e.target,
             ary = [];
 
@@ -845,7 +1001,7 @@ function showFlairMakerPanel() {
             menuControl.styleUI(ary);
             socket.emit('saveProfile', ary[target.id[0]]);
         }
-    });
+    });*/
     
     //custom cursors
     document.getElementById('customCursor').getElementsByTagName('button')[0].addEventListener('click', function () {
@@ -885,6 +1041,21 @@ function showFlairMakerPanel() {
         socket.emit('activeChannels');
         $$$.tabber('menu-panels', 'activeChannels');
     });
+    
+    //toggles UI
+    document.getElementById('toggles').getElementsByTagName('ul')[0].addEventListener('click', function (e) {
+        var target = e.target,
+            parent = target.parentNode;
+
+        if (target.nodeName == 'BUTTON') {
+            if (target.id == 'setTrue') {
+                Attributes.set('toggle-' + parent.id.split('-')[1], true);
+            } else if (target.id == 'setFalse') {
+                Attributes.set('toggle-' + parent.id.split('-')[1], false);
+            }
+        }
+    });
+    
 })();
 
 (function () {
@@ -919,6 +1090,8 @@ function showFlairMakerPanel() {
                 menuContainer.style.width = '300px';
             }, 10);
         }
+        
+        this.style.backgroundColor = '';
     });
     
     document.body.addEventListener('mouseup', function (e) {

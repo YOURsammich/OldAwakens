@@ -145,9 +145,11 @@ module.exports = {
     },
     getChannelAtt : function (channelName, att) {
         var defer = $.Deferred();
-        this.getChannelinfo(channelName).then(function (channelData) {
-            if (channelData[att]) {
-                defer.resolve(channelData[att]).promise();
+        var sql = "SELECT * FROM `channel_info` WHERE `channelName` = ? and attribute = ?";
+        
+        db.query(sql, [channelName, att], function (err, rows, fields) {
+            if (rows[0]) {
+                defer.resolve(rows[0].value).promise();
             } else {
                 defer.reject();
             }
@@ -172,7 +174,7 @@ module.exports = {
 
         db.query(sql, nick, function (err, rows, fields) {
             if (rows.length) {
-                defer.resolve(rows[0].channelName);
+                defer.resolve(rows);
             } else {
                 defer.reject().promise();    
             }

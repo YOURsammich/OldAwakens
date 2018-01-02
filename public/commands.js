@@ -35,7 +35,6 @@ var COMMANDS = {
                 parser.changeInput('color', 'white');
             } else {
                 Attributes.set('color', params.color.replace(/#/g,''));
-                parser.changeInput('color', params.color);
             }
         }
     },
@@ -92,7 +91,6 @@ var COMMANDS = {
                 parser.changeInput('font', 'Droid Sans');
             } else {
                 Attributes.set('font', params.font);
-                parser.changeInput('font', params.font);
             }
         }
     },
@@ -236,24 +234,7 @@ var COMMANDS = {
                 attr = params.attr,
                 attValue = !Attributes.get('toggle-' + attr);
             
-            if (validAtts.indexOf(attr) !== -1) {
-                if (attr === 'cursors') {
-                    socket.emit('removeCursor');
-                    COMMANDS.clearcursors.handler();
-                } else if (attr === 'background') {
-                    if (attValue) {
-                        document.getElementById('messages-background').style.background = Attributes.get('background').value;
-                    } else {
-                        document.getElementById('messages-background').style.background = 'black';
-                    }      
-                } else if (attr === 'msg') {
-                    if (attValue) {
-                        document.getElementById('center-text').style.display = 'table-cell';
-                    } else {
-                        document.getElementById('center-text').style.display = 'none';
-                    }     
-                }
-                
+            if (validAtts.indexOf(attr) !== -1) {                
                 Attributes.set('toggle-' + attr, attValue);
             } else {
                 messageBuilder.showMessage({
@@ -515,11 +496,11 @@ var COMMANDS = {
     wordfilteroff : {
         role : 1
     },
-    /*yt : {
+    yt : {
         handler : function () {
             embed('youtube', '9p88Rh3C_rQ', true)
         }
-    },*/
+    },
     fe : {
         handler : function () {
             showFlairMakerPanel();

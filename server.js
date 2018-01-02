@@ -811,11 +811,11 @@ function createChannel(io, channelName) {
                     showMessage(user.socket, 'This channel has already been claimed by: ' + owner, 'error');
                 }).fail(function () {
                     dao.find(user.nick).then(function (dbuser) {
-                        dao.checkChannelOwnerShip(dbuser.nick).then(function (userOwnedChannel) {
-                            showMessage(user.socket, 'You may only own one channel at a time, first give up ownership of ' + userOwnedChannel + ' with /giveupchannel', 'info');
+                        dao.checkChannelOwnerShip(dbuser.nick).then(function (userOwnedChannels) {
+                            showMessage(user.socket, 'You may only own up to 5 channels at a time, first give up ownership of one of your channels with /giveupchannel', 'info');
                         }).fail(function () {
                             dao.setChannelAtt(channelName, 'owner', dbuser.nick).then(function () {
-                                showMessage(user.socket, 'You\'ve claimed "' + channelName + '", its yours :)', 'info');
+                                showMessage(user.socket, 'You\'ve claimed "' + channelName + '", its yours', 'info');
                                 updateUserData(user, {role : 1});
                                 roomEmit('channelDetails', {
                                     owner : dbuser.nick
@@ -830,12 +830,18 @@ function createChannel(io, channelName) {
         },
         giveupchannel : {
             handler : function (user) {
-                dao.checkChannelOwnerShip(user.nick).then(function (userOwnedChannel) {
-                    dao.deleteChannelAtt(userOwnedChannel, 'owner').then(function () {
-                        showMessage(user.socket, 'You\'ve given up ownership of: ' + userOwnedChannel, 'info'); 
-                    });
+                console.log('test')
+                dao.getChannelAtt(channelName , 'owner').then(function (channelOwner) {
+                    console.log(channelOwner);
+                    if (channelOwner == user.nick) {
+                        dao.deleteChannelAtt(channelName, 'owner')
+                        showMessage(user.socket, 'You\'ve given up ownership of: ' + channelName, 'info'); 
+                    } else {
+                        showMessage(user.socket, 'You don\'t own this channel', 'error'); 
+                    }
                 }).fail(function () {
-                    showMessage(user.socket, 'You don\'t own a channel', 'error'); 
+                    console.log('?')
+                    showMessage(user.socket, 'You don\'t own this channel', 'error'); 
                 });
             }
         },
@@ -972,7 +978,7 @@ function createChannel(io, channelName) {
                 dao.getUsersStyleProfile(dbuser.nick).then(function (allProfiles) {
                     if (allProfiles.length < 6) {
                         profile = [
-                            profile.num, profile.flair,
+                            profile.num.toString(), profile.flair,
                             profile.cursor, profile.part,
                             profile.font, profile.color,
                             profile.bgcolor, profile.glow,
@@ -980,6 +986,9 @@ function createChannel(io, channelName) {
                         ];
                         if (profile.length == 10 && profile[0] >= 0 && profile[0] <= 5) {
                             for (var i = 0; i < profile.length; i++) {
+                                if (typeof profile[i] == 'undefined') {
+                                    profile[i] = '';
+                                }
                                 if (typeof profile[i] !== 'string') {
                                     valid = false;
                                 }

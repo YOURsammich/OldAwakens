@@ -110,15 +110,21 @@
     });
 
     socket.on('removeCursor', function(id) {
-        if (ONLINE.users[id].cursor && ONLINE.users[id].cursor.parentNode) {
+        if (ONLINE.users[id].cursor) {
             if (ONLINE.getId(Attributes.get('nick')) == id) {
                 document.getElementById('messages').style.cursor = 'default';
             };
-            ONLINE.users[id].cursor.parentNode.removeChild(ONLINE.users[id].cursor);
-        } else {
-            console.error(ONLINE.users[id].cursor, 'Cursor but no parentNode?');
+            if (ONLINE.users[id].cursor.parentNode) {
+                ONLINE.users[id].cursor.parentNode.removeChild(ONLINE.users[id].cursor);   
+            }
         }
-    });
+    });            
+            //down, take away every color
+            //up, add main color, add every color
+            //left, add every color besides main
+            //right takes away every color besides main
+            
+            //x axis only invovles main color
     
     document.addEventListener('mousemove', function (e) {
         var target = e.target;

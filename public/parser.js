@@ -68,20 +68,20 @@ var parser = {
     },
     showQuote : function (messageNumber) {
         var container = document.getElementById('messages');
-        var messageContainer = document.getElementsByClassName('msg-' + messageNumber)[0];
-        if (messageContainer) {
+        var messageContainer = messageBuilder.storedMessages.main[messageNumber];
+        if (messageContainer && messageContainer.el) {
             var quoteHolder = document.createElement('div');
             quoteHolder.id = 'qoute';
             quoteHolder.classList = 'message';
             quoteHolder.style.position = 'absolute';
             quoteHolder.style.pointerEvents = 'none';
-            quoteHolder.innerHTML = messageContainer.innerHTML;
+            quoteHolder.innerHTML = messageContainer.el.innerHTML;
 
             document.body.appendChild(quoteHolder);
             //follow cursor
             container.addEventListener('mousemove', function (e) {
-                if (e.clientY + messageContainer.offsetHeight > container.offsetHeight) {
-                    quoteHolder.style.top = container.offsetHeight - messageContainer.offsetHeight + 'px'
+                if (e.clientY + messageContainer.el.offsetHeight > container.offsetHeight) {
+                    quoteHolder.style.top = container.offsetHeight - messageContainer.el.offsetHeight + 'px'
                 } else {
                     quoteHolder.style.top = e.clientY + 'px';
                 }
@@ -262,8 +262,8 @@ var parser = {
         if (check && check.length) {
             for(var i in check){
                 var number = check[i].replace('>&gt;', '');
-                var found = document.getElementsByClassName('msg-' + number);
-                if (found.length) {
+                var found = messageBuilder.storedMessages.main[number];
+                if (found) {
                     str = str.replace(check[i], '<a onmouseenter="parser.showQuote(' + number + ');" onmouseout="document.body.removeChild(document.getElementById(\'qoute\'));" onclick="parser.highlight(' + number + ')">&gt;&gt;' + number + '</a>');
                 } else {
                     str = str.replace(check[i], '<a style=\'color:#AD0000;\'>' + check[i] + '</a>');
@@ -324,7 +324,7 @@ var parser = {
             }
         } 
     },
-    mix : function (hexColors, text) {    
+    mix : function (hexColors, text) {
         function hexToRgb(hex) {
             var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
             hex = hex.replace(shorthandRegex, function(m, r, g, b) {

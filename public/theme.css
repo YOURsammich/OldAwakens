@@ -72,6 +72,12 @@ h2 {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+#center-text img {
+    max-height: 50%;
+    max-width: 50%;
 }
 
 #messages {
@@ -207,7 +213,6 @@ h2 {
     box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px inset, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px, rgba(255, 255, 255, 0.2) 0px -1px 0px 0px inset;
     transition: width .5s;
     border-left: 2px solid #222;
-    display: none;
     overflow: hidden;
     flex-flow: column;
 }
@@ -354,10 +359,17 @@ h2 {
     padding: 15px;
     overflow: auto;
     display: none;
+    text-align: left;
+}
+
+.menuPanel h2 {
+    display: block !important;
+    font-size: small;
+    font-weight: bold;
+    font-family: Montserrat;
 }
 
 #goBack {
-    text-align: left;
     margin-bottom: 10px;
 }
 
@@ -384,7 +396,6 @@ h2 {
     list-style-type: none;
     margin-top: 10px;
     padding: 0px;
-    text-align: left;
     text-indent: 20px;
     cursor: pointer;
 }
@@ -397,33 +408,30 @@ h2 {
     border-bottom: 1px solid #eeeeee;
 }
 
-#chnldefaults {
-    text-align: left;
-}
-
-#chnldefaults label {
+.toggleSlider label {
     position: relative;
     display: inline-block;
-    width: 60px;
+    width: 100px;
     height: 30px;
 }
 
-#chnldefaults label input {
+.toggleSlider label input {
     display: none;
 }
 
-#chnldefaults label .slider {
+.toggleSlider label .slider {
     cursor: pointer;
     background-color: #454545;
     -webkit-transition: .4s;
     transition: .4s;
     display: block;
-    float: none;
+    float: none !important;
     border-radius: 10px;
     padding: 5px;
+    width: 40px;
 }
 
-#chnldefaults label .slider:before {
+.toggleSlider label .slider:before {
     content: "";
     height: 10px;
     width: 10px;
@@ -436,18 +444,43 @@ h2 {
     border-radius: 100%;
 }
 
-#chnldefaults label input:checked + .slider {
+.toggleSlider label input:checked + .slider {
   background-color: #39f;
 }
 
-#chnldefaults label input:focus + .slider {
+.toggleSlider label input:focus + .slider {
   box-shadow: 0 0 1px #39f;
 }
 
-#chnldefaults label input:checked + .slider:before {
+.toggleSlider label input:checked + .slider:before {
   -webkit-transform: translateX(30px);
   -ms-transform: translateX(30px);
   transform: translateX(30px);
+}
+
+#toggles ul {
+    margin-top: 30px;
+}
+
+#toggles .selectedButton {
+    background-color: #39f;
+}
+
+#toggles button {
+    background-color: #222;
+    color: white;
+    border: 1px solid #222;
+    padding: 5px;
+    width: 80px;
+    margin-left: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+}
+
+#toggles button:hover {
+    border: 1px solid #39f;
 }
 
 #chnldefaults ul {
@@ -456,12 +489,6 @@ h2 {
 
 #chnldefaults ul li {
     text-indent: 0px !important;
-}
-
-#chnldefaults h2 {
-    display: block;
-    font-size: small;
-    font-weight: bold;
 }
 
 #chnldefaults input {
@@ -490,10 +517,73 @@ h2 {
     margin-top: 30px;
 }
 
+#styleFlairView {
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid #222;
+}
+
+#stylePro #textStyle {
+    margin-left: 20px;
+}
+
+#stylePro #textStyle h3 {
+    font-size: small;
+    font-weight: initial;
+    margin: 0px;
+}
+
+#stylePro .styleAtt {
+    font-size: small;
+}
+
+#stylePro .styleAtt div {
+    background-color: #fff;
+    border: 1px solid #222;
+    border-radius: 2px;
+    cursor: pointer;
+    width: 60px;
+    height: 20px;
+    margin: 8px 0px 8px 20px;
+    display: inline-block;
+}
+
+#stylePro .styleAtt .trash {
+    width: 20px;
+    height: 20px;
+    float: right;
+    margin-right: -25px;
+    font-size: 10px;
+    line-height: 22px;
+}
+
+#stylePro .styleAtt:hover .trash:after {
+    content: 'clear';
+    width: 20px;
+    height: 20px;
+}
+
+#stylePro .styleAtt:hover .trash:hover:after {
+    text-decoration: underline;
+}
+
+#stylePro .styleAtt div span {
+    float: right;
+    height: 20px;
+    line-height: 20px;
+}
+
+#stylePro .styleAtt div span:before {
+    font-family: Material Icons;
+    content: 'arrow_drop_down';
+    color: black;
+}
+
 .savedStyle {
     background-color: #111;
     margin-top: 20px;
     border-top: 1px solid #111;
+    border: 1px solid #111;
     border-bottom: 1px solid #222;
     cursor: pointer;
     padding: 5px;
@@ -508,9 +598,9 @@ h2 {
 }
 
 .savedStyle .trash {
+    float: right;
     position: relative;
     top: -35px;
-    left: 110px;
     font-size: 25px;
     font-family: Material Icons;
 }
@@ -840,8 +930,15 @@ h2 {
 
 /* embed */
 
-.video-overlay {
-    position: absolute;
+#a-video-overlay {
+    display: flex;
+    flex-direction: row;
+    z-index: 5;
+    width: 528px;
+    height: 322px;
+}
+
+#video-overlay {
     z-index: 5;
     width: 528px;
     height: 322px;
@@ -912,6 +1009,37 @@ h2 {
     display: inline-block;
     border-radius: 5px;
     margin-right: 5px;
+}
+
+#flairFont {
+    text-align: left;
+}
+
+#flairFont button {
+    border: none;
+    border-radius: 5px;
+    background-color: #39F;
+    color: white;
+    padding: 5px 20px 5px 20px;
+    cursor: pointer;
+}
+
+#flairFont a {
+    font-size: small;
+    margin-left: 5px;
+}
+
+#flairFont input {
+    border: 1px solid #111;
+    border-radius: 5px;
+    margin: 3px;
+    padding: 5px;
+    background-color: #eee;
+}
+
+#fontMsg {
+    color: white;
+    font-size: small;
 }
 
 /* chat styles */
@@ -1242,4 +1370,72 @@ h2 {
 #qoute {
     background: #111;
     padding: 4px;
+}
+
+#stylePalette {
+    width: 200px;
+    position: absolute;
+    z-index: 99;
+    background-color: white;
+    padding: 4px;
+}
+
+#stylePalette input {
+    margin: 5px 0px 7px 5px;
+}
+
+#stylePalette #styleslider {
+    height: 2px;
+    background: linear-gradient(to right,red 0,#ff0 16%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 84%,#ff0004 100%);
+    margin: 8px 0px 5px 0px;
+    width: 100%;
+}
+
+#stylePalette #styleslider span {
+    display: block;
+    width: 12px;
+    height: 12px;
+    background-color: white;
+    position: relative;
+    top: -6px;
+    left: 0px;
+    border-radius: 100%;
+    box-shadow: 0px 0px 2px 1px;
+    cursor: pointer;
+    margin-left: -6px;
+}
+
+#specon {
+    position: relative;
+}
+
+#stylePalette #spec {
+    height: 150px;
+    width: 200px;
+    background: linear-gradient(to bottom,rgba(0,0,0,0) 0,#000 100%),linear-gradient(to right,#fff 0,rgba(255,255,255,0) 100%);
+    user-select: none;
+}
+
+#stylePalette #speccircle {
+    position: absolute;
+    border: 1px solid #fff;
+    border-radius: 100%;
+    width: 5px;
+    height: 5px;
+    margin-left: -2.5px;
+    margin-top: -2.5px;
+    box-shadow: 0 1px 2px #444;
+    user-select: none;
+}
+
+#stylePalette #buttonHold {
+    padding-top: 5px;
+}
+
+#stylePalette #buttonHold button {
+background-color: #969696;
+    color: white;
+    border: none;
+    padding: 5px 20px 5px 20px;
+    width: 95px;
 }

@@ -26,7 +26,7 @@
                     <div id="cursor-container"></div>
                     <div id="messages"></div>
                 </div>
-                <div id="menu-container">
+                <div id="menu-container" style="display: none;">
                 
                     <div id="menu-tabs">
                         <span onclick="$$$.tabber('menu-panels', 'userList');">group</span>
@@ -41,26 +41,36 @@
                             <div></div>
                         </div>
                         <div style="display:none" id="mySettings">
-
                             <div id="stylePanels">
                                 <div id="styleMenu">
                                     <ul>
-                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'stylePro');">Style Profiles<span>arrow_forward</span></li>
+                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'stylePro');">Style<span>arrow_forward</span></li>
                                         <li class="selecter" onclick="$$$.tabber('stylePanels', 'myHats');">Hat<span>arrow_forward</span></li>
                                         <li class="selecter" onclick="$$$.tabber('stylePanels', 'myCursors');">Cursor<span>arrow_forward</span></li>
                                         <li class="selecter" id="showFlairMaker">Flair Maker<span>arrow_forward</span></li>
+                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'toggles');">Toggles<span>arrow_forward</span></li>
                                     </ul>
                                 </div>
                                 <div class="menuPanel" id="stylePro">
                                     <div id="goBack" onclick="$$$.tabber('stylePanels', 'styleMenu');">
                                         <span id="goBackArrow"></span>
                                     </div>
-                                    <div id="dislayStyles">
-                                        <div id="0button" class="savedStyle">Save style to profile 1</div>
-                                        <div id="1button" class="savedStyle">Save style to profile 2</div>
-                                        <div id="2button" class="savedStyle">Save style to profile 3</div>
-                                        <div id="3button" class="savedStyle">Save style to profile 4</div>
-                                        <div id="4button" class="savedStyle">Save style to profile 5</div>
+                                    
+                                    <select style="display:none;">
+                                        <option>Default Style Profile</option>
+                                        <option>-Empty Profile-</option>
+                                        <option>-Empty Profile-</option>
+                                        <option>-Empty Profile-</option>
+                                        <option>-Empty Profile-</option>
+                                    </select>
+                                    
+                                    <div id="styleFlairView"></div>
+                                    
+                                    <h2>Text</h2>
+                                    <div id="textStyle">
+                                        <div class="styleAtt" id="stylecolor"><h3>Color</h3> <div class="colorpicker"><trash class="trash"></trash><span></span></div></div>
+                                        <div class="styleAtt" id="stylebgcolor"><h3>Background Color</h3> <div class="colorpicker"><trash class="trash"></trash><span></span></div></div>
+                                        <div class="styleAtt" id="styleglow"><h3>Glow</h3> <div class="colorpicker"><trash class="trash"></trash><span></span></div></div>
                                     </div>
                                 </div>
                                 <div class="menuPanel" id="myHats">
@@ -81,6 +91,37 @@
                                         </div>
                                     </div>
                                     <div id="displayCursors"></div>
+                                </div>
+                                <div class="menuPanel" id="toggles">
+                                    <div id="goBack" onclick="$$$.tabber('stylePanels', 'styleMenu');">
+                                        <span id="goBackArrow"></span>
+                                    </div>
+                                    <ul>
+                                        <li id="toggleUI-background">
+                                            <h2>Background</h2>
+                                            <button id="setTrue">Enable</button><button id="setFalse">Disable</button>
+                                        </li>
+                                        <li id="toggleUI-images">
+                                            <h2>Images</h2>
+                                            <button id="setTrue">Enable</button><button id="setFalse">Disable</button>
+                                        </li>
+                                        <li id="toggleUI-12h">
+                                            <h2>TimeStamp</h2>
+                                            <button id="setTrue">12hr</button><button id="setFalse">24hr</button>
+                                        </li>
+                                        <li id="toggleUI-filters">
+                                            <h2>Filters</h2>
+                                            <button id="setTrue">Enable</button><button id="setFalse">Disable</button>
+                                        </li>
+                                        <li id="toggleUI-cursors">
+                                            <h2>Cursors</h2>
+                                            <button id="setTrue">Enable</button><button id="setFalse">Disable</button>
+                                        </li>
+                                        <li id="toggleUI-msg">
+                                            <h2>Center Message</h2>
+                                            <button id="setTrue">Enable</button><button id="setFalse">Disable</button>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
 
@@ -148,7 +189,7 @@
                                             <input id="chnlfont" placeholder="Droid Sans" />
                                             <button id="loadfont" style="display: none;width:100%;margin-top: 10px;" class="customButton">Load channel font</button>
                                         </li>
-                                        <li>
+                                        <li class="toggleSlider">
                                             <h2>Filters</h2>
                                             <label>
                                                 <input id="tglfilter" type="checkbox"/>

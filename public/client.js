@@ -2,6 +2,7 @@
     coin
     /anon
     youtube replace thing
+    MinecraftDragon@onet.pl
 */
 
 
@@ -31,8 +32,7 @@ channelPanel
 
 */
 
-
-var socket = io.connect(window.location.pathname);
+var socket;
 
 var ONLINE = {
     users : {},
@@ -57,8 +57,9 @@ var Attributes = {
         mute : false,
         background : true,
         msg : true,
-        images : true
-        
+        images : true,
+        filters : true,
+        '12h' : true
     },
     set : function (attribute, newValue, noNotify) {
         var oldValue = this.storedAttributes[attribute];
@@ -81,13 +82,37 @@ var Attributes = {
                 });
             }
         }
-        
+
         if (this.nosaveLocal.indexOf(attribute) === -1 && attribute !== undefined) {
             if (typeof newValue === 'object') {
                 localStorage.setItem('chat-' + attribute, JSON.stringify(newValue));
             } else {
                 localStorage.setItem('chat-' + attribute, newValue);
             }
+        }
+        
+        if (attribute == 'font' || attribute == 'color') {
+            parser.changeInput(attribute, newValue);
+        }
+        
+        if (attribute.substr(0, 6) == 'toggle') {
+            if (attribute === 'toggle-cursors') {
+                socket.emit('removeCursor');
+                COMMANDS.clearcursors.handler();
+            } else if (attribute === 'toggle-background') {
+                if (newValue) {
+                    document.getElementById('messages-background').style.background = Attributes.get('background').value;
+                } else {
+                    document.getElementById('messages-background').style.background = 'black';
+                }      
+            } else if (attribute === 'toggle-msg') {
+                if (newValue) {
+                    document.getElementById('center-text').style.display = 'table-cell';
+                } else {
+                    document.getElementById('center-text').style.display = 'none';
+                }     
+            }
+            menuControl.toggles();
         }
     },
     get : function (attribute) {
@@ -166,7 +191,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         container.appendChild(timeDIV);
         
         hatDIV.className = 'hat';
-        container.append(hatDIV);
+        container.appendChild(hatDIV);
         
         nickDIV.className = 'nick';
         container.appendChild(nickDIV);
@@ -198,7 +223,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         }
         
         if (messageHTML.time) {
-            messageHTML.time.textContent = (!Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
+            messageHTML.time.textContent = (Attributes.get('toggle-12h') ? time.format('shortTime') : time.format('HH:MM')) + ' ';
         }
         
         if (messageData.count) {
@@ -230,7 +255,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
             }
             parser.getAllFonts(messageData.message);
             //messageHTML.message.innerHTML = parser.convert(parser.escape(messageData.message));
-            messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && (Attributes.get('channel-filters') && Attributes.get('channel-filters').value) && !Attributes.get('toggle-filters'));
+            messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && (Attributes.get('channel-filters') && Attributes.get('channel-filters').value) && Attributes.get('toggle-filters'));
         }
         
         return messageHTML.container;
@@ -375,7 +400,8 @@ var privateMessages = {
         }
     },
     handlePM : function (messageData) {
-        var panel = document.getElementById('PmPanel-' + messageData.landOn);
+        var panel = document.getElementById('PmPanel-' + messageData.landOn),
+            menuPanel = document.getElementById('menu-container');
         
         if (!privateMessages.storedconvo[messageData.landOn]) {
             privateMessages.storedconvo[messageData.landOn] = {
@@ -403,16 +429,18 @@ var privateMessages = {
             }
             privateMessages.mini(messageData.landOn);
         }
+        
+
+        if (menuPanel.style.display == 'none') {
+            document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = 'orange';
+            audioPlayer.play(true);
+        }        
     }
 }
 
 var clientSubmit = {
     command : {
         send : function (commandName, params) {
-            if (COMMANDS.shortCuts[commandName]) {
-                commandName = COMMANDS.shortCuts[commandName];
-            }
-            
             if (COMMANDS[commandName].handler) {
                 COMMANDS[commandName].handler(params);
             } else {
@@ -453,6 +481,10 @@ var clientSubmit = {
                 params = commandData[2],
                 formatedParams;
 
+            if (COMMANDS.shortCuts[commandName]) {
+                commandName = COMMANDS.shortCuts[commandName];
+            }
+            
             if (COMMANDS[commandName]) {
                 if (COMMANDS[commandName].params) {
 
@@ -630,7 +662,13 @@ function createPmPanel(id) {
                 messageBuilder.showMessage(privateMessages.storedconvo[id].messages[i], messages);
             }
         }
-
+        
+        socket.on('pmMessage', function (messageData) {
+            if (Attributes.get('nick') != messageData.nick) {
+                nickName.innerHTML = parser.flair(messageData.flair, messageData.nick);
+            }
+        });
+        
         controls.appendChild(minimize);
         controls.appendChild(cancel);
         header.appendChild(nickName);
@@ -941,111 +979,123 @@ function showChannelDetails(channelData) {
     emojione.imagePathSVGSprites = 'images/emojione.sprites.svg';
 })();
 
-socket.on('message', messageBuilder.showMessage);
-
-socket.on('chat-image', messageBuilder.showMessage, true);
-
-socket.on('pmMessage', privateMessages.handlePM);
-
-socket.on('channelDetails', showChannelDetails)
-
-socket.on('banlist', function (banlist) {
-    var border = document.createElement('div'),
-        insideHolder = document.createElement('div'),
-        cancel,
-        table;
-
-    border.className = 'banlist';
-
-    border.appendChild(insideHolder);
-
-    cancel = document.createElement('span');
-    cancel.style.cssText = 'position:absolute;top:0px;right:4px;cursor:pointer;';
-    cancel.textContent = 'x';
-
-    cancel.onclick = function(){
-        document.body.removeChild(border);
-    }
-
-    border.appendChild(cancel);
-
-    table = document.createElement('table');
-    table.innerHTML = '<tr><th>IP</th><th>nick</th><th>Banned by</th><th>Reason</th></tr>';
+(function connectToChannel() {
+    var subDomain = window.location.host.split('.'),
+        sub = window.location.pathname;
     
-    for (var q = 0; q < banlist.length; q++) {
-        var tr = document.createElement('tr');
-        var keys = Object.keys(banlist[q]);
-
-        for(var i = 2; i < 6; i++){
-            var key = keys[i];
-            var td = document.createElement('td');
-            td.textContent = banlist[q][keys[i]] || ' ';
-            tr.appendChild(td);
-        }
-        table.appendChild(tr);
+    if (subDomain.length == 3) {
+        socket = io.connect('/' + subDomain[0] + sub);
+    } else {
+        socket = io.connect(sub);
     }
-
-    insideHolder.appendChild(table);
-    $$$.draggable(border);
-
-    document.body.appendChild(border);
-});
-
-socket.on('update', function (allAtt) {
-    var keys = Object.keys(allAtt),
-        i;
     
-    for (i = 0; i < keys.length; i++) {
-        if (allAtt[keys[i]]) {
-            Attributes.set(keys[i], allAtt[keys[i]]);
+    socket.on('message', messageBuilder.showMessage);
+
+    socket.on('chat-image', messageBuilder.showMessage, true);
+
+    socket.on('pmMessage', privateMessages.handlePM);
+
+    socket.on('channelDetails', showChannelDetails)
+
+    socket.on('banlist', function (banlist) {
+        var border = document.createElement('div'),
+            insideHolder = document.createElement('div'),
+            cancel,
+            table;
+
+        border.className = 'banlist';
+
+        border.appendChild(insideHolder);
+
+        cancel = document.createElement('span');
+        cancel.style.cssText = 'position:absolute;top:0px;right:4px;cursor:pointer;';
+        cancel.textContent = 'x';
+
+        cancel.onclick = function(){
+            document.body.removeChild(border);
         }
-    }
-});
 
-socket.on('locked', function () {
-    var nickInput = document.createElement('input'),
-        passwordInput = document.createElement('input');
+        border.appendChild(cancel);
 
-    nickInput.placeholder = 'Username';
-    passwordInput.placeholder = 'PassWord';
-    passwordInput.type = 'password';
+        table = document.createElement('table');
+        table.innerHTML = '<tr><th>IP</th><th>nick</th><th>Banned by</th><th>Reason</th></tr>';
 
-    createPanel('Login', [nickInput, passwordInput], function () {
-        socket.emit('requestJoin', {
-            nick : nickInput.value,
-            password : passwordInput.value,
-            token : Attributes.get('token')
+        for (var q = 0; q < banlist.length; q++) {
+            var tr = document.createElement('tr');
+            var keys = Object.keys(banlist[q]);
+
+            for(var i = 2; i < 6; i++){
+                var key = keys[i];
+                var td = document.createElement('td');
+                td.className = 'banlistentry';
+                td.textContent = banlist[q][keys[i]] || ' ';
+                tr.appendChild(td);
+            }
+            table.appendChild(tr);
+        }
+
+        insideHolder.appendChild(table);
+        $$$.draggable(border, 'banlistentry');
+
+        document.body.appendChild(border);
+    });
+
+    socket.on('update', function (allAtt) {
+        var keys = Object.keys(allAtt),
+            i;
+
+        for (i = 0; i < keys.length; i++) {
+            if (allAtt[keys[i]]) {
+                Attributes.set(keys[i], allAtt[keys[i]]);
+            }
+        }
+    });
+
+    socket.on('locked', function () {
+        var nickInput = document.createElement('input'),
+            passwordInput = document.createElement('input');
+
+        nickInput.placeholder = 'Username';
+        passwordInput.placeholder = 'PassWord';
+        passwordInput.type = 'password';
+
+        createPanel('Login', [nickInput, passwordInput], function () {
+            socket.emit('requestJoin', {
+                nick : nickInput.value,
+                password : passwordInput.value,
+                token : Attributes.get('token')
+            });
         });
     });
-});
 
-socket.on('disconnect', function () {
-    var userIDs = Object.keys(ONLINE.users);
-    for (var i = 0; i < userIDs.length; i++) {
-        var userID = userIDs[i];
-        var user = ONLINE.users[userID];
-        if (user.cursor && user.cursor.parentNode) {
-            user.cursor.parentNode.removeChild(user.cursor);
-        }
-    };
-    
-    messageBuilder.showMessage({
-        message : 'disconnected',
-        messageType : 'error'
+    socket.on('disconnect', function () {
+        var userIDs = Object.keys(ONLINE.users);
+        for (var i = 0; i < userIDs.length; i++) {
+            var userID = userIDs[i];
+            var user = ONLINE.users[userID];
+            if (user.cursor && user.cursor.parentNode) {
+                user.cursor.parentNode.removeChild(user.cursor);
+            }
+        };
+
+        messageBuilder.showMessage({
+            message : 'disconnected',
+            messageType : 'error'
+        });
     });
-});
 
-socket.on('refresh', function () {
-    location.reload();
-});
+    socket.on('refresh', function () {
+        location.reload();
+    });
 
-socket.on('connect', function () {
-    if (window.top !== window.self) {
-        window.top.location = window.self.location;
-    } else {
-        socket.emit('requestJoin', Attributes.storedAttributes);
-    }
-});
+    socket.on('connect', function () {
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+        } else {
+            socket.emit('requestJoin', Attributes.storedAttributes);
+        }
+    });
 
-menuControl.initMissedMessages(socket);
-menuControl.initMenuUI(socket);
+    menuControl.initMissedMessages(socket);
+    menuControl.initMenuUI(socket);   
+})();
