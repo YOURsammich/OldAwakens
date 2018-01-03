@@ -188,83 +188,86 @@ window.$$$ = {
                 Y,
                 d,
                 xf;
-            if (validHex.test(hex || input.value)) {
-                rgb = hexToRgb(hex || input.value);
-                if (rgb) {
-                    fixedSeed = 0;
-                    if (rgb.r >= rgb.b && rgb.r >= rgb.g) {
-                        if (rgb.b > rgb.g) {
-                            fixedSeed = 1275;
-                            d = rebetweenNumbers(0, 255, rgb.g);
-                            Y = rebetweenNumbers(255, 0, rgb.b);
-                            X = (((d * 100) / (100 - Y)) * -1) + 100;
-                            fakeseedY = getHigher(Y, rgb.r);
-                            fixedSeed = Math.round(getHigher2(1275, X, (1275 + (255 - fakeseedY))));
-                        } else {
-                            d = rebetweenNumbers(0, 255, rgb.b);
-                            Y = rebetweenNumbers(255, 0, rgb.r);
-                            X = (((d * 100) / (100 - Y)) * -1) + 100;
-                            fakeseedY = getHigher(Y, rgb.g);
-                            fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
-                            
-                            if (!isNaN(fakeseedX)) {
-                                fixedSeed += fakeseedX;
-                            } else {
-                                fixedSeed += fakeseedY;
-                            }
-                        }
-                    } else if (rgb.g >= rgb.r && rgb.g >= rgb.b) {
-                        if (rgb.r > rgb.b) {
-                            fixedSeed = 255;
-                            d = rebetweenNumbers(0, 255, rgb.b);
-                            Y = rebetweenNumbers(255, 0, rgb.g);
-                            X = (((d * 100) / (100 - Y)) * -1) + 100;
-                            fakeseedY = getHigher(Y, rgb.r);
-                            fixedSeed = Math.round(getHigher2(255, X, (255 + (255 - fakeseedY))));
-                        } else {
-                            fixedSeed = 510;
-                            d = rebetweenNumbers(0, 255, rgb.r);
-                            Y = rebetweenNumbers(255, 0, rgb.g);
-                            X = (((d * 100) / (100 - Y)) * -1) + 100;
-                            fakeseedY = getHigher(Y, rgb.b);
-                            fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
 
-                            if (!isNaN(fakeseedX)) {
-                                fixedSeed += fakeseedX;
-                            } else {
-                                fixedSeed += fakeseedY;
-                            }
-                        }
-                    } else if (rgb.b >= rgb.r && rgb.b >= rgb.g) {
-                        if (rgb.g > rgb.r) {
-                            fixedSeed = 765;
-                            d = rebetweenNumbers(0, 255, rgb.r);
-                            Y = rebetweenNumbers(255, 0, rgb.b);
-                            X = (((d * 100) / (100 - Y)) * -1) + 100;
-                            fakeseedY = getHigher(Y, rgb.g);
-                            fixedSeed = Math.round(getHigher2(765, X, (765 + (255 - fakeseedY))));
+            if (!validHex.test(hex)) {
+                hex = input.value;
+            }
+            
+            rgb = hexToRgb(hex);
+            if (rgb) {
+                fixedSeed = 0;
+                if (rgb.r >= rgb.b && rgb.r >= rgb.g) {
+                    if (rgb.b > rgb.g) {
+                        fixedSeed = 1275;
+                        d = rebetweenNumbers(0, 255, rgb.g);
+                        Y = rebetweenNumbers(255, 0, rgb.b);
+                        X = (((d * 100) / (100 - Y)) * -1) + 100;
+                        fakeseedY = getHigher(Y, rgb.r);
+                        fixedSeed = Math.round(getHigher2(1275, X, (1275 + (255 - fakeseedY))));
+                    } else {
+                        d = rebetweenNumbers(0, 255, rgb.b);
+                        Y = rebetweenNumbers(255, 0, rgb.r);
+                        X = (((d * 100) / (100 - Y)) * -1) + 100;
+                        fakeseedY = getHigher(Y, rgb.g);
+                        fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
+                        
+                        if (!isNaN(fakeseedX)) {
+                            fixedSeed += fakeseedX;
                         } else {
-                            fixedSeed = 1020;
-                            d = rebetweenNumbers(0, 255, rgb.g);
-                            Y = rebetweenNumbers(255, 0, rgb.b);
-                            X = (((d * 100) / (100 - Y)) * -1) + 100;
-                            fakeseedY = getHigher(Y, rgb.r);
-                            fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
-                            
-                            if (!isNaN(fakeseedX)) {
-                                fixedSeed += fakeseedX;
-                            } else {
-                                fixedSeed += fakeseedY;
-                            }
+                            fixedSeed += fakeseedY;
                         }
                     }
-                    cursorX = (X * 200) / 100;
-                    cursorY = (Y * 150) / 100;
-     
-                    theSeed = fixedSeed;
-                    sliderKnob.style.left = betweenNumbers(0, 200, rebetweenNumbers(0, 1275, theSeed)) + 'px';
-                    selectColor(cursorX, cursorY);
+                } else if (rgb.g >= rgb.r && rgb.g >= rgb.b) {
+                    if (rgb.r > rgb.b) {
+                        fixedSeed = 255;
+                        d = rebetweenNumbers(0, 255, rgb.b);
+                        Y = rebetweenNumbers(255, 0, rgb.g);
+                        X = (((d * 100) / (100 - Y)) * -1) + 100;
+                        fakeseedY = getHigher(Y, rgb.r);
+                        fixedSeed = Math.round(getHigher2(255, X, (255 + (255 - fakeseedY))));
+                    } else {
+                        fixedSeed = 510;
+                        d = rebetweenNumbers(0, 255, rgb.r);
+                        Y = rebetweenNumbers(255, 0, rgb.g);
+                        X = (((d * 100) / (100 - Y)) * -1) + 100;
+                        fakeseedY = getHigher(Y, rgb.b);
+                        fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
+
+                        if (!isNaN(fakeseedX)) {
+                            fixedSeed += fakeseedX;
+                        } else {
+                            fixedSeed += fakeseedY;
+                        }
+                    }
+                } else if (rgb.b >= rgb.r && rgb.b >= rgb.g) {
+                    if (rgb.g > rgb.r) {
+                        fixedSeed = 765;
+                        d = rebetweenNumbers(0, 255, rgb.r);
+                        Y = rebetweenNumbers(255, 0, rgb.b);
+                        X = (((d * 100) / (100 - Y)) * -1) + 100;
+                        fakeseedY = getHigher(Y, rgb.g);
+                        fixedSeed = Math.round(getHigher2(765, X, (765 + (255 - fakeseedY))));
+                    } else {
+                        fixedSeed = 1020;
+                        d = rebetweenNumbers(0, 255, rgb.g);
+                        Y = rebetweenNumbers(255, 0, rgb.b);
+                        X = (((d * 100) / (100 - Y)) * -1) + 100;
+                        fakeseedY = getHigher(Y, rgb.r);
+                        fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
+                        
+                        if (!isNaN(fakeseedX)) {
+                            fixedSeed += fakeseedX;
+                        } else {
+                            fixedSeed += fakeseedY;
+                        }
+                    }
                 }
+                cursorX = (X * 200) / 100;
+                cursorY = (Y * 150) / 100;
+     
+                theSeed = fixedSeed;
+                sliderKnob.style.left = betweenNumbers(0, 200, rebetweenNumbers(0, 1275, theSeed)) + 'px';
+                selectColor(cursorX, cursorY);
             }
         }
         

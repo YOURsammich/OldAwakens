@@ -213,7 +213,9 @@ var menuControl = {
         var hatNames = hats,
             i,
             hatPanel = document.getElementById('displayHats');
-            
+        
+        hatPanel.innerHTML = '';
+        
         for (i = 0; i < hatNames.length; i++) {
             var hatImg = new Image();
             hatImg.src = '/hats/' + hatNames[i];
@@ -321,71 +323,6 @@ var menuControl = {
             document.getElementById('styleFlairView').innerHTML = '';
             document.getElementById('styleFlairView').appendChild(profile);
             document.getElementById('stylecolor').value = Attributes.get('color') || '#000000';
-        }
-    },
-    styleUI2 : function (allProfiles) {
-        var stylePanel = document.getElementById('dislayStyles').getElementsByClassName('savedStyle'),
-            profile,
-            flair,
-            hat,
-            message,
-            i,
-            trashcan;
-        
-        for (i = 0; i < stylePanel.length; i++) {
-            profile = document.createElement('div'),
-            flair = document.createElement('div'),
-            hat = document.createElement('div'),
-            message = document.createElement('div'),
-            
-            hat.className = 'hat';
-            flair.className = 'nick';
-            profile.className = 'message';
-
-            profile.appendChild(hat);
-            profile.appendChild(flair);
-            profile.appendChild(message);
-            
-            if (allProfiles && allProfiles[i]) {
-                messageBuilder.filloutHTML({
-                    hat : hat,
-                    nick : flair,
-                    message : message,
-                    container : profile
-                }, {
-                    hat : allProfiles[i].hat,
-                    nick : Attributes.get('nick'),
-                    flair : parser.flair(allProfiles[i].flair, Attributes.get('nick')),
-                    message : clientSubmit.message.decorateText('Example Text', {
-                        font : allProfiles[i].font,
-                        color : allProfiles[i].color,
-                        bgcolor : allProfiles[i].bgcolor,
-                        glow : allProfiles[i].glow,
-                        style : allProfiles[i].style
-                    })
-                });
-                profile.addEventListener('click', function () {
-                    var thisProfile = allProfiles[this.parentNode.id[0]],
-                        keys = Object.keys(thisProfile);
-                    for (var i = 0; i < keys.length; i++) {
-                        Attributes.set(keys[i], thisProfile[keys[i]], true);
-                    }
-                    clientSubmit.handleInput('/echo Now your messages look like this');
-                });
-                stylePanel[allProfiles[i].num].innerHTML = '';
-                stylePanel[allProfiles[i].num].className += ' flair';
-                stylePanel[allProfiles[i].num].appendChild(profile);
-                trashcan = document.createElement('span');
-                trashcan.textContent = 'delete_forever';
-                trashcan.className = 'trash';
-                trashcan.addEventListener('click', function () {
-                    var id = parseInt(this.parentNode.id[0]) + 1;
-                    this.parentNode.className = 'savedStyle';
-                    this.parentNode.innerHTML = 'Save style to profile ' + id;
-                    socket.emit('deleteProfile', id - 1);
-                });
-                stylePanel[allProfiles[i].num].appendChild(trashcan);
-            }
         }
     },
     ownerUI : function (owned) {
@@ -523,14 +460,34 @@ var menuControl = {
             if (channel.styles) {
                 menuControl.style.storedProfiles = channel.styles;
             } else if (!menuControl.style.storedProfiles.length) {
-                menuControl.style.storedProfiles[0] = Attributes.storedAttributes;
+                menuControl.style.storedProfiles[0] = {
+                    flair : Attributes.get('flair') || '',
+                    cursor : Attributes.get('cursor') || '',
+                    part : Attributes.get('part') || '',
+                    font : Attributes.get('font') || '',
+                    color : Attributes.get('color') || '',
+                    bgcolor : Attributes.get('bgcolor') || '',
+                    glow : Attributes.get('glow') || '',
+                    style : Attributes.get('style') || '',
+                    hat : Attributes.get('hats') || ''
+                }
             }
             menuControl.style.UI(0);
             
             menuControl.toggles();
             socket.on('update', function (data)  {
                 if (data.nick) {
-                    menuControl.style.storedProfiles[0] = Attributes.storedAttributes;
+                    menuControl.style.storedProfiles[0] = {
+                        flair : Attributes.get('flair') || '',
+                        cursor : Attributes.get('cursor') || '',
+                        part : Attributes.get('part') || '',
+                        font : Attributes.get('font') || '',
+                        color : Attributes.get('color') || '',
+                        bgcolor : Attributes.get('bgcolor') || '',
+                        glow : Attributes.get('glow') || '',
+                        style : Attributes.get('style') || '',
+                        hat : Attributes.get('hats') || ''
+                    }
                     menuControl.style.UI(0);
                 }
             });
