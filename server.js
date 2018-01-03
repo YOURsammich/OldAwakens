@@ -830,9 +830,7 @@ function createChannel(io, channelName) {
         },
         giveupchannel : {
             handler : function (user) {
-                console.log('test')
                 dao.getChannelAtt(channelName , 'owner').then(function (channelOwner) {
-                    console.log(channelOwner);
                     if (channelOwner == user.nick) {
                         dao.deleteChannelAtt(channelName, 'owner')
                         showMessage(user.socket, 'You\'ve given up ownership of: ' + channelName, 'info'); 
@@ -840,7 +838,6 @@ function createChannel(io, channelName) {
                         showMessage(user.socket, 'You don\'t own this channel', 'error'); 
                     }
                 }).fail(function () {
-                    console.log('?')
                     showMessage(user.socket, 'You don\'t own this channel', 'error'); 
                 });
             }
@@ -960,7 +957,6 @@ function createChannel(io, channelName) {
     };
     
     room.on('connection', function (socket) {
-        
         var user = {
             remote_addr : socket.conn.remoteAddress,
             socket : socket,
@@ -1478,10 +1474,17 @@ function intoapp(app, http) {
     });
     
     app.get(channelRegex, function (req, res) {
-        if (!channels[req.url]) {
-            channels[req.url] = createChannel(io, req.url);
+        var host = req.headers.host.split('.');
+        var channelName = channelRegex.exec(req.url)[1];
+
+        if (host.length == 3) {
+            channelName = '/' + host[0] + '/' + channelName;
         }
         
+        if (!channels[channelName]) {
+            channels[channelName] = createChannel(io, channelName);
+        }
+
         if (req.url === '/welcome/') {
             var index = fs.readFileSync('public/welcome/welcome.html').toString();
             res.send(index); 
