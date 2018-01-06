@@ -317,7 +317,11 @@ var menuControl = {
 
             for (i = 0; i < textStyle.length; i++) {
                 att = textStyle[i].id.substr(5);
-                textStyle[i].lastChild.style.backgroundColor = Attributes.get(att) ? '#' + Attributes.get(att) : '#FFFFFF';
+                if (att == 'font') {
+                    textStyle[i].getElementsByTagName('input')[0].value = Attributes.get(att);
+                } else {
+                    textStyle[i].lastChild.style.backgroundColor = Attributes.get(att) ? '#' + Attributes.get(att) : '#FFFFFF';
+                }
             }
             
             document.getElementById('styleFlairView').innerHTML = '';
@@ -913,9 +917,9 @@ function showFlairMakerPanel() {
     });
     
     //style profiles
-    
     document.getElementById('stylePro').addEventListener('click', function (e) {
-        var target = e.target;
+        var target = e.target,
+            input;
 
         if (target.className == 'trash') {
             menuControl.style.storedProfiles[0][target.parentNode.parentNode.id.slice(5)] = undefined;
@@ -935,30 +939,12 @@ function showFlairMakerPanel() {
             }, function () {
                 socket.emit('saveProfile', menuControl.style.storedProfiles[0]);
             });
+        } else if (target.nodeName == 'BUTTON') {
+            input = target.parentNode.getElementsByTagName('input')[0];
+            menuControl.style.storedProfiles[0][target.parentNode.id.slice(5)] = input.value;
+            menuControl.style.UI(0);
         }
     });
-    
-    /*document.getElementById('dislayStyles').addEventListener('click', function (e) {
-        var target = e.target,
-            ary = [];
-
-        if (target.className == "savedStyle") {
-            ary[target.id[0]] = {
-                num : target.id[0],
-                flair : Attributes.get('flair') || '',
-                cursor : Attributes.get('cursor') || '',
-                part : Attributes.get('part') || '',
-                font : Attributes.get('font') || '',
-                color : Attributes.get('color') || '',
-                bgcolor : Attributes.get('bgcolor') || '',
-                glow : Attributes.get('glow') || '',
-                style : Attributes.get('style') || '',
-                hat : Attributes.get('hats') || ''
-            }
-            menuControl.styleUI(ary);
-            socket.emit('saveProfile', ary[target.id[0]]);
-        }
-    });*/
     
     //custom cursors
     document.getElementById('customCursor').getElementsByTagName('button')[0].addEventListener('click', function () {

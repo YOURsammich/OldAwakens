@@ -2,7 +2,6 @@
     coin
     /anon
     youtube replace thing
-    MinecraftDragon@onet.pl
 */
 
 
@@ -239,7 +238,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
                 messageHTML.hat.style.backgroundImage = "url('/hats/" + messageData.hat + "')";
             }
             
-            messageHTML.nick.innerHTML = parser.flair(messageData.flair, messageData.nick) + ': ';
+            messageHTML.nick.innerHTML = parser.flair(messageData.flair, messageData.nick) + ':';
         }
         
         if (messageData.messageType === 'info') {
@@ -255,7 +254,7 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
             }
             parser.getAllFonts(messageData.message);
             //messageHTML.message.innerHTML = parser.convert(parser.escape(messageData.message));
-            messageHTML.message.innerHTML = ' ' + parser.parse(messageData.message, messageData.messageType == 'chat' && (Attributes.get('channel-filters') && Attributes.get('channel-filters').value) && Attributes.get('toggle-filters'));
+            messageHTML.message.innerHTML = parser.parse(messageData.message, messageData.messageType == 'chat' && (Attributes.get('channel-filters') && Attributes.get('channel-filters').value) && Attributes.get('toggle-filters'));
         }
         
         return messageHTML.container;
@@ -454,12 +453,8 @@ var clientSubmit = {
 
             if (commandParams[0].indexOf('|') !== -1) {
                 splitCommand = commandParams[0].split('|');
-
-                for (i = 0; i < splitCommand.length; i++) {
-                    if (givenParams.split('|')[i]) {
-                        formatedParams[splitCommand[i]] = givenParams.split('|')[i];
-                    }
-                }
+                formatedParams[splitCommand[0]] = givenParams.substring(0, givenParams.indexOf('|'));
+                formatedParams[splitCommand[1]] = givenParams.substring(givenParams.indexOf('|') + 1);
             } else if (commandParams.length > 1) {
                 splitCommand = givenParams.split(' ');
 
@@ -541,7 +536,7 @@ var clientSubmit = {
                 text = parser.mix([styles.color, styles.greg], text);
             }
 
-            return decorativeModifiers + text;
+            return decorativeModifiers + ' ' + text;
         },
         send : function (message) {
             socket.emit('message', this.decorateText(message), Attributes.get('flair'));
@@ -1068,7 +1063,7 @@ function showChannelDetails(channelData) {
         });
     });
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', function (reason) {
         var userIDs = Object.keys(ONLINE.users);
         for (var i = 0; i < userIDs.length; i++) {
             var userID = userIDs[i];
@@ -1077,7 +1072,9 @@ function showChannelDetails(channelData) {
                 user.cursor.parentNode.removeChild(user.cursor);
             }
         };
-
+        
+        console.error(reason);
+        
         messageBuilder.showMessage({
             message : 'disconnected',
             messageType : 'error'
