@@ -1475,10 +1475,10 @@ function intoapp(app, http) {
     
     app.get(channelRegex, function (req, res) {
         var host = req.headers.host.split('.');
-        var channelName = channelRegex.exec(req.url)[1];
+        var channelName = '/' + channelRegex.exec(req.url)[1];
 
         if (host.length == 3) {
-            channelName = '/' + host[0] + '/' + channelName;
+            channelName = '/' + host[0] + channelName;
         }
         
         if (!channels[channelName]) {
