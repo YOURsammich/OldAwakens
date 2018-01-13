@@ -15,7 +15,8 @@ function buildAdvancedVideoOverlay(url) {
         mainContain,
         videoList,
         container,
-        header;
+        header,
+        cancel;
     
     if (!videoOverlay) {
         videoOverlay = document.createElement('div');
@@ -30,7 +31,19 @@ function buildAdvancedVideoOverlay(url) {
         header.id = 'videoHeader';
         mainContain.appendChild(header);
         
+        cancel = document.createElement('div');
+        cancel.id = 'cancelVideoMode';
+        cancel.textContent = '[close]';
+        cancel.style.cssText = 'text-decoration: underline; color: lightblue; cursor: pointer';
+        header.appendChild(cancel);
+        
+        cancel.addEventListener('click', function () {
+            document.body.removeChild(videoOverlay);
+            clientSubmit.handleInput('/disablevideomode');
+        });
+        
         container = document.createElement('div');
+        container.className = 'iframeHolder';
         container.style.cssText = "height: calc(100% - 15px);width: 100%;";
         container.innerHTML = url;
         mainContain.appendChild(container);
@@ -45,7 +58,7 @@ function buildAdvancedVideoOverlay(url) {
         
         document.body.appendChild(videoOverlay);
     } else {
-        
+        videoOverlay.getElementsByClassName('iframeHolder')[0].innerHTML = url;
     }
 }
 
@@ -65,16 +78,14 @@ function buildVideoOverlay(url) {
         videoOverlay.appendChild(header);
         cancel = document.createElement('a');
         cancel.textContent = '[close]';
-        cancel.style["text-decoration"] = "underline";
-        cancel.style.color = "lightblue";
-        cancel.style.cursor = "pointer";
+        cancel.style.cssText = 'text-decoration: underline; color: lightblue; cursor: pointer';
         cancel.addEventListener('click', function () {
             document.body.removeChild(videoOverlay);
         });
         header.appendChild(cancel);
         container = document.createElement('div');
         container.className = 'container';
-        container.style.cssText = 'width:100%;height:calc(100% - 34px);background-color:#111;';
+        container.style.cssText = 'flex:1;background-color:#111;';
         container.innerHTML = url;
         videoOverlay.appendChild(container);
         document.body.appendChild(videoOverlay);
@@ -88,7 +99,7 @@ function embed(type, input, advan) {
     var url;
     switch (type) {
     case 'youtube':
-        url = '<iframe width="100%" height="100%" src="//www.youtube.com/embed/' + input + '" frameborder="0" allowfullscreen></iframe>';
+        url = '<iframe id="iiframe" width="100%" height="100%" src="//www.youtube.com/embed/' + input + '?enablejsapi=1" frameborder="0" allowfullscreen></iframe>';
         break;
     case 'html5':
         url = '<video width="100%" height="100%" src="' + input + '" controls></video>';

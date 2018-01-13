@@ -514,7 +514,13 @@ var COMMANDS = {
         handler : function (params) {
             Attributes.set('greg', params.colors);
         }
-    }
+    },
+    addvideo : {
+        params : ['YouTubeURL']
+    },
+    enablevideomode : {},
+    disablevideomode : {},
+    skipvideo : {}
 };
 
 (function(){
