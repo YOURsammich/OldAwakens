@@ -1,3 +1,28 @@
+/*function hexToRgb(hex) {
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+setInterval(function () {
+    var input = document.getElementsByClassName('k-color-value')[0];
+    console.log(hexToRgb(input.value))
+}, 100) 
+
+x - 40% = 60
+60 + 40% = 84
+
+
+*/
+
 window.$$$ = {
     query : function (identifier) {
         return document.querySelector(identifier);
@@ -15,42 +40,20 @@ window.$$$ = {
         }
         
         function drag(event) {
-            var clientX = event.clientX || event.touches[0].clientX,
-                clientY = event.clientY || event.touches[0].clientY;
-            
-            var movementX = (clientX - clickX) - parseInt(el.style.left, 10),
-                movementY = (clientY - clickY) - parseInt(el.style.top, 10),
+            var movementX = (event.clientX - clickX) - parseInt(el.style.left, 10),
+                movementY = (event.clientY - clickY) - parseInt(el.style.top, 10),
                 newLeft = parseInt(el.style.left, 10) + movementX,
                 newTop = parseInt(el.style.top, 10) + movementY;
                 
-            if (newLeft + el.offsetWidth < container.offsetWidth) {
-                if (newLeft >= container.offsetLeft) {
-                    el.style.left = newLeft + 'px';
-                } else {
-                    el.style.left = container.offsetLeft + 'px';
-                }
-            } else {
-                el.style.left = (container.offsetWidth - el.offsetWidth) + 'px';
+            if (newLeft + el.offsetWidth < container.offsetWidth && newLeft >= container.offsetLeft) {
+                el.style.left = newLeft + 'px';
             }
-            
-            if (newTop + el.offsetHeight < container.offsetHeight) {
-                if (newTop >= container.offsetTop) {
-                     el.style.top = newTop + 'px';
-                } else {
-                    el.style.top = container.offsetTop + 'px';
-                }
-            } else {
-                el.style.top = (container.offsetHeight - el.offsetHeight) + 'px';
+            if (newTop + el.offsetHeight < container.offsetHeight && newTop >= container.offsetTop) {
+                el.style.top = newTop + 'px';
             }
         }
         
         function remove() {
-            var iframe = el.getElementsByTagName('iframe');
-            
-            if (iframe && iframe[0]) {
-               iframe[0].style.pointerEvents = '';
-            }
-
             el.removeEventListener('mousemove', drag);
             container.removeEventListener('mousemove', drag);
             document.body.classList.remove('noselect');
@@ -58,13 +61,8 @@ window.$$$ = {
         
         el.addEventListener('mousedown', function (e) {
             var target = e.target || e.srcElement,
-                valid = true,
-                iframe = el.getElementsByTagName('iframe');
-            
-            if (iframe && iframe[0]) {
-               iframe[0].style.pointerEvents = 'none';
-            }
-            
+                valid = true;
+
             if (!target.classList.contains('resizable-handle') && (!stopOn || target.className !== stopOn)) {
                 if (stopOn) {
                     for (var i = 0; i < e.path.length; i++) {
@@ -82,12 +80,9 @@ window.$$$ = {
                 }
             }
         });
-                
+        
         el.addEventListener('mouseup', remove);
         container.addEventListener('mouseup', remove);
-    },
-    resizeable : function () {
-        
     },
     tabber : function (panels, openPanelID) {
         var i,

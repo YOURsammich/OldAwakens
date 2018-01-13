@@ -7,7 +7,6 @@ var express = require('express');
 var fs = require('fs');
 //var minify = require('express-minify');
 var url = require("url");
-var fetchVideoInfo = require('youtube-info');
 
 var channels = {};
 var tokens = {};
@@ -42,12 +41,7 @@ function createChannel(io, channelName) {
         status : 'public',
         blockProxy : false,
         messageCount : 0,
-        commandRoles : {},
-        videoMode : {
-            videolist : [],
-            videoStart : null,
-            timeout : null
-        }
+        commandRoles : {}
     };
     
     function updateUserData(user, newData) {
@@ -65,7 +59,6 @@ function createChannel(io, channelName) {
         if (newData.role !== undefined) {
             user.role = newData.role;
             newData.role = roles[newData.role];
-            roomEmit('changeRole', user.id, user.role);
         }
         
         if (newData.remote_addr) {//if true save current ip to database
@@ -95,24 +88,6 @@ function createChannel(io, channelName) {
     
     function roomEmit() {
         room.in('chat').emit.apply(room, arguments);
-    }
-    
-    function videoEmit() {
-        room.in('video').emit.apply(room, arguments);
-    }
-    
-    function playVideo () {
-        clearTimeout(channel.videoMode.timeout);
-        if (channel.videoMode.videolist.length) {
-            videoEmit('playVideo', channel.videoMode.videolist[0].id);
-            channel.videoMode.videoStart = new Date().getTime();
-            channel.videoMode.timeout = setTimeout(function () {
-                channel.videoMode.videolist.shift();
-                playVideo();
-            }, (channel.videoMode.videolist[0].duration + 5) * 1000); 
-        } else {
-            channel.videoMode.videoStart = null;
-        }
     }
     
     function updateChannelInfo(nick, att, value) {
@@ -541,7 +516,6 @@ function createChannel(io, channelName) {
                             var index = findIndex(channel.online, 'nick', dbuser.nick);
                             if (index !== -1) {
                                 channel.online[index].role = parseInt(role, 10);
-                                roomEmit('changeRole', channel.online[index].id, channel.online[index].role)
                                 showMessage(channel.online[index].socket, 'role is now set to ' + role, 'info');
                             }
                             showMessage(user.socket, dbuser.nick + ' now has role ' + role, 'info');
@@ -979,72 +953,6 @@ function createChannel(io, channelName) {
             handler : function (user) {
                 updateChannelInfo(user.nick, 'wordfilter', false);
             }
-        },
-        enablevideomode : {
-            handler : function (user) {
-                user.socket.join('video');
-                user.socket.emit('channeldata', {
-                    videomode : channel.videoMode.videolist
-                });
-                if (channel.videoMode.videolist.length) {
-                    user.socket.emit('playVideo', channel.videoMode.videolist[0].id, channel.videoMode.videoStart);   
-                }
-            }  
-        },
-        disablevideomode : {
-            handler : function (user) {
-                user.socket.leave('video');
-                console.log('?')
-                user.socket.emit('update', {
-                    ['channel-video'] : false
-                })
-            }
-        },
-        addvideo : {
-            params : ['YouTubeURL'],
-            handler : function (user, params) {
-                var videoRegex = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/.exec(params.YouTubeURL);
-                
-                if (videoRegex && videoRegex[1]) {
-                    params.YouTubeURL = videoRegex[1];
-                }
-                
-                fetchVideoInfo(params.YouTubeURL, function (err, videoInfo) {
-                    var i;
-                        valid = true;
-                    if (videoInfo && videoInfo.title) {
-                        
-                        for (i = 0; i < channel.videoMode.videolist.length; i++) {
-                            if (channel.videoMode.videolist[i].id == videoInfo.videoId) {
-                                valid = false;
-                            }
-                        }
-                        
-                        if (valid) {
-                            channel.videoMode.videolist.push({
-                                id : params.YouTubeURL,
-                                duration : videoInfo.duration,
-                                title : videoInfo.title
-                            });
-                            videoEmit('channeldata', {
-                                videomode : channel.videoMode.videolist
-                            });
-                            if (!channel.videoMode.videoStart) {
-                                playVideo();
-                            }   
-                        } else {
-                            showMessage(user.socket, 'Video already added', 'error');
-                        }
-                    }
-                });
-            }
-        },
-        skipvideo : {
-            role : 1,
-            handler : function (user) {
-                channel.videoMode.videolist.shift();
-                playVideo();
-            }
         }
     };
     
@@ -1330,7 +1238,6 @@ function createChannel(io, channelName) {
                     onlineUsers.push({
                         nick : channel.online[i].nick,
                         id : channel.online[i].id,
-                        role :  channel.online[i].role,
                         afk : channel.online[i].afk
                     });
                 }
@@ -1348,7 +1255,7 @@ function createChannel(io, channelName) {
                     commandRoles : commandRoles
                 });
                 
-                roomEmit('joined', user.id, user.nick, user.role);
+                roomEmit('joined', user.id, user.nick);
                 
                 socket.emit('update', {
                     nick : user.nick,
@@ -1568,10 +1475,10 @@ function intoapp(app, http) {
     
     app.get(channelRegex, function (req, res) {
         var host = req.headers.host.split('.');
-        var channelName = channelRegex.exec(req.url)[1];
+        var channelName = '/' + channelRegex.exec(req.url)[1];
 
         if (host.length == 3) {
-            channelName = host[0] + channelName;
+            channelName = '/' + host[0] + channelName;
         }
         
         if (!channels[channelName]) {

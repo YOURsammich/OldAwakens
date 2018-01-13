@@ -14,22 +14,17 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material%20Icons">
         <script src="https://cdn.jsdelivr.net/emojione/2.2.7/lib/js/emojione.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/emojione/2.2.7/assets/css/emojione.min.css"/>
-        <script src="https://www.youtube.com/iframe_api"></script>
-        <script src="/dollarSign.js"></script>
     </head>
 
     <body>
         <main>
             <div id="main-container">
                 <div id="flexOne">
-                    <div id="infobar"></div>
-                    <div id="not-infobar">
-                        <div id="messages-background">
-                            <div id="center-text"></div>
-                        </div>
-                        <div id="cursor-container"></div>
-                        <div id="messages"></div>
+                    <div id="messages-background">
+                        <div id="center-text"></div>
                     </div>
+                    <div id="cursor-container"></div>
+                    <div id="messages"></div>
                 </div>
                 <div id="menu-container" style="display: none;">
                 
@@ -43,11 +38,7 @@
                     
                     <div id="menu-panels">
                         <div id="userList">
-                            <div id="userinfo">
-                                <span id="countUsers"></span>
-                                <span id="sortUsers">reorder</span>
-                            </div>
-                            <div id="listedUsers"></div>
+                            <div></div>
                         </div>
                         <div style="display:none" id="mySettings">
                             <div id="stylePanels">
@@ -58,7 +49,6 @@
                                         <li class="selecter" onclick="$$$.tabber('stylePanels', 'myCursors');">Cursor<span>arrow_forward</span></li>
                                         <li class="selecter" id="showFlairMaker">Flair Maker<span>arrow_forward</span></li>
                                         <li class="selecter" onclick="$$$.tabber('stylePanels', 'toggles');">Toggles<span>arrow_forward</span></li>
-                                        <li class="selecter" onclick="$$$.tabber('stylePanels', 'videoMode');">Video Mode<span>arrow_forward</span></li>
                                     </ul>
                                 </div>
                                 <div class="menuPanel" id="stylePro">
@@ -135,24 +125,6 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="menuPanel" id="videoMode">
-                                    <div id="goBack" onclick="$$$.tabber('stylePanels', 'styleMenu');">
-                                        <span id="goBackArrow"></span>
-                                    </div>
-                                    
-                                    <div class="toggleSlider">
-                                        <h2>Enable Video Mode</h2>
-                                        <label>
-                                            <input id="tglvideo" type="checkbox"/>
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-                                    <div id="videoModeControls"> 
-                                        <button style="width:100%;" class="customButton">Add a video</button>
-                                        <input placeholder="YouTube video URL" style="width:100%;margin-top:10px;" />
-                                    </div>
-                                    <ul id="playlist"></ul>
-                                </div>
                             </div>
 
                         </div>
@@ -169,7 +141,6 @@
                                         <li class="selecter" onclick="$$$.tabber('owned', 'manageRoles');"><h2>Manage roles</h2></li>
                                         <li class="selecter" onclick="$$$.tabber('owned', 'manageCommands');"><h2>Manage commands</h2></li>
                                         <li class="selecter" onclick="$$$.tabber('owned', 'chnldefaults');"><h2>Channel defaults</h2></li>
-                                        <li class="selecter" onclick="$$$.tabber('owned', 'wordfilter');"><h2>Word filters</h2></li>
                                     </ul>
                                 </div>
                                 <div class="menuPanel" id="manageRoles">
@@ -229,13 +200,6 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="menuPanel" id="wordfilter">
-                                    <div id="goBack" onclick="$$$.tabber('owned', 'settingsMenu');">
-                                        <span id="goBackArrow"></span>
-                                    </div>
-                                    
-                                    <ul id="filteredWords"></ul>
-                                </div>
                             </div>
                         </div>
                         <div style="display:none" id="activeChannels">
@@ -257,6 +221,7 @@
 
         <script src="/socket.io/socket.io.js"></script>
         <script src="/media.js"></script>
+        <script src="/dollarSign.js"></script>
         <script src="/dateFormat.js"></script>
         <script src="/parser.js"></script>
         <script src="/menu.js"></script>

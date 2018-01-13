@@ -149,7 +149,6 @@ module.exports = {
         
         db.query(sql, [channelName, att], function (err, rows, fields) {
             if (rows[0]) {
-                
                 defer.resolve(rows[0].value).promise();
             } else {
                 defer.reject();
@@ -222,11 +221,6 @@ module.exports = {
     setChannelRole : function (channelName, nick, role) {
         var defer = $.Deferred(); 
         this.getChannelAtt(channelName, 'roles').then(function (roles) {
-            try {
-                roles = JSON.parse(roles);
-            } catch (err) {
-                //
-            }
             if (role === 4) {
                 delete roles[nick];
             } else {
