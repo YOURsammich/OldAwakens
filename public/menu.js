@@ -1,8 +1,65 @@
 var menuControl = {
-    addUser : function (id, nick, afk, noShow) {
+    roleNames : ['super', 'channelOwner', 'admin', 'mod', 'baisc'],
+    arrangeList : function (orderType) {
+        var sortUsers = ONLINE.users,
+            sKeys = Object.keys(sortUsers),
+            i,
+            children = [],
+            roleHolder,
+            header;
+        
+        document.getElementById('listedUsers').innerHTML = '';
+        
+        if (Attributes.get('menu-order') == 'roles') {
+            for (i = 0; i < sKeys.length; i++) {
+                children.push(sortUsers[sKeys[i]]); 
+            };
+            
+            children.sort(function (a, b) {
+                return a.role - b.role;
+            });
+            
+            for (i = 0; i < children.length; i++) {
+                roleHolder = document.getElementById(children[i].role + '-role');
+ 
+                if (!roleHolder) {
+                    header = document.createElement('header');
+                    header.className = 'roleOrg';
+                    header.textContent = menuControl.roleNames[children[i].role];
+                    roleHolder = document.createElement('div');
+                    roleHolder.className = 'roleHolder';
+                    roleHolder.id = children[i].role + '-role';
+                    roleHolder.appendChild(header);
+                    document.getElementById('listedUsers').appendChild(roleHolder);
+                }
+                
+                roleHolder.appendChild(children[i].li);
+            }
+        } else {
+            for (i = 0; i < sKeys.length; i++) {
+                document.getElementById('listedUsers').appendChild(sortUsers[sKeys[i]].li);
+            }
+        }
+    },
+    addUser : function (id, nick, role, afk, noShow) {
         var nickContain = document.createElement('div'),
             nickText = document.createElement('div'),
-            extraInfo = document.createElement('div');
+            extraInfo = document.createElement('div'),
+            roleHolder = document.getElementById(role + '-role'),
+            header;
+    
+        
+        if (false) {
+            header = document.createElement('header');
+            header.className = 'roleOrg';
+            header.textContent = menuControl.roleNames[role];
+            roleHolder = document.createElement('div');
+            roleHolder.className = 'roleHolder';
+            roleHolder.id = role + '-role';
+            roleHolder.appendChild(header);
+            document.getElementById('listedUsers').appendChild(roleHolder);
+            menuControl.arrangeList();
+        }
         
         nickContain.id = id;
         nickContain.className = 'nickContain';
@@ -19,11 +76,10 @@ var menuControl = {
         
         nickContain.appendChild(nickText);
         nickContain.appendChild(extraInfo);
-        
-        document.getElementById('userList').appendChild(nickContain);
-        
+
         ONLINE.users[id] = {
             nick : nick,
+            role : role,
             li : nickContain,
             resetStatus : function (idleStatus) {
                 var status = this;
@@ -47,6 +103,7 @@ var menuControl = {
             }
         };
         
+        menuControl.arrangeList();
         ONLINE.users[id].resetStatus();
         menuControl.updateCount();
         
@@ -88,15 +145,21 @@ var menuControl = {
             console.error(user.cursor, 'cursor but no parentNode?');
         }
         
-        document.getElementById('userList').removeChild(user.li);
+        user.li.parentNode.removeChild(user.li);
         delete ONLINE.users[id];
-        
         menuControl.updateCount();
-
+        menuControl.arrangeList();
+        
         messageBuilder.showMessage({
             message : user.nick + ' has left' + (part ? ': ' + part : ''),
             messageType : 'general'
         });
+    },
+    changeRole : function (id, newRole) {
+        ONLINE.users[id].role = newRole;
+        if (Attributes.get('menu-order') == 'roles') {
+           menuControl.arrangeList(); 
+        }
     },
     changeNick : function (id, newNick) {
         var User = ONLINE.users[id],
@@ -123,7 +186,7 @@ var menuControl = {
     updateCount : function () {
         var length = Object.keys(ONLINE.users).length;
         $$$.query('.toggle-menu span').textContent = length;
-        //$$$.query('#userList').textContent = 'User list (' + length + ')';
+        $$$.query('#countUsers').textContent = length + ' online';
     },
     contextMenu : {
         defaultOptions : {
@@ -272,17 +335,31 @@ var menuControl = {
     },
     style : {
         storedProfiles : [],
-        UI : function (profileNum) {
+        UI : function (styleData) {
             var textStyle = document.getElementById('textStyle').children,
+                sKeys,
+                s,
                 keys,
                 r,
                 att,
-                i;
+                i,
+                currentProfile = Attributes.get('sProfile') || 0;
             
-            profile = document.createElement('div'),
-            flair = document.createElement('div'),
-            hat = document.createElement('div'),
-            message = document.createElement('div'),
+            if (styleData) {
+                sKeys = Object.keys(styleData);
+                if (this.storedProfiles[currentProfile]) {
+                    for (s = 0; s < sKeys.length; s++) {
+                        this.storedProfiles[currentProfile][sKeys[s]] = styleData[sKeys[s]];
+                    }   
+                } else {
+                    this.storedProfiles[currentProfile] = styleData;
+                }
+            }
+            
+            profile = document.createElement('div');
+            flair = document.createElement('div');
+            hat = document.createElement('div');
+            message = document.createElement('div');
             
             hat.className = 'hat';
             flair.className = 'nick';
@@ -291,7 +368,19 @@ var menuControl = {
             profile.appendChild(hat);
             profile.appendChild(flair);
             profile.appendChild(message);
-
+            
+            if (this.storedProfiles[currentProfile]) {
+                delete this.storedProfiles[currentProfile].nick;
+                keys = Object.keys(this.storedProfiles[currentProfile]);
+                for (r = 0; r < keys.length; r++) {
+                    if (this.storedProfiles[currentProfile][keys[r]]) {
+                        Attributes.set(keys[r], this.storedProfiles[currentProfile][keys[r]], true);
+                    } else {
+                        Attributes.remove(keys[r]);
+                    }
+                }
+            }
+            
             messageBuilder.filloutHTML({
                 hat : hat,
                 nick : flair,
@@ -301,24 +390,13 @@ var menuControl = {
                 hat : false,
                 nick : Attributes.get('nick'),
                 flair : Attributes.get('flair'),
-                message : clientSubmit.message.decorateText('Example Text', menuControl.style.storedProfiles[profileNum])
+                message : clientSubmit.message.decorateText('Example Text', this.storedProfiles[currentProfile])
             });
             
-            if (menuControl.style.storedProfiles[profileNum]) {
-                keys = Object.keys(menuControl.style.storedProfiles[profileNum]);
-                for (r = 0; r < keys.length; r++) {
-                    if (menuControl.style.storedProfiles[profileNum][keys[r]]) {
-                        Attributes.set(keys[r], menuControl.style.storedProfiles[profileNum][keys[r]], true);   
-                    } else {
-                        Attributes.remove(keys[r]);
-                    }
-                }
-            }
-
             for (i = 0; i < textStyle.length; i++) {
                 att = textStyle[i].id.substr(5);
                 if (att == 'font') {
-                    textStyle[i].getElementsByTagName('input')[0].value = Attributes.get(att);
+                    textStyle[i].getElementsByTagName('input')[0].value = Attributes.get(att) || '';
                 } else {
                     textStyle[i].lastChild.style.backgroundColor = Attributes.get(att) ? '#' + Attributes.get(att) : '#FFFFFF';
                 }
@@ -363,6 +441,51 @@ var menuControl = {
         if (filter && filter.value != undefined) {
             Attributes.set('channel-filters', filter);
             document.getElementById('tglfilter').checked = filter.value;
+        }
+    },
+    videomode : {
+        player : null,
+        videoplaylist : [],
+        updateList : function (videolist) {
+            var playlist = document.getElementById('playlist'),
+                li,
+                i;
+
+            menuControl.videomode.videoplaylist = videolist;
+            
+            playlist.innerHTML = '';
+            for (i = 0; i < videolist.length; i++) {
+                li = document.createElement('li');
+                li.textContent = videolist[i].title;
+                playlist.appendChild(li);
+            }
+        },
+        playNextVideo : function (videoID, startAt) {
+            function timeSince(date) {
+                var seconds = Math.floor((new Date() - date) / 1000);
+                return Math.floor(seconds);
+            };
+            
+            if (videoID != menuControl.videomode.videoplaylist[0].id) {
+                menuControl.videomode.videoplaylist.shift();
+                menuControl.videomode.updateList(menuControl.videomode.videoplaylist);
+            }
+
+            embed('youtube', menuControl.videomode.videoplaylist[0].id, true);
+            menuControl.videomode.player = new YT.Player('iiframe', {
+                events: {
+                    'onReady': function (a) {
+                        a.target.seekTo(timeSince(startAt));
+                        a.target.playVideo();
+                    },
+                    'onStateChange': function (a) {
+                        if (a.data === 0 && menuControl.videomode.videoplaylist.length === 1) {
+                            menuControl.videomode.videoplaylist.shift();
+                            menuControl.videomode.updateList(menuControl.videomode.videoplaylist);
+                        }
+                    }
+                }
+            });
         }
     },
     channels : function (active) {
@@ -442,10 +565,10 @@ var menuControl = {
             var i;
 
             if (channel.users) {
-                document.getElementById('userList').innerHTML = '';
+                document.getElementById('listedUsers').innerHTML = '';
                 ONLINE.users = {};
                 for (i = 0; i < channel.users.length; i++) {            
-                    menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].afk, true);
+                    menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].role, channel.users[i].afk, true);
                 }
             }
 
@@ -461,10 +584,15 @@ var menuControl = {
                 menuControl.commandUI(channel.commandRoles);
             }
             
+            if (channel.videomode) {
+                menuControl.videomode.updateList(channel.videomode);
+            }
+            
             if (channel.styles) {
                 menuControl.style.storedProfiles = channel.styles;
+                menuControl.style.UI();
             } else if (!menuControl.style.storedProfiles.length) {
-                menuControl.style.storedProfiles[0] = {
+                menuControl.style.UI({
                     flair : Attributes.get('flair') || '',
                     cursor : Attributes.get('cursor') || '',
                     part : Attributes.get('part') || '',
@@ -474,27 +602,31 @@ var menuControl = {
                     glow : Attributes.get('glow') || '',
                     style : Attributes.get('style') || '',
                     hat : Attributes.get('hats') || ''
-                }
+                });
             }
-            menuControl.style.UI(0);
             
             menuControl.toggles();
-            socket.on('update', function (data)  {
-                if (data.nick) {
-                    menuControl.style.storedProfiles[0] = {
-                        flair : Attributes.get('flair') || '',
-                        cursor : Attributes.get('cursor') || '',
-                        part : Attributes.get('part') || '',
-                        font : Attributes.get('font') || '',
-                        color : Attributes.get('color') || '',
-                        bgcolor : Attributes.get('bgcolor') || '',
-                        glow : Attributes.get('glow') || '',
-                        style : Attributes.get('style') || '',
-                        hat : Attributes.get('hats') || ''
-                    }
-                    menuControl.style.UI(0);
-                }
-            });
+        });
+        
+        socket.on('update', function (data)  {
+            if (data.nick) {
+                menuControl.style.UI({
+                    flair : Attributes.get('flair') || '',
+                    cursor : Attributes.get('cursor') || '',
+                    part : Attributes.get('part') || '',
+                    font : Attributes.get('font') || '',
+                    color : Attributes.get('color') || '',
+                    bgcolor : Attributes.get('bgcolor') || '',
+                    glow : Attributes.get('glow') || '',
+                    style : Attributes.get('style') || '',
+                    hat : Attributes.get('hats') || ''
+                });
+            }
+
+            if (data['channel-video'] !== undefined) {
+                document.getElementById('tglvideo').checked = data['channel-video'];
+                document.getElementById('playlist').innerHTML = '';
+            }
         });
         
         socket.on('idleStatus', menuControl.idleStatus);
@@ -502,6 +634,8 @@ var menuControl = {
         socket.on('joined', menuControl.addUser);
 
         socket.on('nick', menuControl.changeNick);
+        
+        socket.on('changeRole', menuControl.changeRole);
 
         socket.on('typing', menuControl.typing);
 
@@ -511,6 +645,8 @@ var menuControl = {
         
         socket.on('activeChannels', menuControl.channels);
         socket.emit('activeChannels');
+        
+        socket.on('playVideo', menuControl.videomode.playNextVideo);
     },
     typing : function (id, typing) {
         var user = ONLINE.users[id];
@@ -916,33 +1052,43 @@ function showFlairMakerPanel() {
         }
     });
     
+    //sort userlist
+    document.getElementById('sortUsers').addEventListener('click', function () {
+        if (Attributes.get('menu-order') == 'roles') {
+            Attributes.remove('menu-order');
+        } else {
+            Attributes.set('menu-order', 'roles');
+        }
+        menuControl.arrangeList();
+    });
+    
     //style profiles
     document.getElementById('stylePro').addEventListener('click', function (e) {
         var target = e.target,
             input;
 
         if (target.className == 'trash') {
-            menuControl.style.storedProfiles[0][target.parentNode.parentNode.id.slice(5)] = undefined;
+            menuControl.style.UI({
+                [target.parentNode.parentNode.id.slice(5)] : undefined
+            });
             socket.emit('saveProfile', menuControl.style.storedProfiles[0]);
-            menuControl.style.UI(0);
         } else if (target.parentNode.className == 'colorpicker') {
             target = target.parentNode;
         }
         
         if (target.className == 'colorpicker') {
-            if (!menuControl.style.storedProfiles[0]) {
-                menuControl.style.storedProfiles[0] = {};
-            }
             $$$.palette(target, function (color) {
-                menuControl.style.storedProfiles[0][target.parentNode.id.slice(5)] = color;
-                menuControl.style.UI(0);
+                menuControl.style.UI({
+                    [target.parentNode.id.slice(5)] : color
+                });
             }, function () {
                 socket.emit('saveProfile', menuControl.style.storedProfiles[0]);
             });
         } else if (target.nodeName == 'BUTTON') {
             input = target.parentNode.getElementsByTagName('input')[0];
-            menuControl.style.storedProfiles[0][target.parentNode.id.slice(5)] = input.value;
-            menuControl.style.UI(0);
+            menuControl.style.UI({
+                [target.parentNode.id.slice(5)] : input.value
+            });
         }
     });
     
@@ -996,6 +1142,30 @@ function showFlairMakerPanel() {
             } else if (target.id == 'setFalse') {
                 Attributes.set('toggle-' + parent.id.split('-')[1], false);
             }
+        }
+    });
+    
+    //video mode
+    document.getElementById('tglvideo').addEventListener('click', function () {
+        var videoModePanel;
+        Attributes.set('channel-video', this.checked);
+        if (this.checked) {
+            clientSubmit.handleInput('/enablevideomode');
+        } else {
+            clientSubmit.handleInput('/disablevideomode');
+            videoModePanel = document.getElementById('a-video-overlay');
+            document.body.removeChild(videoModePanel);
+        }
+    });
+    
+    document.getElementById('videoModeControls').getElementsByTagName('button')[0].addEventListener('click', function (e) {
+        var input = document.getElementById('videoModeControls').getElementsByTagName('input')[0];
+        
+        if (input.style.display == 'block') {
+            clientSubmit.handleInput('/addvideo ' + input.value);
+        } else {
+            input.style.display = 'block';
+            this.textContent = 'Click to submit';
         }
     });
     

@@ -50,7 +50,7 @@ var Attributes = {
     showMsg : ['flair', 'color', 'glow', 'bgcolor', 'font', 'style'],
     notify : ['part', 'nick', 'role'],
     altAtt : {colour : 'color', bg : 'background'},
-    nosaveLocal : ['channel-filters', 'background', 'msg', 'note', 'topic'],
+    nosaveLocal : ['channel-filters', 'background', 'msg', 'note', 'topic', 'channel-video'],
     default : {
         cursors : true,
         mute : false,
@@ -819,7 +819,14 @@ function showChannelDetails(channelData) {
 (function () {
     var history = [],
         historyIndex = 0,
-        typing = false;
+        typing = false,
+        hoverImage = false,
+        image = new Image();
+    
+    image.className = 'imagehover';
+    image.onload = function () {
+        document.body.appendChild(image);
+    }
     
     $$$.query('#input-bar textarea').addEventListener('keydown', function (e) {
         var keyCode = e.which,
@@ -886,6 +893,28 @@ function showChannelDetails(channelData) {
         if (this.value.length === 0) {
             typing = false;
             socket.emit('typing', false);
+        }
+    });
+    
+    document.body.addEventListener('keydown', function (e) {
+        if (e.ctrlKey) {
+            hoverImage = true;
+        }
+    });
+    
+    document.body.addEventListener('keyup', function (e) {
+        if (!e.ctrlKey && image.parentNode) {
+            hoverImage = false;
+            image.src = '';
+            document.body.removeChild(image);
+        }
+    });
+    
+    document.getElementById('messages').addEventListener('mousemove', function (e) {
+        var target = e.target;
+        
+        if (hoverImage && target.nodeName == 'IMG' && target.src != image.src) {
+            image.src = target.src;
         }
     });
     
@@ -1038,7 +1067,7 @@ function showChannelDetails(channelData) {
     socket.on('update', function (allAtt) {
         var keys = Object.keys(allAtt),
             i;
-
+        
         for (i = 0; i < keys.length; i++) {
             if (allAtt[keys[i]]) {
                 Attributes.set(keys[i], allAtt[keys[i]]);
