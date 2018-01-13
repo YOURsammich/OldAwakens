@@ -34,7 +34,7 @@ function buildAdvancedVideoOverlay(url) {
         cancel = document.createElement('div');
         cancel.id = 'cancelVideoMode';
         cancel.textContent = '[close]';
-        cancel.style.cssText = 'text-decoration: underline; color: lightblue; cursor: pointer';
+        cancel.style.cssText = 'text-decoration:underline; color:lightblue; cursor:pointer;display:inline;';
         header.appendChild(cancel);
         
         cancel.addEventListener('click', function () {

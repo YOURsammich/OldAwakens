@@ -1,5 +1,5 @@
 var menuControl = {
-    roleNames : ['super', 'channelOwner', 'admin', 'mod', 'baisc'],
+    roleNames : ['super', 'channelOwner', 'admin', 'mod', 'basic'],
     arrangeList : function (orderType) {
         var sortUsers = ONLINE.users,
             sKeys = Object.keys(sortUsers),
