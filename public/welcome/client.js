@@ -5,7 +5,6 @@ var socket = io.connect(window.location.pathname);
 //online users
 //tags
 
-
 function addChannels (channels) {
     var keys = Object.keys(channels),
         table = document.getElementsByTagName('tbody')[0],
@@ -13,6 +12,8 @@ function addChannels (channels) {
         channelName,
         channelinfo,
         channelTags,
+        settings,
+        buttonJoin,
         i;
     
     while (table.getElementsByTagName('td').length) {
@@ -32,17 +33,27 @@ function addChannels (channels) {
         channelTags = document.createElement('td');
         channelTags.textContent = 'none';
         
+        settings = document.createElement('td');
+        buttonJoin = document.createElement('button');
+        buttonJoin.textContent = 'Join Channel'
+        settings.appendChild(buttonJoin);
+        
         tr.appendChild(channelName);
         tr.appendChild(channelonline);
         tr.appendChild(channelTags);
+        //tr.appendChild(settings);
         
         table.appendChild(tr);
     }
-    
 }
 
 socket.on('activeChannels', addChannels);
 
 socket.on('connect', function () {
     socket.emit('activeChannels');
+});
+
+
+document.getElementById('joinAchannel').addEventListener('click', function () {
+    document.getElementById('welcomePage').style.display = 'none';
 });

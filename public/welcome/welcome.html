@@ -8,22 +8,36 @@
     
     <body>
         <main>
-            <div style="display:none;" id="joinPage">
-                <div id="logo">Awakens.me</div>
-                <div id="des">Awakens is an online highly customizable web-based chat with multiple different styles, games and features. That is constantly updating and growing over time.</div>
-                <div id="buttonHld">
-                    <button style="background-color: #27ae60" id="join">Join</button>
-                    <button style="background-color: #2980b9" id="create">Create</button>
+            <header><span id="aHolder"><a>About</a><a>Help</a></span></header>
+            
+            <content>
+                <div style="display:block;" id="welcomePage">
+                    <div id="mostBasicInfo">
+                        <h3>
+                            <p class="des center">Awakens is a free highly personalizable text chat.</p>
+                            <p class="des center">You can <a>create</a> your own channel and personlize it or <a>join</a> one.</p>
+                        </h3>
+                        <div id="buttonHld"><button style="">Create</button> Or <button id="joinAchannel">Join</button></div>
+                    </div>
+                    <p class="des center small">Any questions regarding channel creating, personalizing, finding, or any other questions you might have can be answered on the help page.</p>
+                    <hr>
+
+                    <div id="basicInfo">
+                        <div class="center">
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div id="active">
-                <div class="di" id="sorter"></div>
-                <table>
-                    <th>name</th>
-                    <th>online</th>
-                    <th>tags</th>
-                </table>
-            </div>
+
+                <div id="active">
+                    <h1 class="des center">Public channels</h1>
+                    <div class="di" id="sorter"></div>
+                    <table>
+                        <th>name</th>
+                        <th>online</th>
+                        <th>tags</th>
+                    </table>
+                </div>
+            </content>
         </main>
         
         <script src="/socket.io/socket.io.js"></script>

@@ -4,73 +4,146 @@ body {
 }
 
 main {
-    display: flex;
-    flex-direction: column;
     height: 100%;
+    font-family: Montserrat;
+    display: flex;
+    flex-flow: column;
 }
 
-#active {
+hr {
+    border-color: #222;
+}
+
+ul {
+    color: white;
+}
+
+header {
+    color: white;
+    font-family: inherit;
+    text-align: center;
+    border-bottom: 1px solid #222;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+}
+
+header a {
+    margin: 5px;
+    cursor: pointer;
+}
+
+header #aHolder {
+    padding: 20px;
+    display: inline-block;
+}
+
+content {
+    position: relative;
+}
+
+#welcomePage {
     flex: 1;
     background-color: #111;
+    position: absolute;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    z-index: 5;
+}
+
+#mostBasicInfo {
+    display: block;
+    padding: 100px 50px 100px 50px;
+}
+
+#basicInfo {
+    font-size: 12px;
+}
+
+#logo {
+    color: white;
+    font-size: 50px;
+    font-family: Montserrat;
+    margin-left: 15px;
+}
+
+.small {
+    font-size: 12px;
+}
+
+.center {
+    text-align: center;
+}
+
+.inline {
+    display: inline;
+}
+
+.des {
+    color: white;
+    font-family: Montserrat;
+    margin-left: 15px;
+}
+
+#buttonHld {
+    width: 100%;
+    text-align: center;
+    color: white;
+}
+
+#buttonHld button {
+    border: none;
+    width: 100px;
+    height: 40px;
+    margin: 5px;
+    cursor: pointer;
+    color: white;
+    font-size: 15px;
+    font-family: Montserrat;
+    background-color: #607d8b;
+}
+
+
+
+
+/* no */
+#active {
+    background-color: #111;
+    width: 100%;
+    position: absolute;
+    z-index: 1;
+    margin-top: 20px;
 }
 
 #sorter {
     order: 1;
-    background-color: #222;
+    background-color: #111;
     height: 50px;
     width: 100%;
 }
 
 table {
-    order: 2;
-    flex: 1;
     color: white;
-    font-family: Montserrat;
     border-collapse: collapse;
     margin-top: 20px;
+    margin: auto;
 }
 
 table th {
     font-weight: normal;
     padding: 5px 10px 5px 10px;
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid #333;
+    text-align: left;
 }
 
 table td {
     padding: 10px;
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #111;
+    background-color: #222;
+    width: 100px;
 }
 
-#joinPage {
-    text-align: center;
-}
-
-#logo {
-    color: white;
-    font-size: 150px;
-    font-family: Montserrat;
-}
-
-#des {
-    color: white;
-    font-family: Montserrat;
-}
-
-#buttonHld {
-    width: 100%;
-}
-
-#buttonHld button {
+/*table td:last-child {
+    background-color: #111;
     border: none;
-    width: 250px;
-    height: 70px;
-    margin: 15px;
-    cursor: pointer;
-    color: white;
-    font-size: 25px;
-    font-family: Montserrat;
-}
+}*/
