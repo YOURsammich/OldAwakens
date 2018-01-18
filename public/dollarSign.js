@@ -148,7 +148,7 @@ window.$$$ = {
         }
         
         function getHigher (prec, a) {
-            return a / (1 - (prec / 100))
+            return a / (1 - (prec / 100));
         }
         
         function getHigher2 (startInt, prec, a) {
@@ -216,6 +216,10 @@ window.$$$ = {
                         fakeseedY = getHigher(Y, rgb.g);
                         fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
                         
+                        if (fakeseedX == Infinity) {
+                            fakeseedX = 0;
+                        }
+                        
                         if (!isNaN(fakeseedX)) {
                             fixedSeed += fakeseedX;
                         } else {
@@ -238,6 +242,10 @@ window.$$$ = {
                         fakeseedY = getHigher(Y, rgb.b);
                         fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
 
+                        if (fakeseedX == Infinity) {
+                            fakeseedX = 0;
+                        }
+                        
                         if (!isNaN(fakeseedX)) {
                             fixedSeed += fakeseedX;
                         } else {
@@ -260,6 +268,10 @@ window.$$$ = {
                         fakeseedY = getHigher(Y, rgb.r);
                         fakeseedX = Math.round(getLower(255, 100 - X, fakeseedY));
                         
+                        if (fakeseedX == Infinity) {
+                            fakeseedX = 0;
+                        }
+                        
                         if (!isNaN(fakeseedX)) {
                             fixedSeed += fakeseedX;
                         } else {
@@ -269,8 +281,8 @@ window.$$$ = {
                 }
                 cursorX = (X * 200) / 100;
                 cursorY = (Y * 150) / 100;
-     
-                theSeed = fixedSeed;
+                
+                theSeed = fixedSeed;  
                 sliderKnob.style.left = betweenNumbers(0, 200, rebetweenNumbers(0, 1275, theSeed)) + 'px';
                 selectColor(cursorX, cursorY);
             }
@@ -330,7 +342,7 @@ window.$$$ = {
                 green = Math.round(betweenNumbers(fixedSeed - xf, 255 - xf, d));
                 blue = Math.round(betweenNumbers(0, 255, d));
             }
-
+        
             input.value = rgbToHex(red, green, blue);
             el.style.backgroundColor = rgbToHex(red, green, blue);
             
@@ -413,7 +425,7 @@ window.$$$ = {
         container.appendChild(buttonHold);
         
         saveButton.addEventListener('click', function () {
-            save();
+            save(input.value);
             document.body.removeChild(container);
         });
         
@@ -431,7 +443,7 @@ window.$$$ = {
         }
         
         document.body.appendChild(container);
-        restoreColor = rgb2hex(el.style.backgroundColor || '#ffffff');
+        restoreColor = rgb2hex(window.getComputedStyle(el).backgroundColor);
         mapColor(restoreColor);
     }
 };

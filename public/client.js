@@ -47,10 +47,10 @@ var ONLINE = {
 };
 
 var Attributes = {
-    showMsg : ['flair', 'color', 'glow', 'bgcolor', 'font', 'style'],
+    showMsg : ['flair', 'color', 'glow', 'bgcolor', 'font', 'style', 'greg'],
     notify : ['part', 'nick', 'role'],
     altAtt : {colour : 'color', bg : 'background'},
-    nosaveLocal : ['channel-filters', 'background', 'msg', 'note', 'topic', 'channel-video'],
+    nosaveLocal : ['channel-filters', 'background', 'msg', 'note', 'topic', 'channel-video', 'wordfilter', 'themecolors'],
     default : {
         cursors : true,
         mute : false,
@@ -99,7 +99,7 @@ var Attributes = {
                 socket.emit('removeCursor');
                 COMMANDS.clearcursors.handler();
             } else if (attribute === 'toggle-background') {
-                if (newValue) {
+                if (newValue && Attributes.get('background')) {
                     document.getElementById('messages-background').style.background = Attributes.get('background').value;
                 } else {
                     document.getElementById('messages-background').style.background = 'black';
@@ -265,6 +265,11 @@ var messageBuilder = {//message, messageType, nick, flair, count, hat
         }
         
         el.appendChild(message);
+
+        if (el.children.length > 500) {
+            el.removeChild(el.children[0]);
+        }
+        
         if ((el.scrollTop+el.offsetHeight) > message.offsetTop-Math.min(message.offsetHeight, 20)) {
             this.scrollToBottom(el);
         }
@@ -762,14 +767,26 @@ function showChannelDetails(channelData) {
         }
         Attributes.set('background', channelData.background);
     }
-
-    if (channelData.themecolors && channelData.themecolors.value) {
-        document.getElementById('input-bar').style.backgroundColor = channelData.themecolors.value[0];
-        document.getElementsByClassName('toggle-menu')[0].style.backgroundColor = channelData.themecolors.value[1];
-        if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1) {
-            document.styleSheets[0].deleteRule(4);
-            document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
+        
+    if (channelData.themecolors) {
+        
+        if (channelData.themecolors.inputbar) {
+            document.getElementById('input-bar').style.backgroundColor = channelData.themecolors.inputbar.value;
         }
+        
+        if (channelData.themecolors.menutoggle) {
+            document.getElementById('toggle-menu').style.backgroundColor = channelData.themecolors.menutoggle.value;
+        }
+            
+        if (false) {
+            if (navigator.userAgent.toLowerCase().indexOf('chrome') !== -1 && false) {
+                document.styleSheets[0].deleteRule(4);
+                document.styleSheets[0].insertRule("::-webkit-scrollbar-thumb { border-radius: 5px; background: " + channelData.themecolors.value[2], 4);
+            }    
+        }
+        
+        Attributes.set('themecolors', channelData.themecolors);
+        menuControl.chnlStyleUI(channelData.themecolors);
     }
     
     if (channelData.msg && channelData.msg.value) {
@@ -808,6 +825,11 @@ function showChannelDetails(channelData) {
         });
         
         Attributes.set('proxy', channelData.proxy);
+    }
+    
+    if (channelData.filteredWords) {
+        menuControl.wordfilterUI(channelData.filteredWords);
+        Attributes.set('filteredWords', channelData.filteredWords);
     }
     
     menuControl.wordfilter(channelData.wordfilter);

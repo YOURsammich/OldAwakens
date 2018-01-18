@@ -99,7 +99,7 @@ function embed(type, input, advan) {
     var url;
     switch (type) {
     case 'youtube':
-        url = '<iframe id="iiframe" width="100%" height="100%" src="//www.youtube.com/embed/' + input + '?enablejsapi=1" frameborder="0" allowfullscreen></iframe>';
+        url = '<iframe id="iiframe" width="100%" height="100%" src="//www.youtube.com/embed/' + input + '?enablejsapi=1&rel=0" frameborder="0" allowfullscreen></iframe>';
         break;
     case 'html5':
         url = '<video width="100%" height="100%" src="' + input + '" controls></video>';

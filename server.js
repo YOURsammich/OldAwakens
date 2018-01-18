@@ -115,16 +115,16 @@ function createChannel(io, channelName) {
         }
     }
     
-    function updateChannelInfo(nick, att, value) {
+    function updateChannelInfo(nick, att1, att2, value) {
         var formatSettings = {
             value : value,
             updatedBy : nick,
             date : new Date().getTime()
         };
 
-        dao.setChannelAtt(channelName, att, formatSettings).then(function () {
+        dao.setChannelAtt(channelName, att1, att2, formatSettings).then(function () {
             roomEmit('channelDetails', {
-                [att] : formatSettings
+                [att1] : formatSettings
             });
         })
     }
@@ -840,7 +840,7 @@ function createChannel(io, channelName) {
                         dao.checkChannelOwnerShip(dbuser.nick).then(function (userOwnedChannels) {
                             showMessage(user.socket, 'You may only own up to 5 channels at a time, first give up ownership of one of your channels with /giveupchannel', 'info');
                         }).fail(function () {
-                            dao.setChannelAtt(channelName, 'owner', dbuser.nick).then(function () {
+                            dao.setChannelAtt(channelName, 'owner', null, dbuser.nick).then(function () {
                                 showMessage(user.socket, 'You\'ve claimed "' + channelName + '", its yours', 'info');
                                 updateUserData(user, {role : 1});
                                 roomEmit('channelDetails', {
@@ -895,7 +895,7 @@ function createChannel(io, channelName) {
             params : ['topic'],
             handler : function (user, params) {
                 if (params.topic.length < 500) {
-                    updateChannelInfo(user.nick, 'topic', params.topic);   
+                    updateChannelInfo(user.nick, 'topic', null, params.topic);   
                 } else {
                     showMessage(user.socket, 'Topic may not be over 500 characters', 'info');
                 }
@@ -906,7 +906,7 @@ function createChannel(io, channelName) {
             params : ['note'],
             handler : function (user, params) {
                 if (params.note.length < 2000) {
-                    updateChannelInfo(user.nick, 'note', params.note);   
+                    updateChannelInfo(user.nick, 'note', null, params.note);   
                 } else {
                     showMessage(user.socket, 'Note may not be over 2000 characters', 'info');
                 }
@@ -916,22 +916,25 @@ function createChannel(io, channelName) {
             role : 2,
             params : ['background'],
             handler : function (user, params) {
-                updateChannelInfo(user.nick, 'background', params.background);
+                updateChannelInfo(user.nick, 'background', null, params.background);
             } 
         },
         theme : {
             role : 1,
-            params : ['themecolors'],
+            params : ['element', 'value'],
             handler : function (user, params) {
-                //updateChannelInfo(user.nick, 'themecolors', params.themecolors);
-                showMessage(user.socket, 'This command is disabled for now', 'error');
-            } 
+                var validElements = ['inputbar', 'menutoggle', 'scrollbar'],
+                    index = validElements.indexOf(params.element.toLowerCase());
+                if (index != -1) {
+                    updateChannelInfo(user.nick, 'themecolors', validElements[index], params.value);  
+                }
+            }
         },
         msg : {
             params : ['msg'],
             handler : function (user, params) {
                 if (params.msg.length < 200) {
-                    updateChannelInfo(user.nick, 'msg', params.msg);
+                    updateChannelInfo(user.nick, 'msg', null, params.msg);
                 } else {
                     showMessage(user.socket, 'Msg may not be over 200 characters', 'info');
                 }
@@ -940,52 +943,54 @@ function createChannel(io, channelName) {
         unlock : {
             role : 1,
             handler : function (user) {
-                updateChannelInfo(user.nick, 'lock', false);
+                updateChannelInfo(user.nick, 'lock', null, false);
             }
         },
         lock : {
             role : 1,
             handler : function (user) {
-                updateChannelInfo(user.nick, 'lock', true);
+                updateChannelInfo(user.nick, 'lock', null, true);
             }
         },
         proxy : {
             role : 1,
             handler : function (user) {
-                updateChannelInfo(user.nick, 'proxy', true);
+                updateChannelInfo(user.nick, 'proxy', null, true);
             }
         },
         unblockproxy : {
             role : 1,
             handler : function (user) {
-                updateChannelInfo(user.nick, 'proxy', false);
+                updateChannelInfo(user.nick, 'proxy', null, false);
             }
         },
         channelfont : {
             role : 1,
             params : ['font'],
             handler : function (user, params) {
-                updateChannelInfo(user.nick, 'font', params.font);
+                updateChannelInfo(user.nick, 'font', null, params.font);
             }
         },
         wordfilteron : {
             role : 1,
             handler : function (user) {
-                updateChannelInfo(user.nick, 'wordfilter', true);
+                updateChannelInfo(user.nick, 'wordfilter', null, true);
             }
         },
         wordfilteroff : {
             role : 1,
             handler : function (user) {
-                updateChannelInfo(user.nick, 'wordfilter', false);
+                updateChannelInfo(user.nick, 'wordfilter', null, false);
             }
         },
         enablevideomode : {
             handler : function (user) {
+                user.videomode = true;
                 user.socket.join('video');
                 user.socket.emit('channeldata', {
                     videomode : channel.videoMode.videolist
                 });
+                roomEmit('joinVideoMode', user.id);
                 if (channel.videoMode.videolist.length) {
                     user.socket.emit('playVideo', channel.videoMode.videolist[0].id, channel.videoMode.videoStart);   
                 }
@@ -993,8 +998,9 @@ function createChannel(io, channelName) {
         },
         disablevideomode : {
             handler : function (user) {
+                user.videomode = false;
                 user.socket.leave('video');
-                console.log('?')
+                roomEmit('leaveVideoMode', user.id);
                 user.socket.emit('update', {
                     ['channel-video'] : false
                 })
@@ -1044,6 +1050,32 @@ function createChannel(io, channelName) {
             handler : function (user) {
                 channel.videoMode.videolist.shift();
                 playVideo();
+            }
+        },
+        filterword : {
+            role : 1,
+            params : ['word', 'replace'],
+            handler : function (user, params) {
+                dao.setChannelAtt(channelName, 'filteredWords', params.word, params.replace).then(function () {
+                    dao.getChannelAtt(channelName, 'filteredWords').then(function (filteredWords) {
+                        roomEmit('channelDetails', filteredWords)
+                    });
+                });
+            }
+        },
+        unfilterword : {
+            role : 1,
+            params : ['word'],
+            handler : function (user, params) {
+                dao.deleteChannelAtt(channelName, 'filteredWords', params.word).then(function () {
+                    dao.getChannelAtt(channelName, 'filteredWords').then(function (filteredWords) {
+                        roomEmit('channelDetails', filteredWords)
+                    }).fail(function () {
+                        roomEmit('channelDetails', {
+                            filteredWords : {}
+                        });
+                    });
+                });
             }
         }
     };
@@ -1331,7 +1363,8 @@ function createChannel(io, channelName) {
                         nick : channel.online[i].nick,
                         id : channel.online[i].id,
                         role :  channel.online[i].role,
-                        afk : channel.online[i].afk
+                        afk : channel.online[i].afk,
+                        videomode : channel.online[i].videomode
                     });
                 }
 

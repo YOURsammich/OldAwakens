@@ -362,6 +362,32 @@ h2 {
     font-style: italic;
 }
 
+#sortMenu {
+    position: fixed;
+    z-index:10;
+    text-align: center;
+    background-color: #111;
+    color: white;
+    width: 80px;
+    font-size: 13px;
+    border: 1px solid #333;
+}
+
+#sortMenu span {
+    display: block;
+    border-bottom: 1px solid #333;
+    padding: 5px;
+    cursor: pointer;
+}
+
+#sortMenu span:hover {
+    background-color: #39f;
+}
+
+#sortMenu span:last-child {
+    border-bottom: none;
+}
+
 .highlightTab {
     color: orange !important;
 }
@@ -571,6 +597,40 @@ h2 {
     color: #fff;
 }
 
+#filteredWords {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    text-align: center;
+}
+
+#filteredWords td {
+    border-bottom: 1px solid #444;
+    padding: 5px;
+}
+
+#filteredWords td:first-child {
+    border-right: 1px solid #444;
+}
+
+#filteredWords td:last-child {
+    border-bottom: none;
+    cursor: pointer;
+}
+
+#inputreplaceh input {
+    color: #fff;
+    padding: 8px 0px 8px 0px;
+    text-indent: 10px;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+    background-color: #454545;
+    border-radius: 5px;
+    border: none;
+    margin-top: 10px;
+}
+
 #cmdOptions {
     margin-top: 5px;
     background-color: #111;
@@ -587,21 +647,21 @@ h2 {
     border-bottom: 1px solid #222;
 }
 
-#stylePro #textStyle {
+.textStyle {
     margin-left: 20px;
 }
 
-#stylePro #textStyle h3 {
+.textStyle h3 {
     font-size: small;
     font-weight: initial;
     margin: 0px;
 }
 
-#stylePro .styleAtt {
+.textStyle .styleAtt {
     font-size: small;
 }
 
-#stylePro .styleAtt input {
+.textStyle .styleAtt input {
     border: 1px solid #111;
     border-radius: 5px;
     margin: 8px 0px 8px 0px;
@@ -610,7 +670,7 @@ h2 {
     width: 120px;
 }
 
-#stylePro .styleAtt button {
+.textStyle .styleAtt button {
     border: none;
     border-radius: 5px;
     background-color: #39F;
@@ -620,7 +680,7 @@ h2 {
     margin-left: 5px;
 }
 
-#stylePro .styleAtt div {
+.textStyle .styleAtt div {
     background-color: #fff;
     border: 1px solid #222;
     border-radius: 2px;
@@ -631,7 +691,7 @@ h2 {
     display: inline-block;
 }
 
-#stylePro .styleAtt .trash {
+.textStyle .styleAtt .trash {
     width: 20px;
     height: 20px;
     float: right;
@@ -640,23 +700,23 @@ h2 {
     line-height: 22px;
 }
 
-#stylePro .styleAtt:hover .trash:after {
+.textStyle .styleAtt:hover .trash:after {
     content: 'clear';
     width: 20px;
     height: 20px;
 }
 
-#stylePro .styleAtt:hover .trash:hover:after {
+.textStyle .styleAtt:hover .trash:hover:after {
     text-decoration: underline;
 }
 
-#stylePro .styleAtt div span {
+.textStyle .styleAtt div span {
     float: right;
     height: 20px;
     line-height: 20px;
 }
 
-#stylePro .styleAtt div span:before {
+.textStyle .styleAtt div span:before {
     font-family: Material Icons;
     content: 'arrow_drop_down';
     color: black;
@@ -743,7 +803,7 @@ h2 {
     border-bottom: 1px solid #39F;
 }
 
-.toggle-menu {
+#toggle-menu {
     position: absolute;
     background-color: rgb(58, 58, 58);
     border-top-left-radius: 10px;
@@ -761,18 +821,18 @@ h2 {
     cursor: pointer;
 }
 
-.toggle-menu:active{
+#toggle-menu:active{
     bottom: 2px;
     box-shadow: inset 0px 1px 0px 0px rgba(255,255,255,.2),
 	        inset 0px -1px 0px 0px rgba(0,0,0,1),
 	        0px 3px 3px rgba(0,0,0,.2);
 }
 
-.toggle-menu span::before{
+#toggle-menu span::before{
     content: '< ';
 }
 
-.toggle-menu span{
+#toggle-menu span{
     width: 36px;
     left: 6px;
     position: absolute;

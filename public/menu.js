@@ -4,11 +4,27 @@ var menuControl = {
         var sortUsers = ONLINE.users,
             sKeys = Object.keys(sortUsers),
             i,
-            children = [],
-            roleHolder,
-            header;
+            children = [];
         
         document.getElementById('listedUsers').innerHTML = '';
+        
+        function appendHolder (att, text, child) {
+            var header,
+                roleHolder = document.getElementById(att);
+            
+            if (!roleHolder) {
+                header = document.createElement('header');
+                header.className = 'roleOrg';
+                header.textContent = text;
+                roleHolder = document.createElement('div');
+                roleHolder.className = 'roleHolder';
+                roleHolder.id = att;
+                roleHolder.appendChild(header);
+                document.getElementById('listedUsers').appendChild(roleHolder);   
+            }
+            
+            roleHolder.appendChild(child);
+        }
         
         if (Attributes.get('menu-order') == 'roles') {
             for (i = 0; i < sKeys.length; i++) {
@@ -20,28 +36,30 @@ var menuControl = {
             });
             
             for (i = 0; i < children.length; i++) {
+                appendHolder(children[i].role + '-role', menuControl.roleNames[children[i].role], children[i].li);
                 roleHolder = document.getElementById(children[i].role + '-role');
- 
-                if (!roleHolder) {
-                    header = document.createElement('header');
-                    header.className = 'roleOrg';
-                    header.textContent = menuControl.roleNames[children[i].role];
-                    roleHolder = document.createElement('div');
-                    roleHolder.className = 'roleHolder';
-                    roleHolder.id = children[i].role + '-role';
-                    roleHolder.appendChild(header);
-                    document.getElementById('listedUsers').appendChild(roleHolder);
-                }
-                
-                roleHolder.appendChild(children[i].li);
             }
+        } else if (Attributes.get('menu-order') == 'videoMode') {
+            for (i = 0; i < sKeys.length; i++) {
+                children.push(sortUsers[sKeys[i]]); 
+            };
+            
+            children.sort(function (a, b) {
+                return (a.videomode === b.videomode) ? 0 : a.videomode ? -1 : 1;
+            });
+            
+            
+            
+            for (i = 0; i < children.length; i++) {
+                appendHolder('videolist-' + (!children[i].videomode), children[i].videomode ? 'watching videos' : 'not watching videos', children[i].li);
+            }  
         } else {
             for (i = 0; i < sKeys.length; i++) {
                 document.getElementById('listedUsers').appendChild(sortUsers[sKeys[i]].li);
             }
         }
     },
-    addUser : function (id, nick, role, afk, noShow) {
+    addUser : function (id, nick, role, afk, videomode, noShow) {
         var nickContain = document.createElement('div'),
             nickText = document.createElement('div'),
             extraInfo = document.createElement('div'),
@@ -98,7 +116,7 @@ var menuControl = {
                     nickContain.children[0].classList.remove('away', 'unavailable');
                     status.idleStatus = setTimeout(function () {
                         status.resetStatus('away');
-                    }, 90000);
+                    }, 300000);
                 }
             }
         };
@@ -109,6 +127,10 @@ var menuControl = {
         
         if (afk) {
             menuControl.afk(id, afk);
+        }
+        
+        if (videomode) {
+            menuControl.addBadge(id);
         }
         
         if (noShow === undefined) {
@@ -183,9 +205,23 @@ var menuControl = {
             user.resetStatus('away');
         }
     },
+    addBadge : function (id) {
+        var user = ONLINE.users[id];
+        user.videomode = true;
+        if (Attributes.get('menu-order') == 'videoMode') {
+            menuControl.arrangeList();
+        }
+    },
+    removeBadge : function (id) {
+        var user = ONLINE.users[id];
+        user.videomode = false;  
+        if (Attributes.get('menu-order') == 'videoMode') {
+            menuControl.arrangeList();
+        }
+    },
     updateCount : function () {
         var length = Object.keys(ONLINE.users).length;
-        $$$.query('.toggle-menu span').textContent = length;
+        $$$.query('#toggle-menu span').textContent = length;
         $$$.query('#countUsers').textContent = length + ' online';
     },
     contextMenu : {
@@ -336,7 +372,7 @@ var menuControl = {
     style : {
         storedProfiles : [],
         UI : function (styleData) {
-            var textStyle = document.getElementById('textStyle').children,
+            var textStyle = document.getElementsByClassName('textStyle')[0].children,
                 sKeys,
                 s,
                 keys,
@@ -407,6 +443,15 @@ var menuControl = {
             document.getElementById('stylecolor').value = Attributes.get('color') || '#000000';
         }
     },
+    chnlStyleUI : function (themecolors) {
+        if (themecolors.inputbar) {
+            document.getElementById('styleinput-bar').getElementsByClassName('colorpicker')[0].style.backgroundColor = themecolors.inputbar.value;
+        }
+        
+        if (themecolors.menutoggle) {
+            document.getElementById('styletoggle-menu').getElementsByClassName('colorpicker')[0].style.backgroundColor = themecolors.menutoggle.value;
+        }
+    },
     ownerUI : function (owned) {
         if (owned) {
             document.getElementById('unowned').style.display = 'none';
@@ -419,7 +464,10 @@ var menuControl = {
                 i,
                 element,
                 roles = ['Admin', 'Mod'];
-
+            
+            document.getElementById('listAdmins').innerHTML = '';
+            document.getElementById('listMods').innerHTML = '';
+            
             for (i = 0; i < keys.length; i++) {
                 element = document.createElement('li');
                 element.textContent = keys[i];
@@ -541,6 +589,38 @@ var menuControl = {
         }
         
     },
+    wordfilterUI : function (filters) {
+        var keys,
+            i,
+            wordlist = document.getElementById('filteredWords'),
+            tr,
+            firstd,
+            secondtd,
+            deletetd;
+        
+        wordlist.innerHTML = '';
+        if (filters) {
+            keys = Object.keys(filters);
+            for (i = 0; i < keys.length; i++) {
+                tr = document.createElement('tr');
+                firstd = document.createElement('td');
+                secondtd = document.createElement('td');
+                deletetd = document.createElement('td');
+                firstd.textContent = keys[i];
+                secondtd.textContent = filters[keys[i]];
+                deletetd.textContent = 'X';
+                tr.appendChild(firstd);
+                tr.appendChild(secondtd);
+                tr.appendChild(deletetd);
+                wordlist.appendChild(tr);
+                
+                deletetd.addEventListener('click', function (e) {
+                    clientSubmit.handleInput('/unfilterword ' + e.target.parentNode.firstChild.textContent);
+                });
+            }
+        }
+        
+    },
     initMissedMessages : function (socket) {
         var unread = 0;
         
@@ -568,7 +648,7 @@ var menuControl = {
                 document.getElementById('listedUsers').innerHTML = '';
                 ONLINE.users = {};
                 for (i = 0; i < channel.users.length; i++) {            
-                    menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].role, channel.users[i].afk, true);
+                    menuControl.addUser(channel.users[i].id, channel.users[i].nick, channel.users[i].role, channel.users[i].afk, channel.users[i].videomode, true);
                 }
             }
 
@@ -647,6 +727,9 @@ var menuControl = {
         socket.emit('activeChannels');
         
         socket.on('playVideo', menuControl.videomode.playNextVideo);
+        
+        socket.on('joinVideoMode', menuControl.addBadge);
+        socket.on('leaveVideoMode', menuControl.removeBadge);
     },
     typing : function (id, typing) {
         var user = ONLINE.users[id];
@@ -1054,12 +1137,43 @@ function showFlairMakerPanel() {
     
     //sort userlist
     document.getElementById('sortUsers').addEventListener('click', function () {
-        if (Attributes.get('menu-order') == 'roles') {
-            Attributes.remove('menu-order');
-        } else {
+        var sortMenu = document.createElement('div'),
+            byRoles = document.createElement('span'),
+            byvideo = document.createElement('span'),
+            nosort = document.createElement('span'),
+            pos;
+        
+        byRoles.textContent = 'role';
+        byvideo.textContent = 'video mode';
+        nosort.textContent = 'unsorted';
+        
+        sortMenu.appendChild(byRoles);
+        sortMenu.appendChild(byvideo);
+        sortMenu.appendChild(nosort);
+        
+        byRoles.addEventListener('click', function () {
             Attributes.set('menu-order', 'roles');
-        }
-        menuControl.arrangeList();
+            document.body.removeChild(sortMenu);
+            menuControl.arrangeList();
+        });
+        
+        byvideo.addEventListener('click', function () {
+            Attributes.set('menu-order', 'videoMode');
+            document.body.removeChild(sortMenu);
+            menuControl.arrangeList();
+        });
+        
+        nosort.addEventListener('click', function () {
+            Attributes.remove('menu-order');
+            document.body.removeChild(sortMenu);
+            menuControl.arrangeList();
+        });
+        
+        sortMenu.id = 'sortMenu';
+        
+        document.body.appendChild(sortMenu);
+        pos = this.getBoundingClientRect();
+        sortMenu.style.cssText = 'left:' + (pos.left - 80) + 'px;top:' + pos.top + 'px;';
     });
     
     //style profiles
@@ -1090,6 +1204,35 @@ function showFlairMakerPanel() {
                 [target.parentNode.id.slice(5)] : input.value
             });
         }
+    });
+    
+    //style channel
+    document.getElementById('chnltheme').addEventListener('click', function (e) {
+        var target = e.target;
+
+        if (target.className == 'trash') {
+            clientSubmit.handleInput('/theme ' + target.parentNode.parentNode.firstChild.textContent + ' #333');
+        } else if (target.parentNode.className == 'colorpicker') {
+            target = target.parentNode;
+        }
+        
+        if (target.className == 'colorpicker') {
+            $$$.palette(target, function (color) {
+                document.getElementById(target.parentNode.id.slice(5)).style.backgroundColor = '#' + color;
+            }, function (color) {
+                clientSubmit.handleInput('/theme ' + target.parentNode.firstChild.textContent + ' ' + color)
+            });
+        }
+    });
+    
+    //filters
+    document.getElementById('wordfilter').getElementsByTagName('button')[0].addEventListener('click', function () {
+        var replace = document.getElementById('wordfilter').getElementsByTagName('input')[0],
+            withThis = document.getElementById('wordfilter').getElementsByTagName('input')[1];
+        
+        clientSubmit.handleInput('/filterword ' + replace.value + ' ' + withThis.value);
+        replace.value = '';
+        withThis.value = '';
     });
     
     //custom cursors
@@ -1176,7 +1319,7 @@ function showFlairMakerPanel() {
         closing = false,
         timeOut;
     
-    $$$.query('.toggle-menu').addEventListener('click', function () {
+    $$$.query('#toggle-menu').addEventListener('click', function () {
         var menuContainer = document.getElementById('menu-container'),
             messages = document.getElementById('messages'),
             currentScroll = messages.scrollTop,
@@ -1204,7 +1347,11 @@ function showFlairMakerPanel() {
             }, 10);
         }
         
-        this.style.backgroundColor = '';
+        if (Attributes.get('themecolors') && Attributes.get('themecolors').menutoggle) {
+            this.style.backgroundColor = Attributes.get('themecolors').menutoggle.value;  
+        } else {
+            this.style.backgroundColor = '';
+        }
     });
     
     document.body.addEventListener('mouseup', function (e) {

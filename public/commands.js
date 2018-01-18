@@ -467,7 +467,7 @@ var COMMANDS = {
     },
     theme : {
         role : 1,
-        params : ['inputColor', 'buttonColor', 'scrollBarColor']
+        params : ['element', 'value']
     },
     background : {
         role : 2,
@@ -499,11 +499,6 @@ var COMMANDS = {
     wordfilteroff : {
         role : 1
     },
-    yt : {
-        handler : function () {
-            embed('youtube', '9p88Rh3C_rQ', true)
-        }
-    },
     fe : {
         handler : function () {
             showFlairMakerPanel();
@@ -512,7 +507,20 @@ var COMMANDS = {
     greg : {
         params : ['colors'],
         handler : function (params) {
-            Attributes.set('greg', params.colors);
+            var fakeElm = document.createElement('span');
+            fakeElm.style.backgroundColor = params.colors;
+            document.body.appendChild(fakeElm);
+            
+            function rgb2hex(rgb) {
+                rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+                function hex(x) {
+                    return ("0" + parseInt(x).toString(16)).slice(-2);
+                }
+                return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
+            }
+            
+            Attributes.set('greg', rgb2hex(window.getComputedStyle(fakeElm).backgroundColor));
+            document.body.removeChild(fakeElm);
         }
     },
     addvideo : {
@@ -520,7 +528,17 @@ var COMMANDS = {
     },
     enablevideomode : {},
     disablevideomode : {},
-    skipvideo : {}
+    skipvideo : {
+        role : 1
+    },
+    filterword : {
+        role : 1,
+        params : ['word', 'replace']
+    },
+    unfilterword : {
+        role : 1,
+        params : ['word']
+    }
 };
 
 (function(){

@@ -128,14 +128,27 @@ module.exports = {
         var defer = $.Deferred();
         var sql = "SELECT * FROM `channel_info` WHERE `channelName` = ?";
         var returnObj = {},
-            i;
+            i,
+            value;
         db.query(sql, channelName, function (err, rows, fields) {
             if (rows && rows.length) {
                 for (i = 0; i < rows.length; i++) {
-                    try { 
-                        returnObj[rows[i].attribute] = JSON.parse(rows[i].value);
+                    try {
+                        value = JSON.parse(rows[i].value);
                     } catch (err) {
-                        returnObj[rows[i].attribute] = rows[i].value;
+                        value = rows[i].value;
+                    }
+                    
+                    if (rows[i].attribute2) {
+                        if (returnObj[rows[i].attribute1]) {
+                            returnObj[rows[i].attribute1][rows[i].attribute2] = value;
+                        } else {
+                            returnObj[rows[i].attribute1] = {
+                                [rows[i].attribute2] : value
+                            };
+                        }
+                    } else {
+                        returnObj[rows[i].attribute1] = value;
                     }
                 }
             }
@@ -143,25 +156,51 @@ module.exports = {
         });
         return defer;
     },
-    getChannelAtt : function (channelName, att) {
+    getChannelAtt : function (channelName, att1, att2) {
         var defer = $.Deferred();
-        var sql = "SELECT * FROM `channel_info` WHERE `channelName` = ? and attribute = ?";
+        var sql = "SELECT * FROM `channel_info` WHERE `channelName` = ? AND `attribute1` = ?";
+        var values = [channelName, att1];
+        var returnObj = {},
+            i;
         
-        db.query(sql, [channelName, att], function (err, rows, fields) {
+        if (att2) {
+            sql += ' AND `attribute2` = ?';
+            values.push(att2);
+        }
+        
+        db.query(sql, values, function (err, rows, fields) {
             if (rows[0]) {
-                
-                defer.resolve(rows[0].value).promise();
+                for (i = 0; i < rows.length; i++) {
+                    if (rows[i].attribute2) {
+                        if (returnObj[rows[i].attribute1]) {
+                            returnObj[rows[i].attribute1][rows[i].attribute2] = rows[i].value;
+                        } else {
+                            returnObj[rows[i].attribute1] = {
+                                [rows[i].attribute2] : rows[i].value
+                            };
+                        }
+                    } else {
+                        returnObj[rows[i].attribute1] = rows[i].value;
+                    }
+                }
+                defer.resolve(returnObj).promise();
             } else {
                 defer.reject();
             }
         });
         return defer;
     },
-    deleteChannelAtt : function (channelName, att) {
+    deleteChannelAtt : function (channelName, att1, att2) {
         var defer = $.Deferred();
-        var sql = "DELETE FROM `channel_info` WHERE `channelName` = ? AND `attribute` = ?";
+        var sql = "DELETE FROM `channel_info` WHERE `channelName` = ? AND `attribute1` = ?";
+        var values = [channelName, att1];
         
-        db.query(sql, [channelName, att], function (err, rows, fields) {
+        if (att2) {
+            sql += ' AND `attribute2` = ?';
+            values.push(att2);
+        }
+        
+        db.query(sql, values, function (err, rows, fields) {
             if (!err) {
                 defer.resolve().promise();
             }
@@ -171,7 +210,7 @@ module.exports = {
     },
     checkChannelOwnerShip : function (nick) {
         var defer = $.Deferred();
-        var sql = "SELECT `channelName` FROM `channel_info` WHERE `attribute` = 'owner' AND `value` = ?";
+        var sql = "SELECT `channelName` FROM `channel_info` WHERE `attribute1` = 'owner' AND `value` = ?";
 
         db.query(sql, nick, function (err, rows, fields) {
             if (rows.length) {
@@ -182,10 +221,16 @@ module.exports = {
         });
         return defer;
     },
-    setChannelAtt : function (channelName, att, value) {
+    setChannelAtt : function (channelName, att1, att2, value) {
         var defer = $.Deferred();
-        var sqlUpdate = "UPDATE `channel_info` SET `value` = ? WHERE `channelName` = ? AND `attribute` = ?";
-        var sqlInsert = "INSERT INTO `channel_info` (`channelName`, `attribute`, `value`) VALUES (?, ?, ?);";
+        var sqlUpdate = "UPDATE `channel_info` SET `value` = ? WHERE `channelName` = ? AND `attribute1` = ?";
+        var values = [channelName, att1];
+        var sqlInsert = "INSERT INTO `channel_info` (`channelName`, `attribute1`, `attribute2`, `value`) VALUES (?, ?, ?, ?);";
+        
+        if (att2) {
+            sqlUpdate += ' AND `attribute2` = ?';
+            values.push(att2);
+        }
         
         if (typeof value != 'string') {
             try {
@@ -194,29 +239,16 @@ module.exports = {
                 //
             }
         }
-        
-        this.getChannelAtt(channelName, att).then(function () {
-            db.query(sqlUpdate, [value, channelName, att], function (err) {
-                defer.resolve().promise(); 
+
+        this.getChannelAtt(channelName, att1, att2).then(function (err, rows) {
+            db.query(sqlUpdate, [value, channelName, att1, att2], function (err) {
+                defer.resolve(rows).promise(); 
             });
         }).fail(function () {
-            db.query(sqlInsert, [channelName, att, value], function (err) {
+            db.query(sqlInsert, [channelName, att1, att2, value], function (err) {
                 defer.resolve().promise(); 
             });
         });
-        return defer;
-    },
-    setChannelinfo : function (channelName, newValues){
-        var defer = $.Deferred(),
-            keys = Object.keys(newValues),
-            i;
-        
-        for (i = 0; i < keys.length; i++) {
-            this.setChannelAtt(channelName, keys[i], newValues[keys[i]]);
-        }
-                
-        defer.resolve().promise();
-        
         return defer;
     },
     setChannelRole : function (channelName, nick, role) {

@@ -11,7 +11,6 @@ function addChannels (channels) {
         pan,
         channelName,
         channelinfo,
-        channelTags,
         settings,
         buttonJoin,
         i;
@@ -27,21 +26,20 @@ function addChannels (channels) {
         channelName = document.createElement('td');
         channelName.textContent = channels[keys[i]].name;
         
+        channelName.style.paddingLeft = '50px';
+        channelName.style.paddingRight = '50px';
+        
         channelonline = document.createElement('td');
         channelonline.textContent = channels[keys[i]].online;
         
-        channelTags = document.createElement('td');
-        channelTags.textContent = 'none';
-        
         settings = document.createElement('td');
         buttonJoin = document.createElement('button');
-        buttonJoin.textContent = 'Join Channel'
+        buttonJoin.textContent = 'Join';
         settings.appendChild(buttonJoin);
         
-        tr.appendChild(channelName);
         tr.appendChild(channelonline);
-        tr.appendChild(channelTags);
-        //tr.appendChild(settings);
+        tr.appendChild(channelName);
+        tr.appendChild(settings);
         
         table.appendChild(tr);
     }
