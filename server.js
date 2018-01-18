@@ -838,7 +838,17 @@ function createChannel(io, channelName) {
                 }).fail(function () {
                     dao.find(user.nick).then(function (dbuser) {
                         dao.checkChannelOwnerShip(dbuser.nick).then(function (userOwnedChannels) {
-                            showMessage(user.socket, 'You may only own up to 5 channels at a time, first give up ownership of one of your channels with /giveupchannel', 'info');
+                            if (userOwnedChannels.length < 6) {
+                                dao.setChannelAtt(channelName, 'owner', null, dbuser.nick).then(function () {
+                                    showMessage(user.socket, 'You\'ve claimed "' + channelName + '", its yours', 'info');
+                                    updateUserData(user, {role : 1});
+                                    roomEmit('channelDetails', {
+                                        owner : dbuser.nick
+                                    });
+                                });
+                            } else {
+                                showMessage(user.socket, 'You may only own up to 5 channels at a time, first give up ownership of one of your channels with /giveupchannel', 'info');
+                            }
                         }).fail(function () {
                             dao.setChannelAtt(channelName, 'owner', null, dbuser.nick).then(function () {
                                 showMessage(user.socket, 'You\'ve claimed "' + channelName + '", its yours', 'info');
