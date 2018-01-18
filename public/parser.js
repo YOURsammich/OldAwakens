@@ -121,7 +121,9 @@ var parser = {
         if (filters) {
             keys = Object.keys(filters);
             for (i = 0; i < keys.length; i++) {
-                str = str.replace(new RegExp('(' + keys[i] + ')', "gi"), '<div>' + parser.escape(filters[keys[i]]) + '</div>');
+                if (keys[i].length > 3) {
+                    str = str.replace(new RegExp('(' + keys[i] + ')+?', "gi"), '<div>' + filters[keys[i]] + '</div>');   
+                }
             }
         }
 

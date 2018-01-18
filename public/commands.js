@@ -533,7 +533,7 @@ var COMMANDS = {
     },
     filterword : {
         role : 1,
-        params : ['word', 'replace']
+        params : ['word|replace']
     },
     unfilterword : {
         role : 1,

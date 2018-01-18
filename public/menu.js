@@ -1230,7 +1230,7 @@ function showFlairMakerPanel() {
         var replace = document.getElementById('wordfilter').getElementsByTagName('input')[0],
             withThis = document.getElementById('wordfilter').getElementsByTagName('input')[1];
         
-        clientSubmit.handleInput('/filterword ' + replace.value + ' ' + withThis.value);
+        clientSubmit.handleInput('/filterword ' + replace.value + '|' + withThis.value);
         replace.value = '';
         withThis.value = '';
     });

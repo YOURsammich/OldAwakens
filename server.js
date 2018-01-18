@@ -120,11 +120,18 @@ function createChannel(io, channelName) {
             value : value,
             updatedBy : nick,
             date : new Date().getTime()
-        };
-
+        },
+            sendData;
+        
+        if (att2) {
+            sendData = {
+                [att2] : value
+            }
+        }
+        
         dao.setChannelAtt(channelName, att1, att2, formatSettings).then(function () {
             roomEmit('channelDetails', {
-                [att1] : formatSettings
+                [att1] : sendData || formatSettings
             });
         })
     }
@@ -834,7 +841,11 @@ function createChannel(io, channelName) {
         claimchannel : {
             handler : function (user, params) {
                 dao.getChannelAtt(channelName, 'owner').then(function (owner) {
-                    showMessage(user.socket, 'This channel has already been claimed by: ' + owner, 'error');
+                    if (owner.owner == user.nick) {
+                        showMessage(user.socket, 'You are own this channel', 'error');
+                    } else {
+                        showMessage(user.socket, 'This channel has already been claimed by: ' + owner.owner, 'error');
+                    }
                 }).fail(function () {
                     dao.find(user.nick).then(function (dbuser) {
                         dao.checkChannelOwnerShip(dbuser.nick).then(function (userOwnedChannels) {
@@ -867,7 +878,7 @@ function createChannel(io, channelName) {
         giveupchannel : {
             handler : function (user) {
                 dao.getChannelAtt(channelName , 'owner').then(function (channelOwner) {
-                    if (channelOwner == user.nick) {
+                    if (channelOwner.owner == user.nick) {
                         dao.deleteChannelAtt(channelName, 'owner')
                         showMessage(user.socket, 'You\'ve given up ownership of: ' + channelName, 'info'); 
                     } else {
@@ -1066,11 +1077,15 @@ function createChannel(io, channelName) {
             role : 1,
             params : ['word', 'replace'],
             handler : function (user, params) {
-                dao.setChannelAtt(channelName, 'filteredWords', params.word, params.replace).then(function () {
-                    dao.getChannelAtt(channelName, 'filteredWords').then(function (filteredWords) {
-                        roomEmit('channelDetails', filteredWords)
-                    });
-                });
+                if (params.word.length > 3 && params.replace.length > 3) {
+                    dao.setChannelAtt(channelName, 'filteredWords', params.word, params.replace).then(function () {
+                        dao.getChannelAtt(channelName, 'filteredWords').then(function (filteredWords) {
+                            roomEmit('channelDetails', filteredWords)
+                        });
+                    });   
+                } else {
+                    showMessage(user.socket, 'Filters have to be at least 4 characters', 'error');
+                }
             }
         },
         unfilterword : {
